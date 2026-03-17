@@ -537,3 +537,21 @@ body{
     align-items:stretch;
   }
 }
+@media (max-width: 900px){
+
+  .sidebar{
+    display:none;
+  }
+
+  .layout{
+    grid-template-columns:1fr;
+    padding:0;
+    gap:0;
+  }
+
+  #map{
+    height:calc(100vh - 70px);
+    border-radius:0;
+  }
+
+}
