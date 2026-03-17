@@ -521,10 +521,40 @@ async function uploadSinglePhoto(file) {
 }
 
 map.on("click", (e) => {
-  selectedCoordsValue = [e.latlng.lat, e.latlng.lng];
-  setCoordsBoxes(selectedCoordsValue);
-  editingId = null;
-  openFormModal(false);
+
+  // prova a usare GPS preciso
+  if (navigator.geolocation) {
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        selectedCoordsValue = [
+          pos.coords.latitude,
+          pos.coords.longitude
+        ];
+        setCoordsBoxes(selectedCoordsValue);
+        editingId = null;
+        openFormModal(false);
+      },
+      () => {
+        // se GPS fallisce usa punto cliccato
+        selectedCoordsValue = [e.latlng.lat, e.latlng.lng];
+        setCoordsBoxes(selectedCoordsValue);
+        editingId = null;
+        openFormModal(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000
+      }
+    );
+
+  } else {
+    selectedCoordsValue = [e.latlng.lat, e.latlng.lng];
+    setCoordsBoxes(selectedCoordsValue);
+    editingId = null;
+    openFormModal(false);
+  }
+
 });
 
 formSegnalazione.addEventListener("submit", async (e) => {
