@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mappa dell'Accessibilità</title>
+  <meta name="theme-color" content="#1f4b7a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>Mappa dell’Accessibilità</h1>
+    <p>Scopri, segnala e monitora accessibilità e barriere urbane</p>
+  </div>
+
+  <div class="topbar-actions">
+    <button id="btnLocate" class="btn btn-primary" type="button">📍 Mostra la mia posizione</button>
+    <button id="btnLegend" class="btn btn-secondary" type="button">ℹ️ Legenda</button>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="sidebar">
+
+    <section class="panel">
+      <h2>Ricerca e filtri</h2>
+
+      <label class="field">
+        <span>Ricerca</span>
+        <input id="searchText" type="text" placeholder="Cerca per titolo, luogo o comune">
+      </label>
+
+      <label class="field">
+        <span>Comune</span>
+        <select id="filterComune">
+          <option value="tutti">Tutti</option>
+          <option value="San Cataldo">San Cataldo</option>
+          <option value="Caltanissetta">Caltanissetta</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Impostazione colori</span>
+        <select id="filterStatus">
+          <option value="tutti">Tutti</option>
+          <option value="rosso">🔴 Rosso — Non accessibile</option>
+          <option value="arancione">🟠 Arancione — Parziale</option>
+          <option value="verde">🟢 Verde — Accessibile</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Stato segnalazione</span>
+        <select id="filterWorkflow">
+          <option value="tutti">Tutti</option>
+          <option value="nuova">Nuova</option>
+          <option value="in verifica">In verifica</option>
+          <option value="risolta">Risolta</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="panel">
+      <button id="toggleSegnalazioni" class="toggle-panel" type="button">
+        <span>Segnalazioni</span>
+        <span>▼</span>
+      </button>
+
+      <div id="contenitoreSegnalazioni">
+        <div id="listaSegnalazioni"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <button id="toggleNuovoPunto" class="toggle-panel" type="button">
+        <span>Nuovo punto</span>
+        <span>▼</span>
+      </button>
+
+      <div id="contenitoreNuovoPunto">
+        <p class="small">Clicca su un punto della mappa per aprire la finestra di inserimento.</p>
+
+        <div id="selectedCoords" class="coords-box">
+          Nessun punto selezionato
+        </div>
+
+        <button id="btnApriForm" class="btn btn-light" type="button">Apri finestra segnalazione</button>
+      </div>
+    </section>
+
+  </aside>
+
+  <section class="map-area">
+    <div id="map"></div>
+  </section>
+</main>
+
+<div id="legendModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card small-modal">
+    <div class="modal-header">
+      <h3>Legenda</h3>
+      <button id="btnCloseLegend" class="btn btn-close" type="button">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>🔴 Rosso</strong> — Non accessibile</p>
+      <p><strong>🟠 Arancione</strong> — Parzialmente accessibile</p>
+      <p><strong>🟢 Verde</strong> — Accessibile</p>
+    </div>
+  </div>
+</div>
+
+<div id="formModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card form-modal">
+    <div class="modal-header">
+      <h3 id="formModalTitle">Nuova segnalazione</h3>
+      <button id="btnCloseFormModal" class="btn btn-close" type="button">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="small">Compila i dati del punto selezionato.</p>
+
+      <div id="modalSelectedCoords" class="coords-box">Nessun punto selezionato</div>
+
+      <form id="formSegnalazione" class="form-segnalazione">
+
+        <label class="field">
+          <span>Titolo</span>
+          <input id="inputTitolo" type="text" placeholder="Es. Gradino ingresso municipio" autocomplete="off" required />
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Comune</span>
+          <input id="inputComune" type="text" placeholder="Es. San Cataldo" autocomplete="off" required />
+          <div id="suggestionsComune" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Categoria</span>
+          <input id="inputCategoria" type="text" placeholder="Es. Parcheggio disabili" autocomplete="off" required />
+          <div id="suggestionsCategoria" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Luogo</span>
+          <input id="inputLuogo" type="text" placeholder="Es. Municipio di San Cataldo" autocomplete="off" required />
+          <div id="suggestionsLuogo" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field">
+          <span>Descrizione</span>
+          <textarea id="inputDescrizione" rows="4" placeholder="Descrivi il problema o il punto accessibile"></textarea>
+        </label>
+
+        <label class="field">
+          <span>Stato accessibilità</span>
+          <select id="inputStatus" required>
+            <option value="">Seleziona</option>
+            <option value="rosso">🔴 Rosso — Non accessibile</option>
+            <option value="arancione">🟠 Arancione — Parziale</option>
+            <option value="verde">🟢 Verde — Accessibile</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Stato segnalazione</span>
+          <select id="inputWorkflow" required>
+            <option value="nuova">Nuova</option>
+            <option value="in verifica">In verifica</option>
+            <option value="risolta">Risolta</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Nome segnalante</span>
+          <input id="inputNomeSegnalante" type="text" placeholder="Nome e cognome">
+        </label>
+
+        <label class="field">
+          <span>Contatto segnalante</span>
+          <input id="inputContattoSegnalante" type="text" placeholder="Telefono o email">
+        </label>
+
+        <label class="field">
+          <span>GPS automatico telefono</span>
+          <div class="gps-row">
+            <button id="btnGpsPhone" class="btn btn-light" type="button">Usa GPS del telefono</button>
+            <div id="gpsStatus" class="gps-status">Non acquisito</div>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Foto 1</span>
+          <input id="inputFoto1" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <label class="field">
+          <span>Foto 2</span>
+          <input id="inputFoto2" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <label class="field">
+          <span>Foto 3</span>
+          <input id="inputFoto3" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Salva</button>
+          <button id="btnResetSegnalazione" class="btn btn-light" type="button">Pulisci</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
