@@ -316,8 +316,8 @@ function getFilteredPoints() {
 
 function setCoordsBoxes(coords) {
   if (!coords) {
-    selectedCoords.innerHTML = "Nessun punto selezionato";
-    modalSelectedCoords.innerHTML = "Nessun punto selezionato";
+    if (selectedCoords) selectedCoords.innerHTML = "Nessun punto selezionato";
+    if (modalSelectedCoords) modalSelectedCoords.innerHTML = "Nessun punto selezionato";
     return;
   }
 
@@ -327,8 +327,8 @@ function setCoordsBoxes(coords) {
     Lng: ${coords[1].toFixed(5)}
   `;
 
-  selectedCoords.innerHTML = html;
-  modalSelectedCoords.innerHTML = html;
+  if (selectedCoords) selectedCoords.innerHTML = html;
+  if (modalSelectedCoords) modalSelectedCoords.innerHTML = html;
 }
 
 function openFormModal(isEdit = false) {
@@ -347,7 +347,7 @@ function closeFormModal() {
 
 function resetGpsStatus() {
   gpsPhoneCoords = null;
-  gpsStatus.textContent = "Non acquisito";
+  if (gpsStatus) gpsStatus.textContent = "Non acquisito";
 }
 
 function clearForm() {
@@ -372,7 +372,7 @@ function fillFormFromPoint(point) {
   selectedCoordsValue = [...point.coords];
   editingId = point.id;
   gpsPhoneCoords = point.gpsLat && point.gpsLng ? [Number(point.gpsLat), Number(point.gpsLng)] : null;
-  gpsStatus.textContent = gpsPhoneCoords ? "GPS acquisito" : "Non acquisito";
+  if (gpsStatus) gpsStatus.textContent = gpsPhoneCoords ? "GPS acquisito" : "Non acquisito";
   setCoordsBoxes(point.coords);
   openFormModal(true);
 }
@@ -405,7 +405,7 @@ function wirePopupPhotoButtons(marker) {
 
 function renderPoints() {
   markersLayer.clearLayers();
-  listaSegnalazioni.innerHTML = "";
+  if (listaSegnalazioni) listaSegnalazioni.innerHTML = "";
 
   const filtered = getFilteredPoints();
 
@@ -426,60 +426,62 @@ function renderPoints() {
     });
     wirePopupPhotoButtons(marker);
 
-    const item = document.createElement("div");
-    item.className = "segnalazione-item";
-    item.innerHTML = `
-      <strong>${point.title}</strong><br>
-      <small>${point.comune} · ${getStatusLabel(point.status)}</small><br>
-      <small><b>${point.categoria}</b></small><br>
-      <small>${point.luogo}</small><br>
-      <small>${point.description || ""}</small><br>
-      <small class="${workflowBadgeClass(point.workflow)}">${workflowLabel(point.workflow)}</small><br>
-      <button class="btn-modifica" data-id="${point.id}" type="button">Modifica</button>
-      <button class="btn-elimina" data-id="${point.id}" type="button">Elimina</button>
-    `;
+    if (listaSegnalazioni) {
+      const item = document.createElement("div");
+      item.className = "segnalazione-item";
+      item.innerHTML = `
+        <strong>${point.title}</strong><br>
+        <small>${point.comune} · ${getStatusLabel(point.status)}</small><br>
+        <small><b>${point.categoria}</b></small><br>
+        <small>${point.luogo}</small><br>
+        <small>${point.description || ""}</small><br>
+        <small class="${workflowBadgeClass(point.workflow)}">${workflowLabel(point.workflow)}</small><br>
+        <button class="btn-modifica" data-id="${point.id}" type="button">Modifica</button>
+        <button class="btn-elimina" data-id="${point.id}" type="button">Elimina</button>
+      `;
 
-    listaSegnalazioni.appendChild(item);
+      listaSegnalazioni.appendChild(item);
 
-    item.addEventListener("click", () => {
-      map.setView(point.coords, 18);
-      marker.openPopup();
-    });
+      item.addEventListener("click", () => {
+        map.setView(point.coords, 18);
+        marker.openPopup();
+      });
 
-    item.querySelector(".btn-modifica").addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      fillFormFromPoint(point);
-      map.setView(point.coords, 18);
-    });
+      item.querySelector(".btn-modifica").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        fillFormFromPoint(point);
+        map.setView(point.coords, 18);
+      });
 
-    item.querySelector(".btn-elimina").addEventListener("click", async (ev) => {
-      ev.stopPropagation();
+      item.querySelector(".btn-elimina").addEventListener("click", async (ev) => {
+        ev.stopPropagation();
 
-      const conferma = confirm(`Vuoi eliminare la segnalazione "${point.title}"?`);
-      if (!conferma) return;
+        const conferma = confirm(`Vuoi eliminare la segnalazione "${point.title}"?`);
+        if (!conferma) return;
 
-      const { error } = await supabaseClient
-        .from("segnalazioni")
-        .delete()
-        .eq("id", point.id);
+        const { error } = await supabaseClient
+          .from("segnalazioni")
+          .delete()
+          .eq("id", point.id);
 
-      if (error) {
-        alert("Eliminazione non riuscita.");
-        console.error(error);
-        return;
-      }
+        if (error) {
+          alert("Eliminazione non riuscita.");
+          console.error(error);
+          return;
+        }
 
-      const filesToDelete = [point.foto1, point.foto2, point.foto3].filter(Boolean);
-      if (filesToDelete.length > 0) {
-        await supabaseClient.storage.from("foto").remove(filesToDelete);
-      }
+        const filesToDelete = [point.foto1, point.foto2, point.foto3].filter(Boolean);
+        if (filesToDelete.length > 0) {
+          await supabaseClient.storage.from("foto").remove(filesToDelete);
+        }
 
-      await loadPointsFromSupabase();
-      if (editingId === point.id) editingId = null;
-    });
+        await loadPointsFromSupabase();
+        if (editingId === point.id) editingId = null;
+      });
+    }
   });
 
-  if (filtered.length === 0) {
+  if (listaSegnalazioni && filtered.length === 0) {
     listaSegnalazioni.innerHTML = "Nessuna segnalazione trovata";
   }
 
@@ -521,40 +523,11 @@ async function uploadSinglePhoto(file) {
 }
 
 map.on("click", (e) => {
-
-  // prova a usare GPS preciso
-  if (navigator.geolocation) {
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        selectedCoordsValue = [
-          pos.coords.latitude,
-          pos.coords.longitude
-        ];
-        setCoordsBoxes(selectedCoordsValue);
-        editingId = null;
-        openFormModal(false);
-      },
-      () => {
-        // se GPS fallisce usa punto cliccato
-        selectedCoordsValue = [e.latlng.lat, e.latlng.lng];
-        setCoordsBoxes(selectedCoordsValue);
-        editingId = null;
-        openFormModal(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000
-      }
-    );
-
-  } else {
-    selectedCoordsValue = [e.latlng.lat, e.latlng.lng];
-    setCoordsBoxes(selectedCoordsValue);
-    editingId = null;
-    openFormModal(false);
-  }
-
+  selectedCoordsValue = [e.latlng.lat, e.latlng.lng];
+  editingId = null;
+  setCoordsBoxes(selectedCoordsValue);
+  resetGpsStatus();
+  openFormModal(false);
 });
 
 formSegnalazione.addEventListener("submit", async (e) => {
@@ -652,135 +625,157 @@ formSegnalazione.addEventListener("submit", async (e) => {
   }
 });
 
-btnResetSegnalazione.addEventListener("click", () => {
-  formSegnalazione.reset();
-  resetGpsStatus();
-  hideSuggestions(suggestionsComune);
-  hideSuggestions(suggestionsCategoria);
-  hideSuggestions(suggestionsLuogo);
-});
+if (btnResetSegnalazione) {
+  btnResetSegnalazione.addEventListener("click", () => {
+    formSegnalazione.reset();
+    resetGpsStatus();
+    hideSuggestions(suggestionsComune);
+    hideSuggestions(suggestionsCategoria);
+    hideSuggestions(suggestionsLuogo);
+  });
+}
 
-btnGpsPhone.addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    alert("GPS non supportato da questo dispositivo o browser.");
-    return;
-  }
-
-  gpsStatus.textContent = "Ricerca GPS...";
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      gpsPhoneCoords = [position.coords.latitude, position.coords.longitude];
-      gpsStatus.textContent = `GPS acquisito: ${gpsPhoneCoords[0].toFixed(5)}, ${gpsPhoneCoords[1].toFixed(5)}`;
-    },
-    () => {
-      gpsStatus.textContent = "GPS non acquisito";
-      alert("Non sono riuscito a leggere il GPS del telefono.");
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
+if (btnGpsPhone) {
+  btnGpsPhone.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      alert("GPS non supportato da questo dispositivo o browser.");
+      return;
     }
-  );
-});
 
-toggleSegnalazioni.addEventListener("click", () => {
-  contenitoreSegnalazioni.classList.toggle("collapsed");
-  refreshMapSize();
-});
+    gpsStatus.textContent = "Ricerca GPS...";
 
-toggleNuovoPunto.addEventListener("click", () => {
-  contenitoreNuovoPunto.classList.toggle("collapsed");
-  refreshMapSize();
-});
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        gpsPhoneCoords = [position.coords.latitude, position.coords.longitude];
+        gpsStatus.textContent = `GPS acquisito: ${gpsPhoneCoords[0].toFixed(5)}, ${gpsPhoneCoords[1].toFixed(5)}`;
+      },
+      () => {
+        gpsStatus.textContent = "GPS non acquisito";
+        alert("Non sono riuscito a leggere il GPS del telefono.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  });
+}
 
-btnApriForm.addEventListener("click", () => {
-  if (!selectedCoordsValue) {
-    alert("Prima clicca sulla mappa per scegliere il punto.");
-    return;
-  }
-  openFormModal(false);
-});
+if (toggleSegnalazioni) {
+  toggleSegnalazioni.addEventListener("click", () => {
+    contenitoreSegnalazioni.classList.toggle("collapsed");
+    refreshMapSize();
+  });
+}
 
-searchText.addEventListener("input", renderPoints);
-filterComune.addEventListener("change", renderPoints);
-filterStatus.addEventListener("change", renderPoints);
-filterWorkflow.addEventListener("change", renderPoints);
+if (toggleNuovoPunto) {
+  toggleNuovoPunto.addEventListener("click", () => {
+    contenitoreNuovoPunto.classList.toggle("collapsed");
+    refreshMapSize();
+  });
+}
 
-btnLegend.addEventListener("click", () => {
-  legendModal.classList.remove("hidden");
-  legendModal.setAttribute("aria-hidden", "false");
-});
+if (btnApriForm) {
+  btnApriForm.addEventListener("click", () => {
+    if (!selectedCoordsValue) {
+      alert("Prima clicca sulla mappa per scegliere il punto.");
+      return;
+    }
+    openFormModal(false);
+  });
+}
 
-btnCloseLegend.addEventListener("click", () => {
-  legendModal.classList.add("hidden");
-  legendModal.setAttribute("aria-hidden", "true");
-});
+if (searchText) searchText.addEventListener("input", renderPoints);
+if (filterComune) filterComune.addEventListener("change", renderPoints);
+if (filterStatus) filterStatus.addEventListener("change", renderPoints);
+if (filterWorkflow) filterWorkflow.addEventListener("change", renderPoints);
 
-legendModal.addEventListener("click", (e) => {
-  if (e.target === legendModal) {
+if (btnLegend) {
+  btnLegend.addEventListener("click", () => {
+    legendModal.classList.remove("hidden");
+    legendModal.setAttribute("aria-hidden", "false");
+  });
+}
+
+if (btnCloseLegend) {
+  btnCloseLegend.addEventListener("click", () => {
     legendModal.classList.add("hidden");
     legendModal.setAttribute("aria-hidden", "true");
-  }
-});
+  });
+}
 
-btnCloseFormModal.addEventListener("click", () => {
-  closeFormModal();
-});
-
-formModal.addEventListener("click", (e) => {
-  if (e.target === formModal) {
-    closeFormModal();
-  }
-});
-
-btnLocate.addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    alert("La geolocalizzazione non è supportata da questo dispositivo o browser.");
-    return;
-  }
-
-  btnLocate.disabled = true;
-  btnLocate.textContent = "⌛ Ricerca posizione...";
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-
-      map.setView([lat, lng], 17);
-
-      if (userMarker) {
-        map.removeLayer(userMarker);
-      }
-
-      userMarker = L.circleMarker([lat, lng], {
-        radius: 8,
-        color: "#1f4b7a",
-        fillColor: "#1f4b7a",
-        fillOpacity: 1,
-        weight: 2
-      }).addTo(map);
-
-      userMarker.bindPopup("<strong>Sei qui</strong>").openPopup();
-
-      btnLocate.disabled = false;
-      btnLocate.textContent = "📍 Mostra la mia posizione";
-      refreshMapSize();
-    },
-    () => {
-      alert("Non sono riuscito a trovare la tua posizione.");
-      btnLocate.disabled = false;
-      btnLocate.textContent = "📍 Mostra la mia posizione";
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
+if (legendModal) {
+  legendModal.addEventListener("click", (e) => {
+    if (e.target === legendModal) {
+      legendModal.classList.add("hidden");
+      legendModal.setAttribute("aria-hidden", "true");
     }
-  );
-});
+  });
+}
+
+if (btnCloseFormModal) {
+  btnCloseFormModal.addEventListener("click", () => {
+    closeFormModal();
+  });
+}
+
+if (formModal) {
+  formModal.addEventListener("click", (e) => {
+    if (e.target === formModal) {
+      closeFormModal();
+    }
+  });
+}
+
+if (btnLocate) {
+  btnLocate.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      alert("La geolocalizzazione non è supportata da questo dispositivo o browser.");
+      return;
+    }
+
+    btnLocate.disabled = true;
+    btnLocate.textContent = "⌛ Ricerca posizione...";
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        map.setView([lat, lng], 17);
+
+        if (userMarker) {
+          map.removeLayer(userMarker);
+        }
+
+        userMarker = L.circleMarker([lat, lng], {
+          radius: 8,
+          color: "#1f4b7a",
+          fillColor: "#1f4b7a",
+          fillOpacity: 1,
+          weight: 2
+        }).addTo(map);
+
+        userMarker.bindPopup("<strong>Sei qui</strong>").openPopup();
+
+        btnLocate.disabled = false;
+        btnLocate.textContent = "📍 Mostra la mia posizione";
+        refreshMapSize();
+      },
+      () => {
+        alert("Non sono riuscito a trovare la tua posizione.");
+        btnLocate.disabled = false;
+        btnLocate.textContent = "📍 Mostra la mia posizione";
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  });
+}
 
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".autocomplete-field")) {
