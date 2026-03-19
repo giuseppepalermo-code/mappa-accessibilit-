@@ -538,20 +538,36 @@ body{
   }
 }
 @media (max-width: 900px){
-
-  .sidebar{
-    display:none;
+  body{
+    overflow:auto;
   }
 
   .layout{
     grid-template-columns:1fr;
-    padding:0;
-    gap:0;
+    height:auto;
+    min-height:calc(100vh - 88px);
+    overflow:auto;
+    padding:10px;
+    gap:10px;
+  }
+
+  .sidebar{
+    display:flex;
+    overflow:visible;
+    padding-right:0;
+  }
+
+  .map-area{
+    min-height:58vh;
   }
 
   #map{
-    height:calc(100vh - 70px);
-    border-radius:0;
+    height:58vh;
+    min-height:58vh;
+    border-radius:16px;
   }
 
+  #listaSegnalazioni{
+    max-height:220px;
+  }
 }
