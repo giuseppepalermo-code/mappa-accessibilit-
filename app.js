@@ -884,4 +884,13 @@ attachAutocomplete(inputLuogo, suggestionsLuogo, "luoghi");
 window.addEventListener("load", async () => {
   refreshMapSize();
   await loadPointsFromSupabase();
+
+  if ("serviceWorker" in navigator) {
+    try {
+      await navigator.serviceWorker.register("./service-worker.js");
+      console.log("Service Worker registrato correttamente");
+    } catch (error) {
+      console.error("Errore registrazione Service Worker:", error);
+    }
+  }
 });
