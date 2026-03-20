@@ -161,6 +161,11 @@ body{
   cursor:pointer;
 }
 
+.field input[readonly]{
+  background:#f7fafc;
+  color:#334155;
+}
+
 .small{
   color:var(--muted);
   font-size:.95rem;
@@ -283,6 +288,17 @@ body{
   line-height:1.5;
 }
 
+.segnalazione-code{
+  display:inline-block;
+  margin-bottom:6px;
+  font-size:.8rem;
+  font-weight:700;
+  background:#eef3f8;
+  color:#223;
+  border-radius:999px;
+  padding:4px 8px;
+}
+
 .segnalazione-item .btn-modifica,
 .segnalazione-item .btn-elimina{
   margin-top:10px;
@@ -308,6 +324,24 @@ body{
 .popup-content{
   max-width:240px;
   line-height:1.5;
+}
+
+.popup-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.popup-delete-btn{
+  border:none;
+  border-radius:10px;
+  padding:7px 10px;
+  background:#fdecec;
+  color:#b42318;
+  font-size:.82rem;
+  font-weight:700;
+  cursor:pointer;
 }
 
 .popup-foto-box{
@@ -408,6 +442,18 @@ body{
 .wf-green{
   background:#e8f7ef;
   color:#18794e;
+}
+
+.legend-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:8px 0;
+}
+
+.legend-row strong{
+  font-size:1rem;
 }
 
 .modal{
