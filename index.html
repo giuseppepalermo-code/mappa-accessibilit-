@@ -31,7 +31,7 @@
 
       <label class="field">
         <span>Ricerca</span>
-        <input id="searchText" type="text" placeholder="Cerca per titolo, luogo o comune">
+        <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo o comune">
       </label>
 
       <label class="field">
@@ -58,8 +58,8 @@
         <select id="filterWorkflow">
           <option value="tutti">Tutti</option>
           <option value="nuova">Nuova</option>
-          <option value="in verifica">In verifica</option>
-          <option value="risolta">Risolta</option>
+          <option value="presa in carico">Presa in carico</option>
+          <option value="chiusa">Chiusa</option>
         </select>
       </label>
     </section>
@@ -84,9 +84,7 @@
       <div id="contenitoreNuovoPunto">
         <p class="small">Clicca su un punto della mappa per aprire la finestra di inserimento.</p>
 
-        <div id="selectedCoords" class="coords-box">
-          Nessun punto selezionato
-        </div>
+        <div id="selectedCoords" class="coords-box">Nessun punto selezionato</div>
 
         <button id="btnApriForm" class="btn btn-light" type="button">Apri finestra segnalazione</button>
       </div>
@@ -102,13 +100,15 @@
 <div id="legendModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card small-modal">
     <div class="modal-header">
-      <h3>Legenda</h3>
+      <h3>Legenda e conteggi</h3>
       <button id="btnCloseLegend" class="btn btn-close" type="button">✕</button>
     </div>
     <div class="modal-body">
-      <p><strong>🔴 Rosso</strong> — Non accessibile</p>
-      <p><strong>🟠 Arancione</strong> — Parzialmente accessibile</p>
-      <p><strong>🟢 Verde</strong> — Accessibile</p>
+      <div class="legend-row"><span>🔴 Rosso — Non accessibile</span><strong id="countRosso">0</strong></div>
+      <div class="legend-row"><span>🟠 Arancione — Parziale</span><strong id="countArancione">0</strong></div>
+      <div class="legend-row"><span>🟢 Verde — Accessibile</span><strong id="countVerde">0</strong></div>
+      <hr>
+      <div class="legend-row"><span>Totale segnalazioni</span><strong id="countTotale">0</strong></div>
     </div>
   </div>
 </div>
@@ -126,6 +126,11 @@
       <div id="modalSelectedCoords" class="coords-box">Nessun punto selezionato</div>
 
       <form id="formSegnalazione" class="form-segnalazione">
+
+        <label class="field">
+          <span>Codice segnalazione</span>
+          <input id="inputCodice" type="text" readonly>
+        </label>
 
         <label class="field">
           <span>Titolo</span>
@@ -169,8 +174,8 @@
           <span>Stato segnalazione</span>
           <select id="inputWorkflow" required>
             <option value="nuova">Nuova</option>
-            <option value="in verifica">In verifica</option>
-            <option value="risolta">Risolta</option>
+            <option value="presa in carico">Presa in carico</option>
+            <option value="chiusa">Chiusa</option>
           </select>
         </label>
 
