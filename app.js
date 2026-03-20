@@ -1,6 +1,6 @@
 // ===============================
 // MAPPA DELL'ACCESSIBILITÀ
-// Pacchetto finale: UX + dati + GPS + 3 foto
+// Codice automatico + legenda conteggi + elimina da popup
 // ===============================
 
 const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
@@ -28,12 +28,6 @@ function getStatusLabel(status) {
   return "Stato non valido";
 }
 
-function fotoPublicUrl(nomeFile) {
-  if (!nomeFile) return "";
-  const { data } = supabaseClient.storage.from("foto").getPublicUrl(nomeFile);
-  return data.publicUrl;
-}
-
 function getColor(status) {
   const s = normalizeStatus(status);
   if (s === "rosso") return "#d62828";
@@ -42,20 +36,42 @@ function getColor(status) {
   return "#6b7280";
 }
 
+function fotoPublicUrl(nomeFile) {
+  if (!nomeFile) return "";
+  const { data } = supabaseClient.storage.from("foto").getPublicUrl(nomeFile);
+  return data.publicUrl;
+}
+
+function workflowLabel(value) {
+  const v = normalizeText(value).toLowerCase();
+  if (v === "nuova") return "Nuova";
+  if (v === "presa in carico") return "Presa in carico";
+  if (v === "chiusa") return "Chiusa";
+  return "Nuova";
+}
+
+function workflowBadgeClass(value) {
+  const v = normalizeText(value).toLowerCase();
+  if (v === "chiusa") return "wf-badge wf-green";
+  if (v === "presa in carico") return "wf-badge wf-orange";
+  return "wf-badge wf-blue";
+}
+
 function dbRowToPoint(row) {
   return {
     id: row.id,
+    codice: row.codice || "",
     title: row.titolo || row.Titolo || "",
     comune: row.comune || row.Comune || "",
     categoria: row.categoria || row.Categoria || "Altro",
     status: normalizeStatus(row.stato || row.Stato || ""),
-    workflow: normalizeText(row.StatoSegnalazione || row.statosegnalazione || "nuova").toLowerCase(),
+    workflow: normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase(),
     luogo: row.luogo || row.Luogo || "",
     description: row.descrizione || row.Descrizione || "",
-    nomeSegnalante: row.NomeSegnalante || row.nomesegnalante || "",
-    contattoSegnalante: row.ContattoSegnalante || row.contattosegnalante || "",
-    gpsLat: row.GpsLat ?? row.gpslat ?? null,
-    gpsLng: row.GpsLng ?? row.gpslng ?? null,
+    nomeSegnalante: row.nomesegnalante || row.NomeSegnalante || "",
+    contattoSegnalante: row.contattosegnalante || row.ContattoSegnalante || "",
+    gpsLat: row.gpslat ?? row.GpsLat ?? null,
+    gpsLng: row.gpslng ?? row.GpsLng ?? null,
     foto1: row.foto1 || null,
     foto2: row.foto2 || null,
     foto3: row.foto3 || null,
@@ -68,6 +84,7 @@ function dbRowToPoint(row) {
 
 function pointToDbRow(point) {
   return {
+    codice: point.codice,
     Titolo: point.title,
     Comune: point.comune,
     Categoria: point.categoria,
@@ -85,6 +102,30 @@ function pointToDbRow(point) {
     foto2: point.foto2 || null,
     foto3: point.foto3 || null
   };
+}
+
+function comunePrefix(comune) {
+  const c = normalizeText(comune).toLowerCase();
+  if (c === "san cataldo") return "SC";
+  if (c === "caltanissetta") return "CL";
+  return "PT";
+}
+
+function generateNextCode(comune, existingPoints, currentId = null) {
+  const prefix = comunePrefix(comune);
+  const sameComune = existingPoints.filter(p => p.id !== currentId && comunePrefix(p.comune) === prefix);
+
+  let maxNum = 0;
+  sameComune.forEach(p => {
+    const match = String(p.codice || "").match(/-(\d+)$/);
+    if (match) {
+      const n = Number(match[1]);
+      if (n > maxNum) maxNum = n;
+    }
+  });
+
+  const nextNum = String(maxNum + 1).padStart(3, "0");
+  return `${prefix}-${nextNum}`;
 }
 
 const map = L.map("map", {
@@ -121,6 +162,12 @@ const filterComune = document.getElementById("filterComune");
 const filterStatus = document.getElementById("filterStatus");
 const filterWorkflow = document.getElementById("filterWorkflow");
 
+// legend counts
+const countRosso = document.getElementById("countRosso");
+const countArancione = document.getElementById("countArancione");
+const countVerde = document.getElementById("countVerde");
+const countTotale = document.getElementById("countTotale");
+
 // topbar/modal
 const btnLocate = document.getElementById("btnLocate");
 const btnLegend = document.getElementById("btnLegend");
@@ -136,6 +183,7 @@ const modalSelectedCoords = document.getElementById("modalSelectedCoords");
 
 // form
 const formSegnalazione = document.getElementById("formSegnalazione");
+const inputCodice = document.getElementById("inputCodice");
 const inputTitolo = document.getElementById("inputTitolo");
 const inputComune = document.getElementById("inputComune");
 const inputCategoria = document.getElementById("inputCategoria");
@@ -242,6 +290,11 @@ function attachAutocomplete(inputEl, boxEl, type) {
     renderSuggestions(boxEl, filtered, (selectedValue) => {
       inputEl.value = selectedValue;
       hideSuggestions(boxEl);
+
+      if (inputEl === inputComune && !editingId) {
+        inputCodice.value = generateNextCode(selectedValue, points);
+      }
+
       inputEl.focus();
     });
   };
@@ -254,19 +307,15 @@ function attachAutocomplete(inputEl, boxEl, type) {
   });
 }
 
-function workflowLabel(value) {
-  const v = normalizeText(value).toLowerCase();
-  if (v === "nuova") return "Nuova";
-  if (v === "in verifica") return "In verifica";
-  if (v === "risolta") return "Risolta";
-  return "Nuova";
-}
+function updateLegendCounts() {
+  const rosso = points.filter(p => p.status === "rosso").length;
+  const arancione = points.filter(p => p.status === "arancione").length;
+  const verde = points.filter(p => p.status === "verde").length;
 
-function workflowBadgeClass(value) {
-  const v = normalizeText(value).toLowerCase();
-  if (v === "risolta") return "wf-badge wf-green";
-  if (v === "in verifica") return "wf-badge wf-orange";
-  return "wf-badge wf-blue";
+  countRosso.textContent = rosso;
+  countArancione.textContent = arancione;
+  countVerde.textContent = verde;
+  countTotale.textContent = points.length;
 }
 
 function buildPhotoButtons(point) {
@@ -284,7 +333,8 @@ function buildPopup(point) {
     : "";
 
   return `
-    <div class="popup-content">
+    <div class="popup-content" data-point-id="${point.id}">
+      <div class="segnalazione-code">${point.codice || "-"}</div>
       <b>${point.title}</b><br>
       ${point.comune} · ${getStatusLabel(point.status)}<br>
       <i>${point.categoria}</i><br>
@@ -292,8 +342,11 @@ function buildPopup(point) {
       ${point.luogo}<br>
       ${point.description || ""}
       ${gpsHtml}
-      ${buttonsHtml ? `<div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">${buttonsHtml}</div>` : ""}
-      <div class="popup-foto-box" style="margin-top:8px;"></div>
+      ${buttonsHtml ? `<div class="popup-actions">${buttonsHtml}</div>` : ""}
+      <div class="popup-actions">
+        <button type="button" class="popup-delete-btn" data-delete-id="${point.id}">Elimina</button>
+      </div>
+      <div class="popup-foto-box"></div>
     </div>
   `;
 }
@@ -306,9 +359,9 @@ function getFilteredPoints() {
 
   return points.filter((point) => {
     const matchComune = comuneValue === "tutti" || point.comune === comuneValue;
-    const matchStatus = statusValue === "tutti" || normalizeStatus(point.status) === statusValue;
-    const matchWorkflow = workflowValue === "tutti" || normalizeText(point.workflow).toLowerCase() === workflowValue;
-    const haystack = `${point.title} ${point.luogo} ${point.comune}`.toLowerCase();
+    const matchStatus = statusValue === "tutti" || normalizeText(point.status) === statusValue;
+    const matchWorkflow = workflowValue === "tutti" || normalizeText(point.workflow) === workflowValue;
+    const haystack = `${point.codice} ${point.title} ${point.luogo} ${point.comune}`.toLowerCase();
     const matchSearch = !q || haystack.includes(q);
     return matchComune && matchStatus && matchWorkflow && matchSearch;
   });
@@ -354,12 +407,14 @@ function clearForm() {
   formSegnalazione.reset();
   editingId = null;
   selectedCoordsValue = null;
+  inputCodice.value = "";
   setCoordsBoxes(null);
   resetGpsStatus();
   closeFormModal();
 }
 
 function fillFormFromPoint(point) {
+  inputCodice.value = point.codice || "";
   inputTitolo.value = point.title || "";
   inputComune.value = point.comune || "";
   inputCategoria.value = point.categoria || "";
@@ -377,29 +432,65 @@ function fillFormFromPoint(point) {
   openFormModal(true);
 }
 
-function wirePopupPhotoButtons(marker) {
+async function deletePointById(pointId) {
+  const point = points.find(p => p.id === pointId);
+  if (!point) return;
+
+  const conferma = confirm(`Vuoi eliminare la segnalazione "${point.title}" (${point.codice})?`);
+  if (!conferma) return;
+
+  const { error } = await supabaseClient
+    .from("segnalazioni")
+    .delete()
+    .eq("id", pointId);
+
+  if (error) {
+    alert("Eliminazione non riuscita.");
+    console.error(error);
+    return;
+  }
+
+  const filesToDelete = [point.foto1, point.foto2, point.foto3].filter(Boolean);
+  if (filesToDelete.length > 0) {
+    await supabaseClient.storage.from("foto").remove(filesToDelete);
+  }
+
+  await loadPointsFromSupabase();
+  if (editingId === pointId) editingId = null;
+}
+
+function wirePopupActions(marker) {
   marker.on("popupopen", (e) => {
     const popupEl = e.popup.getElement();
     if (!popupEl) return;
 
     const buttons = popupEl.querySelectorAll(".foto-btn");
     const box = popupEl.querySelector(".popup-foto-box");
-    if (!box) return;
+    const deleteBtn = popupEl.querySelector(".popup-delete-btn");
 
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const url = btn.getAttribute("data-foto");
-        if (!url) return;
+    if (box) {
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const url = btn.getAttribute("data-foto");
+          if (!url) return;
 
-        box.innerHTML = `
-          <img
-            src="${url}"
-            alt="Foto segnalazione"
-            style="max-width:220px; width:100%; border-radius:10px; display:block;"
-          >
-        `;
+          box.innerHTML = `
+            <img
+              src="${url}"
+              alt="Foto segnalazione"
+              style="max-width:220px; width:100%; border-radius:10px; display:block;"
+            >
+          `;
+        });
       });
-    });
+    }
+
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", async () => {
+        const pointId = Number(deleteBtn.getAttribute("data-delete-id"));
+        await deletePointById(pointId);
+      });
+    }
   });
 }
 
@@ -424,12 +515,13 @@ function renderPoints() {
       autoClose: true,
       closeOnClick: true
     });
-    wirePopupPhotoButtons(marker);
+    wirePopupActions(marker);
 
     if (listaSegnalazioni) {
       const item = document.createElement("div");
       item.className = "segnalazione-item";
       item.innerHTML = `
+        <div class="segnalazione-code">${point.codice || "-"}</div>
         <strong>${point.title}</strong><br>
         <small>${point.comune} · ${getStatusLabel(point.status)}</small><br>
         <small><b>${point.categoria}</b></small><br>
@@ -455,28 +547,7 @@ function renderPoints() {
 
       item.querySelector(".btn-elimina").addEventListener("click", async (ev) => {
         ev.stopPropagation();
-
-        const conferma = confirm(`Vuoi eliminare la segnalazione "${point.title}"?`);
-        if (!conferma) return;
-
-        const { error } = await supabaseClient
-          .from("segnalazioni")
-          .delete()
-          .eq("id", point.id);
-
-        if (error) {
-          alert("Eliminazione non riuscita.");
-          console.error(error);
-          return;
-        }
-
-        const filesToDelete = [point.foto1, point.foto2, point.foto3].filter(Boolean);
-        if (filesToDelete.length > 0) {
-          await supabaseClient.storage.from("foto").remove(filesToDelete);
-        }
-
-        await loadPointsFromSupabase();
-        if (editingId === point.id) editingId = null;
+        await deletePointById(point.id);
       });
     }
   });
@@ -485,6 +556,7 @@ function renderPoints() {
     listaSegnalazioni.innerHTML = "Nessuna segnalazione trovata";
   }
 
+  updateLegendCounts();
   refreshMapSize();
 }
 
@@ -527,6 +599,7 @@ map.on("click", (e) => {
   editingId = null;
   setCoordsBoxes(selectedCoordsValue);
   resetGpsStatus();
+  inputCodice.value = generateNextCode(inputComune.value || "", points);
   openFormModal(false);
 });
 
@@ -568,6 +641,9 @@ formSegnalazione.addEventListener("submit", async (e) => {
     if (inputFoto3 && inputFoto3.files.length > 0) foto3 = await uploadSinglePhoto(inputFoto3.files[0]);
 
     const point = {
+      codice: editingId
+        ? (points.find(p => p.id === editingId)?.codice || generateNextCode(comune, points, editingId))
+        : generateNextCode(comune, points),
       title,
       comune,
       categoria,
@@ -625,9 +701,24 @@ formSegnalazione.addEventListener("submit", async (e) => {
   }
 });
 
+if (inputComune) {
+  inputComune.addEventListener("change", () => {
+    if (!editingId) {
+      inputCodice.value = generateNextCode(inputComune.value, points);
+    }
+  });
+
+  inputComune.addEventListener("blur", () => {
+    if (!editingId && normalizeText(inputComune.value)) {
+      inputCodice.value = generateNextCode(inputComune.value, points);
+    }
+  });
+}
+
 if (btnResetSegnalazione) {
   btnResetSegnalazione.addEventListener("click", () => {
     formSegnalazione.reset();
+    inputCodice.value = "";
     resetGpsStatus();
     hideSuggestions(suggestionsComune);
     hideSuggestions(suggestionsCategoria);
@@ -693,6 +784,7 @@ if (filterWorkflow) filterWorkflow.addEventListener("change", renderPoints);
 
 if (btnLegend) {
   btnLegend.addEventListener("click", () => {
+    updateLegendCounts();
     legendModal.classList.remove("hidden");
     legendModal.setAttribute("aria-hidden", "false");
   });
