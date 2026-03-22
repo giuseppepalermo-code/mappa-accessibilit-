@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Mappa - NessunOstacolo</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root{
+      --brand:#1f4b7a;
+      --brand-dark:#163a5f;
+      --accent:#f2b705;
+      --bg:#f6f8fb;
+      --text:#111827;
+      --muted:#5b6673;
+      --line:#dbe4ef;
+      --white:#ffffff;
+      --radius:18px;
+      --shadow:0 12px 30px rgba(0,0,0,.08);
+      --shadow-soft:0 6px 18px rgba(0,0,0,.06);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      padding:16px 20px;
+      background:linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color:#fff;
+      box-shadow:var(--shadow);
+    }
+
+    .topbar h1{
+      margin:0;
+      font-size:1.4rem;
+    }
+
+    .topbar p{
+      margin:6px 0 0 0;
+      opacity:.95;
+      font-size:.95rem;
+    }
+
+    .topbar-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .wrap{
+      max-width:1400px;
+      margin:0 auto;
+      padding:18px;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
+    }
+
+    h2,h3{
+      margin-top:0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .stat{
+      background:#f8fbff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .stat strong{
+      display:block;
+      font-size:1.5rem;
+      margin-bottom:6px;
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns:2fr 1fr 1fr 1fr;
+      gap:12px;
+      align-items:end;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .field label{
+      font-size:.92rem;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .field input,
+    .field select{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      font-size:.96rem;
+      outline:none;
+      background:#fff;
+    }
+
+    .field input:focus,
+    .field select:focus{
+      border-color:var(--brand);
+      box-shadow:0 0 0 3px rgba(31,75,122,.12);
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font-size:.95rem;
+      cursor:pointer;
+      transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      box-shadow:var(--shadow-soft);
+    }
+
+    .btn-primary{
+      background:var(--accent);
+      color:#111;
+      font-weight:700;
+    }
+
+    .btn-light{
+      background:#eef3f8;
+      color:#223;
+      font-weight:700;
+    }
+
+    .btn-danger{
+      background:#fdecec;
+      color:#b42318;
+      font-weight:700;
+    }
+
+    .btn-brand{
+      background:var(--brand);
+      color:#fff;
+      font-weight:700;
+    }
+
+    .btn-small{
+      padding:8px 10px;
+      border-radius:10px;
+      font-size:.82rem;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    .muted{
+      color:var(--muted);
+    }
+
+    .login-wrap{
+      max-width:520px;
+      margin:50px auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.92rem;
+    }
+
+    th, td{
+      text-align:left;
+      padding:10px 8px;
+      border-bottom:1px solid #edf2f7;
+      vertical-align:top;
+    }
+
+    th{
+      font-size:.82rem;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    .table-wrap{
+      overflow:auto;
+    }
+
+    .code-badge{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#eef3f8;
+      color:#223;
+      font-weight:700;
+      font-size:.78rem;
+      white-space:nowrap;
+    }
+
+    .wf-badge{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .wf-blue{
+      background:#e8f1fb;
+      color:#1f4b7a;
+    }
+
+    .wf-orange{
+      background:#fff3e8;
+      color:#b85c00;
+    }
+
+    .wf-green{
+      background:#e8f7ef;
+      color:#18794e;
+    }
+
+    .msg{
+      margin-top:10px;
+      font-size:.92rem;
+      color:var(--muted);
+    }
+
+    @media (max-width: 1100px){
+      .grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .filters{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width: 760px){
+      .topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .topbar-actions{
+        width:100%;
+      }
+
+      .topbar-actions .btn{
+        flex:1;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .filters{
+        grid-template-columns:1fr;
+      }
+
+      .wrap{
+        padding:12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div>
+      <h1>Area Admin Mappa</h1>
+      <p>Gestione segnalazioni, statistiche ed esportazione dati</p>
+    </div>
+    <div class="topbar-actions">
+      <button id="btnRefreshTop" class="btn btn-light hidden" type="button">Aggiorna</button>
+      <button id="btnLogoutTop" class="btn btn-danger hidden" type="button">Esci</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section id="loginSection" class="login-wrap">
+      <div class="card">
+        <h2>Login associazione</h2>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="Inserisci email admin">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="Inserisci password">
+        </div>
+
+        <button id="btnLogin" class="btn btn-brand" type="button">Entra</button>
+        <div id="loginMsg" class="msg"></div>
+      </div>
+    </section>
+
+    <section id="adminSection" class="hidden">
+
+      <div class="card">
+        <h2>Statistiche automatiche</h2>
+        <div class="grid">
+          <div class="stat">
+            <strong id="statTotale">0</strong>
+            <span class="muted">Totale segnalazioni</span>
+          </div>
+          <div class="stat">
+            <strong id="statRosso">0</strong>
+            <span class="muted">Rosso</span>
+          </div>
+          <div class="stat">
+            <strong id="statArancione">0</strong>
+            <span class="muted">Arancione</span>
+          </div>
+          <div class="stat">
+            <strong id="statVerde">0</strong>
+            <span class="muted">Verde</span>
+          </div>
+          <div class="stat">
+            <strong id="statNuova">0</strong>
+            <span class="muted">Nuova</span>
+          </div>
+          <div class="stat">
+            <strong id="statPresa">0</strong>
+            <span class="muted">Presa in carico</span>
+          </div>
+          <div class="stat">
+            <strong id="statChiusa">0</strong>
+            <span class="muted">Chiusa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Filtri e strumenti</h2>
+
+        <div class="filters">
+          <div class="field">
+            <label for="searchText">Ricerca</label>
+            <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo, comune">
+          </div>
+
+          <div class="field">
+            <label for="filterComune">Comune</label>
+            <select id="filterComune">
+              <option value="tutti">Tutti</option>
+              <option value="San Cataldo">San Cataldo</option>
+              <option value="Caltanissetta">Caltanissetta</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="filterStatus">Stato accessibilità</label>
+            <select id="filterStatus">
+              <option value="tutti">Tutti</option>
+              <option value="rosso">Rosso</option>
+              <option value="arancione">Arancione</option>
+              <option value="verde">Verde</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="filterWorkflow">Stato segnalazione</label>
+            <select id="filterWorkflow">
+              <option value="tutti">Tutti</option>
+              <option value="nuova">Nuova</option>
+              <option value="presa in carico">Presa in carico</option>
+              <option value="chiusa">Chiusa</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <button id="btnRefresh" class="btn btn-light" type="button">Aggiorna dati</button>
+          <button id="btnExportCsv" class="btn btn-light" type="button">Esporta CSV</button>
+          <button id="btnExportXlsx" class="btn btn-light" type="button">Esporta Excel</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Elenco segnalazioni</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Codice</th>
+                <th>Titolo</th>
+                <th>Comune</th>
+                <th>Categoria</th>
+                <th>Stato</th>
+                <th>Workflow</th>
+                <th>Luogo</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let rowsCache = [];
+
+    const loginSection = document.getElementById("loginSection");
+    const adminSection = document.getElementById("adminSection");
+    const loginMsg = document.getElementById("loginMsg");
+
+    const btnLogin = document.getElementById("btnLogin");
+    const btnRefresh = document.getElementById("btnRefresh");
+    const btnRefreshTop = document.getElementById("btnRefreshTop");
+    const btnLogoutTop = document.getElementById("btnLogoutTop");
+    const btnExportCsv = document.getElementById("btnExportCsv");
+    const btnExportXlsx = document.getElementById("btnExportXlsx");
+
+    const searchText = document.getElementById("searchText");
+    const filterComune = document.getElementById("filterComune");
+    const filterStatus = document.getElementById("filterStatus");
+    const filterWorkflow = document.getElementById("filterWorkflow");
+    const tableBody = document.getElementById("tableBody");
+
+    function normalizeText(value) {
+      return (value ?? "").toString().trim();
+    }
+
+    function workflowBadgeClass(value) {
+      const v = normalizeText(value).toLowerCase();
+      if (v === "chiusa") return "wf-badge wf-green";
+      if (v === "presa in carico") return "wf-badge wf-orange";
+      return "wf-badge wf-blue";
+    }
+
+    async function isAdminUser() {
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData?.user;
+      if (!user?.email) return false;
+
+      const { data, error } = await supabase
+        .from("admin_utenti")
+        .select("email")
+        .eq("email", user.email)
+        .maybeSingle();
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
+
+      return !!data;
+    }
+
+    async function checkSession() {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        const admin = await isAdminUser();
+        if (!admin) {
+          loginMsg.textContent = "Utente autenticato ma non autorizzato.";
+          await supabase.auth.signOut();
+          return;
+        }
+
+        showAdminArea();
+        await loadData();
+      }
+    }
+
+    function showAdminArea() {
+      loginSection.classList.add("hidden");
+      adminSection.classList.remove("hidden");
+      btnRefreshTop.classList.remove("hidden");
+      btnLogoutTop.classList.remove("hidden");
+    }
+
+    function hideAdminArea() {
+      loginSection.classList.remove("hidden");
+      adminSection.classList.add("hidden");
+      btnRefreshTop.classList.add("hidden");
+      btnLogoutTop.classList.add("hidden");
+    }
+
+    async function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      loginMsg.textContent = "Accesso in corso...";
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        loginMsg.textContent = "Login non riuscito.";
+        console.error(error);
+        return;
+      }
+
+      const admin = await isAdminUser();
+
+      if (!admin) {
+        await supabase.auth.signOut();
+        loginMsg.textContent = "Utente non autorizzato.";
+        return;
+      }
+
+      loginMsg.textContent = "";
+      showAdminArea();
+      await loadData();
+    }
+
+    async function logout() {
+      await supabase.auth.signOut();
+      hideAdminArea();
+      rowsCache = [];
+      tableBody.innerHTML = "";
+    }
+
+    function getFilteredRows() {
+      const q = normalizeText(searchText.value).toLowerCase();
+      const comune = filterComune.value;
+      const status = filterStatus.value;
+      const workflow = filterWorkflow.value;
+
+      return rowsCache.filter(row => {
+        const titolo = row.Titolo || row.titolo || "";
+        const luogo = row.Luogo || row.luogo || "";
+        const comuneRow = row.Comune || row.comune || "";
+        const codice = row.codice || "";
+        const stato = normalizeText(row.Stato || row.stato).toLowerCase();
+        const wf = normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase();
+
+        const haystack = `${codice} ${titolo} ${luogo} ${comuneRow}`.toLowerCase();
+
+        const matchSearch = !q || haystack.includes(q);
+        const matchComune = comune === "tutti" || comuneRow === comune;
+        const matchStatus = status === "tutti" || stato === status;
+        const matchWorkflow = workflow === "tutti" || wf === workflow;
+
+        return matchSearch && matchComune && matchStatus && matchWorkflow;
+      });
+    }
+
+    function updateStats(rows) {
+      const stato = r => normalizeText(r.Stato || r.stato).toLowerCase();
+      const wf = r => normalizeText(r.statosegnalazione || r.StatoSegnalazione || "nuova").toLowerCase();
+
+      document.getElementById("statTotale").textContent = rows.length;
+      document.getElementById("statRosso").textContent = rows.filter(r => stato(r) === "rosso").length;
+      document.getElementById("statArancione").textContent = rows.filter(r => stato(r) === "arancione").length;
+      document.getElementById("statVerde").textContent = rows.filter(r => stato(r) === "verde").length;
+      document.getElementById("statNuova").textContent = rows.filter(r => wf(r) === "nuova").length;
+      document.getElementById("statPresa").textContent = rows.filter(r => wf(r) === "presa in carico").length;
+      document.getElementById("statChiusa").textContent = rows.filter(r => wf(r) === "chiusa").length;
+    }
+
+    function renderTable() {
+      const rows = getFilteredRows();
+      updateStats(rows);
+      tableBody.innerHTML = "";
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+
+        const id = row.id;
+        const codice = row.codice || "";
+        const titolo = row.Titolo || row.titolo || "";
+        const comune = row.Comune || row.comune || "";
+        const categoria = row.Categoria || row.categoria || "";
+        const stato = row.Stato || row.stato || "";
+        const workflow = row.statosegnalazione || row.StatoSegnalazione || "nuova";
+        const luogo = row.Luogo || row.luogo || "";
+
+        tr.innerHTML = `
+          <td><span class="code-badge">${codice}</span></td>
+          <td>${titolo}</td>
+          <td>${comune}</td>
+          <td>${categoria}</td>
+          <td>${stato}</td>
+          <td>
+            <select data-workflow-id="${id}">
+              <option value="nuova" ${workflow === "nuova" ? "selected" : ""}>Nuova</option>
+              <option value="presa in carico" ${workflow === "presa in carico" ? "selected" : ""}>Presa in carico</option>
+              <option value="chiusa" ${workflow === "chiusa" ? "selected" : ""}>Chiusa</option>
+            </select>
+          </td>
+          <td>${luogo}</td>
+          <td>
+            <button class="btn btn-light btn-small" data-save-id="${id}" type="button">Salva</button>
+            <button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina</button>
+          </td>
+        `;
+
+        tableBody.appendChild(tr);
+      });
+
+      tableBody.querySelectorAll("[data-save-id]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = Number(btn.getAttribute("data-save-id"));
+          const select = document.querySelector(`[data-workflow-id="${id}"]`);
+          const value = select.value;
+
+          const { error } = await supabase
+            .from("segnalazioni")
+            .update({ statosegnalazione: value })
+            .eq("id", id);
+
+          if (error) {
+            alert("Aggiornamento non riuscito");
+            console.error(error);
+            return;
+          }
+
+          await loadData();
+        });
+      });
+
+      tableBody.querySelectorAll("[data-delete-id]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = Number(btn.getAttribute("data-delete-id"));
+          const conferma = confirm("Vuoi eliminare definitivamente questa segnalazione?");
+          if (!conferma) return;
+
+          const row = rowsCache.find(r => r.id === id);
+
+          const { error } = await supabase
+            .from("segnalazioni")
+            .delete()
+            .eq("id", id);
+
+          if (error) {
+            alert("Eliminazione non riuscita");
+            console.error(error);
+            return;
+          }
+
+          const filesToDelete = [row?.foto1, row?.foto2, row?.foto3].filter(Boolean);
+          if (filesToDelete.length > 0) {
+            await supabase.storage.from("foto").remove(filesToDelete);
+          }
+
+          await loadData();
+        });
+      });
+    }
+
+    async function loadData() {
+      const { data, error } = await supabase
+        .from("segnalazioni")
+        .select("*")
+        .order("id", { ascending: true });
+
+      if (error) {
+        alert("Errore caricamento dati");
+        console.error(error);
+        return;
+      }
+
+      rowsCache = data || [];
+      renderTable();
+    }
+
+    function exportCSV() {
+      const rows = getFilteredRows();
+      if (!rows.length) {
+        alert("Nessun dato da esportare");
+        return;
+      }
+
+      const headers = Object.keys(rows[0]);
+      const csv = [
+        headers.join(","),
+        ...rows.map(row =>
+          headers.map(h => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(",")
+        )
+      ].join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "segnalazioni-mappa.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportXLSX() {
+      const rows = getFilteredRows();
+      if (!rows.length) {
+        alert("Nessun dato da esportare");
+        return;
+      }
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Segnalazioni");
+      XLSX.writeFile(workbook, "segnalazioni-mappa.xlsx");
+    }
+
+    btnLogin.addEventListener("click", login);
+    btnRefresh.addEventListener("click", loadData);
+    btnRefreshTop.addEventListener("click", loadData);
+    btnLogoutTop.addEventListener("click", logout);
+    btnExportCsv.addEventListener("click", exportCSV);
+    btnExportXlsx.addEventListener("click", exportXLSX);
+
+    searchText.addEventListener("input", renderTable);
+    filterComune.addEventListener("change", renderTable);
+    filterStatus.addEventListener("change", renderTable);
+    filterWorkflow.addEventListener("change", renderTable);
+
+    checkSession();
+  </script>
+</body>
+</html>
