@@ -146,12 +146,6 @@
       box-shadow:var(--shadow-soft);
     }
 
-    .btn-primary{
-      background:var(--accent);
-      color:#111;
-      font-weight:700;
-    }
-
     .btn-light{
       background:#eef3f8;
       color:#223;
@@ -224,34 +218,21 @@
       white-space:nowrap;
     }
 
-    .wf-badge{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:.78rem;
-      font-weight:700;
-      white-space:nowrap;
-    }
-
-    .wf-blue{
-      background:#e8f1fb;
-      color:#1f4b7a;
-    }
-
-    .wf-orange{
-      background:#fff3e8;
-      color:#b85c00;
-    }
-
-    .wf-green{
-      background:#e8f7ef;
-      color:#18794e;
-    }
-
     .msg{
       margin-top:10px;
       font-size:.92rem;
       color:var(--muted);
+      min-height:20px;
+    }
+
+    .msg.error{
+      color:#b42318;
+      font-weight:700;
+    }
+
+    .msg.ok{
+      color:#18794e;
+      font-weight:700;
     }
 
     @media (max-width: 1100px){
@@ -313,15 +294,15 @@
 
         <div class="field">
           <label for="email">Email</label>
-          <input id="email" type="email" placeholder="Inserisci email admin">
+          <input id="email" type="email" placeholder="Inserisci email admin" />
         </div>
 
         <div class="field">
           <label for="password">Password</label>
-          <input id="password" type="password" placeholder="Inserisci password">
+          <input id="password" type="password" placeholder="Inserisci password" />
         </div>
 
-<button id="btnLogin" class="btn btn-brand" type="button" onclick="login()">Entra</button>
+        <button id="btnLogin" class="btn btn-brand" type="button">Entra</button>
         <div id="loginMsg" class="msg"></div>
       </div>
     </section>
@@ -368,7 +349,7 @@
         <div class="filters">
           <div class="field">
             <label for="searchText">Ricerca</label>
-            <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo, comune">
+            <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo, comune" />
           </div>
 
           <div class="field">
@@ -461,45 +442,11 @@
       return (value ?? "").toString().trim();
     }
 
-    function workflowBadgeClass(value) {
-      const v = normalizeText(value).toLowerCase();
-      if (v === "chiusa") return "wf-badge wf-green";
-      if (v === "presa in carico") return "wf-badge wf-orange";
-      return "wf-badge wf-blue";
-    }
-
-    async function isAdminUser() {
-      const { data: authData } = await supabase.auth.getUser();
-      const user = authData?.user;
-      if (!user?.email) return false;
-
-      const { data, error } = await supabase
-        .from("admin_utenti")
-        .select("email")
-        .eq("email", user.email)
-        .maybeSingle();
-
-      if (error) {
-        console.error(error);
-        return false;
-      }
-
-      return !!data;
-    }
-
-    async function checkSession() {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        const admin = await isAdminUser();
-        if (!admin) {
-          loginMsg.textContent = "Utente autenticato ma non autorizzato.";
-          await supabase.auth.signOut();
-          return;
-        }
-
-        showAdminArea();
-        await loadData();
-      }
+    function setMsg(text, isError = false, isOk = false) {
+      loginMsg.textContent = text || "";
+      loginMsg.className = "msg";
+      if (isError) loginMsg.classList.add("error");
+      if (isOk) loginMsg.classList.add("ok");
     }
 
     function showAdminArea() {
@@ -516,34 +463,100 @@
       btnLogoutTop.classList.add("hidden");
     }
 
-    async function login() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+    async function isAdminUser() {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error("Errore getUser:", authError);
+        return false;
+      }
 
-      loginMsg.textContent = "Accesso in corso...";
+      const user = authData?.user;
+      const userEmail = normalizeText(user?.email).toLowerCase();
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      if (!userEmail) return false;
+
+      const { data, error } = await supabase
+        .from("admin_utenti")
+        .select("email, attivo, ruolo")
+        .eq("email", userEmail)
+        .maybeSingle();
 
       if (error) {
-        loginMsg.textContent = "Login non riuscito.";
-        console.error(error);
+        console.error("Errore controllo admin:", error);
+        return false;
+      }
+
+      if (!data) return false;
+      if (data.attivo === false) return false;
+
+      return true;
+    }
+
+    async function checkSession() {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Errore sessione:", error);
         return;
       }
 
-      const admin = await isAdminUser();
+      if (data?.session?.user) {
+        const admin = await isAdminUser();
 
-      if (!admin) {
-        await supabase.auth.signOut();
-        loginMsg.textContent = "Utente non autorizzato.";
+        if (!admin) {
+          await supabase.auth.signOut();
+          setMsg("Utente autenticato ma non autorizzato.", true);
+          hideAdminArea();
+          return;
+        }
+
+        showAdminArea();
+        await loadData();
+      }
+    }
+
+    async function login() {
+      const email = normalizeText(document.getElementById("email").value).toLowerCase();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        setMsg("Inserisci email e password.", true);
         return;
       }
 
-      loginMsg.textContent = "";
-      showAdminArea();
-      await loadData();
+      setMsg("Accesso in corso...");
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          console.error("Errore login:", error);
+          setMsg("Login non riuscito: " + error.message, true);
+          return;
+        }
+
+        if (!data?.user) {
+          setMsg("Login non riuscito: utente non trovato.", true);
+          return;
+        }
+
+        const admin = await isAdminUser();
+
+        if (!admin) {
+          await supabase.auth.signOut();
+          setMsg("Utente non autorizzato.", true);
+          return;
+        }
+
+        setMsg("Accesso effettuato.", false, true);
+        showAdminArea();
+        await loadData();
+      } catch (err) {
+        console.error("Eccezione login:", err);
+        setMsg("Errore inatteso durante il login.", true);
+      }
     }
 
     async function logout() {
@@ -551,6 +564,14 @@
       hideAdminArea();
       rowsCache = [];
       tableBody.innerHTML = "";
+      setMsg("");
+    }
+
+    function getField(row, ...keys) {
+      for (const key of keys) {
+        if (row[key] !== undefined && row[key] !== null) return row[key];
+      }
+      return "";
     }
 
     function getFilteredRows() {
@@ -560,12 +581,12 @@
       const workflow = filterWorkflow.value;
 
       return rowsCache.filter(row => {
-        const titolo = row.Titolo || row.titolo || "";
-        const luogo = row.Luogo || row.luogo || "";
-        const comuneRow = row.Comune || row.comune || "";
-        const codice = row.codice || "";
-        const stato = normalizeText(row.Stato || row.stato).toLowerCase();
-        const wf = normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase();
+        const titolo = getField(row, "Titolo", "titolo");
+        const luogo = getField(row, "Luogo", "luogo");
+        const comuneRow = getField(row, "Comune", "comune");
+        const codice = getField(row, "codice", "Codice");
+        const stato = normalizeText(getField(row, "Stato", "stato")).toLowerCase();
+        const wf = normalizeText(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione", "nuova")).toLowerCase();
 
         const haystack = `${codice} ${titolo} ${luogo} ${comuneRow}`.toLowerCase();
 
@@ -579,8 +600,8 @@
     }
 
     function updateStats(rows) {
-      const stato = r => normalizeText(r.Stato || r.stato).toLowerCase();
-      const wf = r => normalizeText(r.statosegnalazione || r.StatoSegnalazione || "nuova").toLowerCase();
+      const stato = r => normalizeText(getField(r, "Stato", "stato")).toLowerCase();
+      const wf = r => normalizeText(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione", "nuova")).toLowerCase();
 
       document.getElementById("statTotale").textContent = rows.length;
       document.getElementById("statRosso").textContent = rows.filter(r => stato(r) === "rosso").length;
@@ -600,13 +621,13 @@
         const tr = document.createElement("tr");
 
         const id = row.id;
-        const codice = row.codice || "";
-        const titolo = row.Titolo || row.titolo || "";
-        const comune = row.Comune || row.comune || "";
-        const categoria = row.Categoria || row.categoria || "";
-        const stato = row.Stato || row.stato || "";
-        const workflow = row.statosegnalazione || row.StatoSegnalazione || "nuova";
-        const luogo = row.Luogo || row.luogo || "";
+        const codice = getField(row, "codice", "Codice");
+        const titolo = getField(row, "Titolo", "titolo");
+        const comune = getField(row, "Comune", "comune");
+        const categoria = getField(row, "Categoria", "categoria");
+        const stato = getField(row, "Stato", "stato");
+        const workflow = getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione") || "nuova";
+        const luogo = getField(row, "Luogo", "luogo");
 
         tr.innerHTML = `
           <td><span class="code-badge">${codice}</span></td>
@@ -643,7 +664,7 @@
             .eq("id", id);
 
           if (error) {
-            alert("Aggiornamento non riuscito");
+            alert("Aggiornamento non riuscito: " + error.message);
             console.error(error);
             return;
           }
@@ -666,7 +687,7 @@
             .eq("id", id);
 
           if (error) {
-            alert("Eliminazione non riuscita");
+            alert("Eliminazione non riuscita: " + error.message);
             console.error(error);
             return;
           }
@@ -688,7 +709,7 @@
         .order("id", { ascending: true });
 
       if (error) {
-        alert("Errore caricamento dati");
+        alert("Errore caricamento dati: " + error.message);
         console.error(error);
         return;
       }
@@ -746,6 +767,7 @@
     filterStatus.addEventListener("change", renderTable);
     filterWorkflow.addEventListener("change", renderTable);
 
+    window.login = login;
     checkSession();
   </script>
 </body>
