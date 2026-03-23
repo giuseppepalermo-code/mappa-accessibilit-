@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Mappa - NessunOstacolo</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root{
@@ -414,10 +414,15 @@
   </main>
 
   <script>
-    const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
+  const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
+const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+if (!window.supabase || !window.supabase.createClient) {
+  alert("Errore: libreria Supabase non caricata correttamente.");
+  throw new Error("Supabase UMD non caricata");
+}
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let rowsCache = [];
 
