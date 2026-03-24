@@ -6,6 +6,7 @@
   <title>Admin Mappa - NessunOstacolo</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
       --brand:#1f4b7a;
@@ -20,16 +21,18 @@
       --shadow:0 14px 34px rgba(15, 23, 42, .08);
       --shadow-soft:0 8px 22px rgba(15, 23, 42, .06);
 
-      --red-bg:#fff1f2;
-      --red-text:#c81e1e;
-      --orange-bg:#fff7ed;
-      --orange-text:#c45d00;
-      --green-bg:#ecfdf3;
+      --red-bg:#ffe2e2;
+      --red-text:#b00020;
+      --orange-bg:#ffe7c2;
+      --orange-text:#b85c00;
+      --green-bg:#d8f7e6;
       --green-text:#0f8a4b;
-      --blue-bg:#eef4ff;
-      --blue-text:#2156c7;
-      --slate-bg:#f8fafc;
+      --blue-bg:#dfe8ff;
+      --blue-text:#1f4ed8;
+      --slate-bg:#edf3f8;
       --slate-text:#334155;
+      --purple-bg:#efe1ff;
+      --purple-text:#6b21a8;
     }
 
     *{box-sizing:border-box}
@@ -37,7 +40,7 @@
     body{
       margin:0;
       font-family:Arial, Helvetica, sans-serif;
-      background:linear-gradient(180deg, #eef3f8 0%, #f8fbff 100%);
+      background:linear-gradient(180deg,#eef3f8 0%,#f8fbff 100%);
       color:var(--text);
     }
 
@@ -119,13 +122,22 @@
     .stat{
       border-radius:22px;
       padding:18px 18px 16px;
-      border:1px solid var(--line);
+      border:2px solid transparent;
       box-shadow:var(--shadow-soft);
-      background:#fff;
-      min-height:122px;
+      min-height:128px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .stat::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0));
+      pointer-events:none;
     }
 
     .stat-top{
@@ -133,44 +145,116 @@
       align-items:flex-start;
       justify-content:space-between;
       gap:10px;
+      position:relative;
+      z-index:1;
     }
 
     .stat strong{
       display:block;
-      font-size:2.2rem;
+      font-size:2.4rem;
       line-height:1;
       letter-spacing:-.03em;
+      position:relative;
+      z-index:1;
     }
 
     .stat-label{
       font-size:1rem;
-      font-weight:700;
-      color:#324154;
+      font-weight:800;
       margin-top:8px;
+      position:relative;
+      z-index:1;
     }
 
     .stat-icon{
-      width:42px;
-      height:42px;
-      border-radius:14px;
+      width:48px;
+      height:48px;
+      border-radius:16px;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:1.2rem;
-      font-weight:700;
+      font-size:1.25rem;
+      font-weight:900;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);
+      position:relative;
+      z-index:1;
     }
 
-    .stat-total{ background:linear-gradient(135deg,#f8fbff,#eef5ff); }
-    .stat-red{ background:linear-gradient(135deg,#fff8f8,#fff1f2); }
-    .stat-orange{ background:linear-gradient(135deg,#fffaf3,#fff7ed); }
-    .stat-green{ background:linear-gradient(135deg,#f5fff9,#ecfdf3); }
-    .stat-blue{ background:linear-gradient(135deg,#f5f8ff,#eef4ff); }
+    .stat-total{
+      background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+      border-color:#93c5fd;
+      color:#0b3a8f;
+    }
+    .stat-red{
+      background:linear-gradient(135deg,#ffd7d7,#ffbdbd);
+      border-color:#ff8f8f;
+      color:#8f1020;
+    }
+    .stat-orange{
+      background:linear-gradient(135deg,#ffe2b0,#ffd08c);
+      border-color:#ffba5a;
+      color:#92400e;
+    }
+    .stat-green{
+      background:linear-gradient(135deg,#d1fae5,#b7f3d6);
+      border-color:#6ee7b7;
+      color:#065f46;
+    }
+    .stat-blue{
+      background:linear-gradient(135deg,#dbeafe,#c7d2fe);
+      border-color:#93c5fd;
+      color:#1e40af;
+    }
+    .stat-purple{
+      background:linear-gradient(135deg,#f3e8ff,#e9d5ff);
+      border-color:#c084fc;
+      color:#6b21a8;
+    }
 
-    .stat-total .stat-icon{ background:#dceafe; color:#1d4ed8; }
-    .stat-red .stat-icon{ background:#ffe1e5; color:#c81e1e; }
-    .stat-orange .stat-icon{ background:#ffe8cc; color:#c45d00; }
-    .stat-green .stat-icon{ background:#d8f7e6; color:#0f8a4b; }
-    .stat-blue .stat-icon{ background:#dfe8ff; color:#2156c7; }
+    .stat-total .stat-icon{ background:rgba(255,255,255,.35); }
+    .stat-red .stat-icon{ background:rgba(255,255,255,.32); }
+    .stat-orange .stat-icon{ background:rgba(255,255,255,.32); }
+    .stat-green .stat-icon{ background:rgba(255,255,255,.32); }
+    .stat-blue .stat-icon{ background:rgba(255,255,255,.32); }
+    .stat-purple .stat-icon{ background:rgba(255,255,255,.32); }
+
+    .legend-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .legend-item{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+
+    .legend-badge{
+      min-width:38px;
+      height:38px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:1rem;
+    }
+
+    .legend-title{
+      font-weight:800;
+      margin-bottom:4px;
+    }
+
+    .legend-text{
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.35;
+    }
 
     .filters{
       display:grid;
@@ -245,6 +329,11 @@
       color:#111827;
     }
 
+    .btn-purple{
+      background:#6b21a8;
+      color:#fff;
+    }
+
     .btn-small{
       padding:10px 12px;
       border-radius:12px;
@@ -295,6 +384,77 @@
       background:var(--blue-bg);
       color:var(--blue-text);
       font-weight:800;
+    }
+
+    .coherence-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .coherence-box{
+      border-radius:18px;
+      padding:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      box-shadow:var(--shadow-soft);
+    }
+
+    .coherence-box strong{
+      display:block;
+      font-size:1.9rem;
+      margin-bottom:6px;
+    }
+
+    .coherence-box span{
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .coherence-ok{
+      background:linear-gradient(135deg,#ecfdf3,#d1fae5);
+      border-color:#86efac;
+    }
+
+    .coherence-warn{
+      background:linear-gradient(135deg,#fff7ed,#ffedd5);
+      border-color:#fdba74;
+    }
+
+    .charts-wrap{
+      margin-top:18px;
+    }
+
+    .charts-toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .charts-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+    }
+
+    .chart-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:var(--shadow-soft);
+      min-height:360px;
+    }
+
+    .chart-card h3{
+      margin:0 0 14px 0;
+      font-size:1rem;
+    }
+
+    .chart-box{
+      position:relative;
+      height:280px;
     }
 
     .cards-grid{
@@ -466,14 +626,14 @@
     }
 
     @media (max-width: 1300px){
-      .grid{
+      .grid,
+      .legend-grid,
+      .coherence-grid{
         grid-template-columns:repeat(2,minmax(0,1fr));
       }
 
-      .filters{
-        grid-template-columns:1fr 1fr;
-      }
-
+      .filters,
+      .charts-grid,
       .cards-grid{
         grid-template-columns:1fr;
       }
@@ -502,10 +662,9 @@
         border-radius:20px;
       }
 
-      .grid{
-        grid-template-columns:1fr;
-      }
-
+      .grid,
+      .legend-grid,
+      .coherence-grid,
       .filters{
         grid-template-columns:1fr;
       }
@@ -575,7 +734,7 @@
         <div class="section-title">
           <div>
             <h2>Statistiche automatiche</h2>
-            <p class="section-note">Panoramica immediata delle segnalazioni presenti nella mappa.</p>
+            <p class="section-note">I colori sono divisi in 2 famiglie: accessibilità e workflow gestionale.</p>
           </div>
         </div>
 
@@ -593,7 +752,7 @@
               <strong id="statRosso">0</strong>
               <div class="stat-icon">!</div>
             </div>
-            <div class="stat-label">Rosso</div>
+            <div class="stat-label">Rosso = criticità grave</div>
           </div>
 
           <div class="stat stat-orange">
@@ -601,7 +760,7 @@
               <strong id="statArancione">0</strong>
               <div class="stat-icon">~</div>
             </div>
-            <div class="stat-label">Arancione</div>
+            <div class="stat-label">Arancione = criticità media</div>
           </div>
 
           <div class="stat stat-green">
@@ -609,7 +768,7 @@
               <strong id="statVerde">0</strong>
               <div class="stat-icon">✓</div>
             </div>
-            <div class="stat-label">Verde</div>
+            <div class="stat-label">Verde = accessibile</div>
           </div>
 
           <div class="stat stat-blue">
@@ -617,7 +776,7 @@
               <strong id="statNuova">0</strong>
               <div class="stat-icon">N</div>
             </div>
-            <div class="stat-label">Nuova</div>
+            <div class="stat-label">Nuova = appena inserita</div>
           </div>
 
           <div class="stat stat-orange">
@@ -625,7 +784,7 @@
               <strong id="statPresa">0</strong>
               <div class="stat-icon">P</div>
             </div>
-            <div class="stat-label">Presa in carico</div>
+            <div class="stat-label">Presa in carico = in lavorazione</div>
           </div>
 
           <div class="stat stat-green">
@@ -633,7 +792,116 @@
               <strong id="statChiusa">0</strong>
               <div class="stat-icon">C</div>
             </div>
-            <div class="stat-label">Chiusa</div>
+            <div class="stat-label">Chiusa = risolta o conclusa</div>
+          </div>
+
+          <div class="stat stat-purple">
+            <div class="stat-top">
+              <strong id="statSenzaWorkflow">0</strong>
+              <div class="stat-icon">?</div>
+            </div>
+            <div class="stat-label">Record senza workflow valido</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Legenda rapida</h2>
+            <p class="section-note">Qui capisci subito il significato di lettere, colori e famiglie di dati.</p>
+          </div>
+        </div>
+
+        <div class="legend-grid">
+          <div class="legend-item">
+            <div class="legend-badge" style="background:#dbeafe;color:#1d4ed8;">#</div>
+            <div>
+              <div class="legend-title">Totale</div>
+              <div class="legend-text">Numero complessivo delle segnalazioni presenti nel database.</div>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-badge" style="background:#ffe2e2;color:#b00020;">!</div>
+            <div>
+              <div class="legend-title">Rosso</div>
+              <div class="legend-text">Barriera grave o accessibilità fortemente compromessa.</div>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-badge" style="background:#ffe7c2;color:#b85c00;">~</div>
+            <div>
+              <div class="legend-title">Arancione</div>
+              <div class="legend-text">Problema medio o accessibilità parziale.</div>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-badge" style="background:#d8f7e6;color:#0f8a4b;">✓</div>
+            <div>
+              <div class="legend-title">Verde</div>
+              <div class="legend-text">Situazione accessibile o positiva.</div>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-badge" style="background:#dfe8ff;color:#1f4ed8;">N</div>
+            <div>
+              <div class="legend-title">Nuova</div>
+              <div class="legend-text">Segnalazione appena arrivata, non ancora lavorata.</div>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-badge" style="background:#ffe7c2;color:#b85c00;">P</div>
+            <div>
+              <div class="legend-title">Presa in carico</div>
+              <div class="legend-text">Segnalazione già vista e in gestione.</div>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-badge" style="background:#d8f7e6;color:#0f8a4b;">C</div>
+            <div>
+              <div class="legend-title">Chiusa</div>
+              <div class="legend-text">Segnalazione conclusa, archiviata o risolta.</div>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="legend-badge" style="background:#efe1ff;color:#6b21a8;">?</div>
+            <div>
+              <div class="legend-title">Anomalia dati</div>
+              <div class="legend-text">Record con workflow vuoto o non coerente con i valori previsti.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Controllo coerenza dati</h2>
+            <p class="section-note">Serve a capire se i numeri tornano e se ci sono segnalazioni incomplete.</p>
+          </div>
+        </div>
+
+        <div class="coherence-grid">
+          <div class="coherence-box coherence-ok">
+            <strong id="coherenceAccess">0</strong>
+            <span>Totale accessibilità (rosso + arancione + verde)</span>
+          </div>
+
+          <div class="coherence-box coherence-ok">
+            <strong id="coherenceWorkflow">0</strong>
+            <span>Totale workflow valido (nuova + presa in carico + chiusa)</span>
+          </div>
+
+          <div class="coherence-box coherence-warn">
+            <strong id="coherenceMissing">0</strong>
+            <span>Record senza workflow valido</span>
           </div>
         </div>
       </div>
@@ -686,11 +954,49 @@
           <button id="btnRefresh" class="btn btn-light" type="button">Aggiorna dati</button>
           <button id="btnExportCsv" class="btn btn-light" type="button">Esporta CSV</button>
           <button id="btnExportXlsx" class="btn btn-accent" type="button">Esporta Excel</button>
+          <button id="btnBuildCharts" class="btn btn-purple" type="button">Genera grafici</button>
         </div>
 
         <div class="meta-row">
           <div id="resultsCount" class="results-count">0 schede mostrate</div>
           <div id="adminMsg" class="msg"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Analisi e grafici</h2>
+            <p class="section-note">I grafici si creano solo quando clicchi “Genera grafici”.</p>
+          </div>
+        </div>
+
+        <div id="chartsEmpty" class="empty-state">
+          Nessun grafico ancora generato. Clicca su <strong>Genera grafici</strong>.
+        </div>
+
+        <div id="chartsWrap" class="charts-wrap hidden">
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3>Distribuzione stato accessibilità</h3>
+              <div class="chart-box"><canvas id="chartStatus"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+              <h3>Distribuzione workflow</h3>
+              <div class="chart-box"><canvas id="chartWorkflow"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+              <h3>Segnalazioni per comune</h3>
+              <div class="chart-box"><canvas id="chartComune"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+              <h3>Segnalazioni per categoria</h3>
+              <div class="chart-box"><canvas id="chartCategoria"></canvas></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -720,6 +1026,7 @@
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let rowsCache = [];
+    let charts = [];
 
     const loginSection = document.getElementById("loginSection");
     const adminSection = document.getElementById("adminSection");
@@ -732,6 +1039,7 @@
     const btnLogoutTop = document.getElementById("btnLogoutTop");
     const btnExportCsv = document.getElementById("btnExportCsv");
     const btnExportXlsx = document.getElementById("btnExportXlsx");
+    const btnBuildCharts = document.getElementById("btnBuildCharts");
 
     const searchText = document.getElementById("searchText");
     const filterComune = document.getElementById("filterComune");
@@ -739,6 +1047,9 @@
     const filterWorkflow = document.getElementById("filterWorkflow");
     const cardsGrid = document.getElementById("cardsGrid");
     const resultsCount = document.getElementById("resultsCount");
+
+    const chartsWrap = document.getElementById("chartsWrap");
+    const chartsEmpty = document.getElementById("chartsEmpty");
 
     function normalizeText(value) {
       return (value ?? "").toString().trim();
@@ -795,6 +1106,14 @@
       return "workflow-badge wf-new";
     }
 
+    function normalizeWorkflowValue(value) {
+      const v = normalizeText(value).toLowerCase();
+      if (v === "nuova") return "nuova";
+      if (v === "presa in carico") return "presa in carico";
+      if (v === "chiusa") return "chiusa";
+      return "";
+    }
+
     async function isAdminUser() {
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError) {
@@ -834,10 +1153,7 @@
 
       setMsg(loginMsg, "Accesso in corso...");
 
-      const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
 
       if (error) {
         setMsg(loginMsg, "Login non riuscito: " + error.message, "error");
@@ -879,6 +1195,9 @@
       rowsCache = [];
       cardsGrid.innerHTML = "";
       hideAdminArea();
+      destroyCharts();
+      chartsWrap.classList.add("hidden");
+      chartsEmpty.classList.remove("hidden");
       setMsg(loginMsg, "", "");
       setAdminMessage("", "");
     }
@@ -896,7 +1215,7 @@
         const comuneRow = getField(row, "Comune", "comune");
         const codice = getField(row, "codice", "Codice");
         const stato = normalizeText(getField(row, "Stato", "stato")).toLowerCase();
-        const wf = (normalizeText(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "nuova").toLowerCase();
+        const wf = normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione"));
 
         const haystack = `${codice} ${titolo} ${luogo} ${descrizione} ${comuneRow}`.toLowerCase();
 
@@ -911,15 +1230,29 @@
 
     function updateStats(rows) {
       const stato = r => normalizeText(getField(r, "Stato", "stato")).toLowerCase();
-      const wf = r => (normalizeText(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "nuova").toLowerCase();
+      const wf = r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione"));
 
-      document.getElementById("statTotale").textContent = rows.length;
-      document.getElementById("statRosso").textContent = rows.filter(r => stato(r) === "rosso").length;
-      document.getElementById("statArancione").textContent = rows.filter(r => stato(r) === "arancione").length;
-      document.getElementById("statVerde").textContent = rows.filter(r => stato(r) === "verde").length;
-      document.getElementById("statNuova").textContent = rows.filter(r => wf(r) === "nuova").length;
-      document.getElementById("statPresa").textContent = rows.filter(r => wf(r) === "presa in carico").length;
-      document.getElementById("statChiusa").textContent = rows.filter(r => wf(r) === "chiusa").length;
+      const total = rows.length;
+      const rosso = rows.filter(r => stato(r) === "rosso").length;
+      const arancione = rows.filter(r => stato(r) === "arancione").length;
+      const verde = rows.filter(r => stato(r) === "verde").length;
+      const nuova = rows.filter(r => wf(r) === "nuova").length;
+      const presa = rows.filter(r => wf(r) === "presa in carico").length;
+      const chiusa = rows.filter(r => wf(r) === "chiusa").length;
+      const senzaWorkflow = rows.filter(r => wf(r) === "").length;
+
+      document.getElementById("statTotale").textContent = total;
+      document.getElementById("statRosso").textContent = rosso;
+      document.getElementById("statArancione").textContent = arancione;
+      document.getElementById("statVerde").textContent = verde;
+      document.getElementById("statNuova").textContent = nuova;
+      document.getElementById("statPresa").textContent = presa;
+      document.getElementById("statChiusa").textContent = chiusa;
+      document.getElementById("statSenzaWorkflow").textContent = senzaWorkflow;
+
+      document.getElementById("coherenceAccess").textContent = rosso + arancione + verde;
+      document.getElementById("coherenceWorkflow").textContent = nuova + presa + chiusa;
+      document.getElementById("coherenceMissing").textContent = senzaWorkflow;
     }
 
     function renderCards() {
@@ -944,7 +1277,7 @@
         const comune = getField(row, "Comune", "comune");
         const categoria = getField(row, "Categoria", "categoria");
         const stato = getField(row, "Stato", "stato");
-        const workflow = getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione") || "nuova";
+        const workflow = normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "nuova";
         const luogo = getField(row, "Luogo", "luogo");
         const descrizione = getField(row, "Descrizione", "descrizione");
         const nomeSegnalante = getField(row, "nomesegnalante", "NomeSegnalante");
@@ -1071,6 +1404,133 @@
       });
     }
 
+    function destroyCharts() {
+      charts.forEach(chart => chart.destroy());
+      charts = [];
+    }
+
+    function groupCount(rows, getter) {
+      const map = {};
+      rows.forEach(row => {
+        const key = normalizeText(getter(row)) || "Non definito";
+        map[key] = (map[key] || 0) + 1;
+      });
+      return map;
+    }
+
+    function createChart(canvasId, type, labels, values, labelText) {
+      const ctx = document.getElementById(canvasId).getContext("2d");
+      return new Chart(ctx, {
+        type,
+        data: {
+          labels,
+          datasets: [{
+            label: labelText,
+            data: values
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: type === "doughnut"
+            }
+          }
+        }
+      });
+    }
+
+    function buildCharts() {
+      const rows = getFilteredRows();
+
+      if (!rows.length) {
+        alert("Nessun dato disponibile per generare i grafici.");
+        return;
+      }
+
+      destroyCharts();
+
+      chartsEmpty.classList.add("hidden");
+      chartsWrap.classList.remove("hidden");
+
+      const statusMap = {
+        Rosso: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "rosso").length,
+        Arancione: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length,
+        Verde: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "verde").length
+      };
+
+      const workflowMap = {
+        Nuova: rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "nuova").length,
+        "Presa in carico": rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "presa in carico").length,
+        Chiusa: rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "chiusa").length,
+        "Senza workflow": rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "").length
+      };
+
+      const comuneMap = groupCount(rows, r => getField(r, "Comune", "comune"));
+      const categoriaMap = groupCount(rows, r => getField(r, "Categoria", "categoria"));
+
+      charts.push(new Chart(document.getElementById("chartStatus"), {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(statusMap),
+          datasets: [{
+            data: Object.values(statusMap),
+            backgroundColor: ["#ef4444", "#f59e0b", "#10b981"]
+          }]
+        },
+        options: { responsive:true, maintainAspectRatio:false }
+      }));
+
+      charts.push(new Chart(document.getElementById("chartWorkflow"), {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(workflowMap),
+          datasets: [{
+            data: Object.values(workflowMap),
+            backgroundColor: ["#3b82f6", "#f59e0b", "#10b981", "#a855f7"]
+          }]
+        },
+        options: { responsive:true, maintainAspectRatio:false }
+      }));
+
+      charts.push(new Chart(document.getElementById("chartComune"), {
+        type: "bar",
+        data: {
+          labels: Object.keys(comuneMap),
+          datasets: [{
+            label: "Segnalazioni",
+            data: Object.values(comuneMap),
+            backgroundColor: "#1f4b7a"
+          }]
+        },
+        options: {
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById("chartCategoria"), {
+        type: "bar",
+        data: {
+          labels: Object.keys(categoriaMap),
+          datasets: [{
+            label: "Segnalazioni",
+            data: Object.values(categoriaMap),
+            backgroundColor: "#f2b705"
+          }]
+        },
+        options: {
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } }
+        }
+      }));
+
+      setAdminMessage("Grafici generati correttamente.", "ok");
+    }
+
     async function loadData() {
       const { data, error } = await client
         .from("segnalazioni")
@@ -1084,6 +1544,10 @@
 
       rowsCache = data || [];
       renderCards();
+
+      destroyCharts();
+      chartsWrap.classList.add("hidden");
+      chartsEmpty.classList.remove("hidden");
     }
 
     function exportCSV() {
@@ -1129,6 +1593,7 @@
     btnLogoutTop.onclick = logout;
     btnExportCsv.onclick = exportCSV;
     btnExportXlsx.onclick = exportXLSX;
+    btnBuildCharts.onclick = buildCharts;
 
     searchText.addEventListener("input", renderCards);
     filterComune.addEventListener("change", renderCards);
