@@ -11,7 +11,7 @@
       --brand:#1f4b7a;
       --brand-dark:#163a5f;
       --accent:#f2b705;
-      --bg:#f6f8fb;
+      --bg:#f4f7fb;
       --text:#111827;
       --muted:#5b6673;
       --line:#dbe4ef;
@@ -19,8 +19,19 @@
       --radius:18px;
       --shadow:0 12px 30px rgba(0,0,0,.08);
       --shadow-soft:0 6px 18px rgba(0,0,0,.06);
+
+      --red-bg:#fdecec;
+      --red-text:#b42318;
+      --orange-bg:#fff4e8;
+      --orange-text:#b85c00;
+      --green-bg:#e8f7ef;
+      --green-text:#18794e;
+      --blue-bg:#e8f1fb;
+      --blue-text:#1f4b7a;
+      --gray-bg:#f3f4f6;
+      --gray-text:#374151;
     }
- 
+
     *{box-sizing:border-box}
 
     body{
@@ -33,23 +44,26 @@
     .topbar{
       display:flex;
       justify-content:space-between;
-      align-items:center;
+      align-items:flex-start;
       gap:16px;
       padding:16px 20px;
       background:linear-gradient(135deg, var(--brand), var(--brand-dark));
       color:#fff;
       box-shadow:var(--shadow);
+      position:sticky;
+      top:0;
+      z-index:50;
     }
 
     .topbar h1{
       margin:0;
-      font-size:1.4rem;
+      font-size:2rem;
     }
 
     .topbar p{
       margin:6px 0 0 0;
       opacity:.95;
-      font-size:.95rem;
+      font-size:1rem;
     }
 
     .topbar-actions{
@@ -59,47 +73,77 @@
     }
 
     .wrap{
-      max-width:1400px;
+      max-width:1600px;
       margin:0 auto;
-      padding:18px;
+      padding:20px;
     }
 
     .card{
       background:#fff;
       border:1px solid var(--line);
-      border-radius:var(--radius);
+      border-radius:24px;
       box-shadow:var(--shadow);
-      padding:18px;
-      margin-bottom:18px;
+      padding:22px;
+      margin-bottom:20px;
     }
 
     h2{
       margin-top:0;
+      margin-bottom:18px;
+      font-size:1.25rem;
     }
 
     .grid{
       display:grid;
       grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:14px;
+      gap:16px;
     }
 
     .stat{
-      background:#f8fbff;
+      border-radius:18px;
+      padding:18px;
       border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px;
+      box-shadow:var(--shadow-soft);
+      background:#fff;
     }
 
     .stat strong{
       display:block;
-      font-size:1.5rem;
-      margin-bottom:6px;
+      font-size:2rem;
+      margin-bottom:8px;
+      line-height:1;
+    }
+
+    .stat span{
+      font-size:1rem;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .stat-total{
+      background:linear-gradient(135deg,#f8fbff,#eef6ff);
+    }
+
+    .stat-red{
+      background:linear-gradient(135deg,#fff7f7,#fdecec);
+    }
+
+    .stat-orange{
+      background:linear-gradient(135deg,#fffaf3,#fff4e8);
+    }
+
+    .stat-green{
+      background:linear-gradient(135deg,#f5fcf8,#e8f7ef);
+    }
+
+    .stat-blue{
+      background:linear-gradient(135deg,#f6f9ff,#e8f1fb);
     }
 
     .filters{
       display:grid;
       grid-template-columns:2fr 1fr 1fr 1fr;
-      gap:12px;
+      gap:14px;
       align-items:end;
     }
 
@@ -110,7 +154,7 @@
     }
 
     .field label{
-      font-size:.92rem;
+      font-size:.94rem;
       color:var(--muted);
       font-weight:700;
     }
@@ -118,10 +162,10 @@
     .field input,
     .field select{
       width:100%;
-      padding:12px 14px;
+      padding:13px 14px;
       border:1px solid var(--line);
       border-radius:14px;
-      font-size:.96rem;
+      font-size:.98rem;
       outline:none;
       background:#fff;
     }
@@ -138,7 +182,7 @@
       padding:12px 16px;
       font-size:.95rem;
       cursor:pointer;
-      transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+      transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease, background .15s ease;
       font-weight:700;
     }
 
@@ -162,6 +206,11 @@
       color:#fff;
     }
 
+    .btn-accent{
+      background:var(--accent);
+      color:#111827;
+    }
+
     .btn-small{
       padding:8px 10px;
       border-radius:10px;
@@ -173,59 +222,19 @@
     }
 
     .login-wrap{
-      max-width:520px;
-      margin:50px auto;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:.92rem;
-    }
-
-    th, td{
-      text-align:left;
-      padding:10px 8px;
-      border-bottom:1px solid #edf2f7;
-      vertical-align:top;
-    }
-
-    th{
-      font-size:.82rem;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:.04em;
-    }
-
-    .table-wrap{
-      overflow:auto;
-    }
-
-    .code-badge{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      background:#eef3f8;
-      color:#223;
-      font-weight:700;
-      font-size:.78rem;
-      white-space:nowrap;
+      max-width:540px;
+      margin:60px auto;
     }
 
     .msg{
-      margin-top:10px;
-      font-size:.92rem;
-      min-height:20px;
+      margin-top:12px;
+      font-size:.95rem;
+      min-height:22px;
       font-weight:700;
     }
 
-    .msg.error{
-      color:#b42318;
-    }
-
-    .msg.ok{
-      color:#18794e;
-    }
+    .msg.error{ color:var(--red-text); }
+    .msg.ok{ color:var(--green-text); }
 
     .muted{
       color:var(--muted);
@@ -235,18 +244,169 @@
       display:flex;
       gap:10px;
       flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .meta-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-top:16px;
+      flex-wrap:wrap;
+    }
+
+    .results-count{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:var(--blue-bg);
+      color:var(--blue-text);
+      font-weight:700;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:.93rem;
+      min-width:1400px;
+    }
+
+    th, td{
+      text-align:left;
+      padding:12px 10px;
+      border-bottom:1px solid #edf2f7;
+      vertical-align:top;
+    }
+
+    th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#f8fbff;
+      font-size:.82rem;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      font-weight:800;
+    }
+
+    tr:hover td{
+      background:#fafcff;
+    }
+
+    .col-codice{ width:110px; }
+    .col-titolo{ width:220px; }
+    .col-comune{ width:140px; }
+    .col-categoria{ width:170px; }
+    .col-stato{ width:130px; }
+    .col-workflow{ width:170px; }
+    .col-luogo{ width:220px; }
+    .col-descrizione{ width:320px; }
+    .col-segnalante{ width:180px; }
+    .col-contatto{ width:180px; }
+    .col-azioni{ width:150px; }
+
+    .code-badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#eef3f8;
+      color:#223;
+      font-weight:700;
+      font-size:.8rem;
+      white-space:nowrap;
+    }
+
+    .state-badge,
+    .workflow-badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.8rem;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .state-red{
+      background:var(--red-bg);
+      color:var(--red-text);
+    }
+
+    .state-orange{
+      background:var(--orange-bg);
+      color:var(--orange-text);
+    }
+
+    .state-green{
+      background:var(--green-bg);
+      color:var(--green-text);
+    }
+
+    .state-default{
+      background:var(--gray-bg);
+      color:var(--gray-text);
+    }
+
+    .wf-new{
+      background:var(--blue-bg);
+      color:var(--blue-text);
+    }
+
+    .wf-progress{
+      background:var(--orange-bg);
+      color:var(--orange-text);
+    }
+
+    .wf-closed{
+      background:var(--green-bg);
+      color:var(--green-text);
     }
 
     .workflow-select{
-      min-width:150px;
-      padding:8px 10px;
+      min-width:160px;
+      padding:9px 10px;
       border:1px solid var(--line);
       border-radius:10px;
       font-size:.9rem;
       background:#fff;
     }
 
-    @media (max-width: 1100px){
+    .desc-box{
+      max-width:320px;
+      line-height:1.45;
+      color:#243041;
+    }
+
+    .cell-soft{
+      color:#324154;
+      line-height:1.45;
+    }
+
+    .action-stack{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .section-note{
+      margin-top:-6px;
+      margin-bottom:16px;
+      color:var(--muted);
+      font-size:.94rem;
+    }
+
+    @media (max-width: 1200px){
       .grid{
         grid-template-columns:repeat(2,minmax(0,1fr));
       }
@@ -280,6 +440,15 @@
 
       .wrap{
         padding:12px;
+      }
+
+      .card{
+        padding:16px;
+        border-radius:18px;
+      }
+
+      .topbar h1{
+        font-size:1.55rem;
       }
     }
   </style>
@@ -322,45 +491,47 @@
 
       <div class="card">
         <h2>Statistiche automatiche</h2>
+        <p class="section-note">Panoramica immediata delle segnalazioni inserite nella mappa.</p>
         <div class="grid">
-          <div class="stat">
+          <div class="stat stat-total">
             <strong id="statTotale">0</strong>
-            <span class="muted">Totale segnalazioni</span>
+            <span>Totale segnalazioni</span>
           </div>
-          <div class="stat">
+          <div class="stat stat-red">
             <strong id="statRosso">0</strong>
-            <span class="muted">Rosso</span>
+            <span>Rosso</span>
           </div>
-          <div class="stat">
+          <div class="stat stat-orange">
             <strong id="statArancione">0</strong>
-            <span class="muted">Arancione</span>
+            <span>Arancione</span>
           </div>
-          <div class="stat">
+          <div class="stat stat-green">
             <strong id="statVerde">0</strong>
-            <span class="muted">Verde</span>
+            <span>Verde</span>
           </div>
-          <div class="stat">
+          <div class="stat stat-blue">
             <strong id="statNuova">0</strong>
-            <span class="muted">Nuova</span>
+            <span>Nuova</span>
           </div>
-          <div class="stat">
+          <div class="stat stat-orange">
             <strong id="statPresa">0</strong>
-            <span class="muted">Presa in carico</span>
+            <span>Presa in carico</span>
           </div>
-          <div class="stat">
+          <div class="stat stat-green">
             <strong id="statChiusa">0</strong>
-            <span class="muted">Chiusa</span>
+            <span>Chiusa</span>
           </div>
         </div>
       </div>
 
       <div class="card">
         <h2>Filtri e strumenti</h2>
+        <p class="section-note">Ricerca veloce, filtri e strumenti di esportazione.</p>
 
         <div class="filters">
           <div class="field">
             <label for="searchText">Ricerca</label>
-            <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo, comune" />
+            <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo, comune, descrizione" />
           </div>
 
           <div class="field">
@@ -393,27 +564,36 @@
           </div>
         </div>
 
-        <div class="toolbar" style="margin-top:14px;">
+        <div class="toolbar">
           <button id="btnRefresh" class="btn btn-light" type="button">Aggiorna dati</button>
           <button id="btnExportCsv" class="btn btn-light" type="button">Esporta CSV</button>
-          <button id="btnExportXlsx" class="btn btn-light" type="button">Esporta Excel</button>
+          <button id="btnExportXlsx" class="btn btn-accent" type="button">Esporta Excel</button>
+        </div>
+
+        <div class="meta-row">
+          <div id="resultsCount" class="results-count">0 righe mostrate</div>
+          <div id="adminMsg" class="msg"></div>
         </div>
       </div>
 
       <div class="card">
         <h2>Elenco segnalazioni</h2>
+        <p class="section-note">Gestione operativa: controlla i dettagli, aggiorna il workflow o elimina una riga.</p>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Codice</th>
-                <th>Titolo</th>
-                <th>Comune</th>
-                <th>Categoria</th>
-                <th>Stato</th>
-                <th>Workflow</th>
-                <th>Luogo</th>
-                <th>Azioni</th>
+                <th class="col-codice">Codice</th>
+                <th class="col-titolo">Titolo</th>
+                <th class="col-comune">Comune</th>
+                <th class="col-categoria">Categoria</th>
+                <th class="col-stato">Stato</th>
+                <th class="col-workflow">Workflow</th>
+                <th class="col-luogo">Luogo</th>
+                <th class="col-descrizione">Descrizione</th>
+                <th class="col-segnalante">Segnalante</th>
+                <th class="col-contatto">Contatto</th>
+                <th class="col-azioni">Azioni</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -440,6 +620,7 @@
     const loginSection = document.getElementById("loginSection");
     const adminSection = document.getElementById("adminSection");
     const loginMsg = document.getElementById("loginMsg");
+    const adminMsg = document.getElementById("adminMsg");
 
     const btnLogin = document.getElementById("btnLogin");
     const btnRefresh = document.getElementById("btnRefresh");
@@ -453,6 +634,7 @@
     const filterStatus = document.getElementById("filterStatus");
     const filterWorkflow = document.getElementById("filterWorkflow");
     const tableBody = document.getElementById("tableBody");
+    const resultsCount = document.getElementById("resultsCount");
 
     function normalizeText(value) {
       return (value ?? "").toString().trim();
@@ -465,10 +647,19 @@
       return "";
     }
 
-    function setMsg(text, type = "") {
-      loginMsg.textContent = text;
-      loginMsg.className = "msg";
-      if (type) loginMsg.classList.add(type);
+    function setMsg(el, text, type = "") {
+      el.textContent = text || "";
+      el.className = "msg";
+      if (type) el.classList.add(type);
+    }
+
+    function setAdminMessage(text, type = "") {
+      setMsg(adminMsg, text, type);
+      if (text) {
+        setTimeout(() => {
+          if (adminMsg.textContent === text) setMsg(adminMsg, "");
+        }, 2500);
+      }
     }
 
     function showAdminArea() {
@@ -483,6 +674,21 @@
       adminSection.classList.add("hidden");
       btnRefreshTop.classList.add("hidden");
       btnLogoutTop.classList.add("hidden");
+    }
+
+    function getStateBadgeClass(value) {
+      const v = normalizeText(value).toLowerCase();
+      if (v === "rosso") return "state-badge state-red";
+      if (v === "arancione") return "state-badge state-orange";
+      if (v === "verde") return "state-badge state-green";
+      return "state-badge state-default";
+    }
+
+    function getWorkflowBadgeClass(value) {
+      const v = normalizeText(value).toLowerCase();
+      if (v === "chiusa") return "workflow-badge wf-closed";
+      if (v === "presa in carico") return "workflow-badge wf-progress";
+      return "workflow-badge wf-new";
     }
 
     async function isAdminUser() {
@@ -518,11 +724,11 @@
       const password = document.getElementById("password").value;
 
       if (!email || !password) {
-        setMsg("Inserisci email e password.", "error");
+        setMsg(loginMsg, "Inserisci email e password.", "error");
         return;
       }
 
-      setMsg("Accesso in corso...");
+      setMsg(loginMsg, "Accesso in corso...");
 
       const { data, error } = await client.auth.signInWithPassword({
         email,
@@ -530,23 +736,23 @@
       });
 
       if (error) {
-        setMsg("Login non riuscito: " + error.message, "error");
+        setMsg(loginMsg, "Login non riuscito: " + error.message, "error");
         return;
       }
 
       if (!data || !data.user) {
-        setMsg("Login non riuscito: utente non trovato.", "error");
+        setMsg(loginMsg, "Login non riuscito: utente non trovato.", "error");
         return;
       }
 
       const admin = await isAdminUser();
       if (!admin) {
         await client.auth.signOut();
-        setMsg("Utente non autorizzato.", "error");
+        setMsg(loginMsg, "Utente non autorizzato.", "error");
         return;
       }
 
-      setMsg("", "");
+      setMsg(loginMsg, "", "");
       showAdminArea();
       await loadData();
     }
@@ -569,7 +775,8 @@
       rowsCache = [];
       tableBody.innerHTML = "";
       hideAdminArea();
-      setMsg("", "");
+      setMsg(loginMsg, "", "");
+      setAdminMessage("", "");
     }
 
     function getFilteredRows() {
@@ -581,17 +788,18 @@
       return rowsCache.filter(row => {
         const titolo = getField(row, "Titolo", "titolo");
         const luogo = getField(row, "Luogo", "luogo");
+        const descrizione = getField(row, "Descrizione", "descrizione");
         const comuneRow = getField(row, "Comune", "comune");
         const codice = getField(row, "codice", "Codice");
         const stato = normalizeText(getField(row, "Stato", "stato")).toLowerCase();
-        const wf = normalizeText(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")).toLowerCase() || "nuova";
+        const wf = normalizeText(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "nuova";
 
-        const haystack = `${codice} ${titolo} ${luogo} ${comuneRow}`.toLowerCase();
+        const haystack = `${codice} ${titolo} ${luogo} ${descrizione} ${comuneRow}`.toLowerCase();
 
         const matchSearch = !q || haystack.includes(q);
         const matchComune = comune === "tutti" || comuneRow === comune;
         const matchStatus = status === "tutti" || stato === status;
-        const matchWorkflow = workflow === "tutti" || wf === workflow;
+        const matchWorkflow = workflow === "tutti" || wf.toLowerCase() === workflow;
 
         return matchSearch && matchComune && matchStatus && matchWorkflow;
       });
@@ -613,6 +821,7 @@
     function renderTable() {
       const rows = getFilteredRows();
       updateStats(rows);
+      resultsCount.textContent = `${rows.length} righe mostrate`;
       tableBody.innerHTML = "";
 
       rows.forEach(row => {
@@ -626,24 +835,35 @@
         const stato = getField(row, "Stato", "stato");
         const workflow = getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione") || "nuova";
         const luogo = getField(row, "Luogo", "luogo");
+        const descrizione = getField(row, "Descrizione", "descrizione");
+        const nomeSegnalante = getField(row, "nomesegnalante", "NomeSegnalante");
+        const contattoSegnalante = getField(row, "contattosegnalante", "ContattoSegnalante");
 
         tr.innerHTML = `
-          <td><span class="code-badge">${codice}</span></td>
-          <td>${titolo}</td>
-          <td>${comune}</td>
-          <td>${categoria}</td>
-          <td>${stato}</td>
+          <td><span class="code-badge">${codice || "—"}</span></td>
+          <td class="cell-soft">${titolo || "—"}</td>
+          <td class="cell-soft">${comune || "—"}</td>
+          <td class="cell-soft">${categoria || "—"}</td>
+          <td><span class="${getStateBadgeClass(stato)}">${stato || "—"}</span></td>
           <td>
-            <select class="workflow-select" data-workflow-id="${id}">
-              <option value="nuova" ${workflow === "nuova" ? "selected" : ""}>Nuova</option>
-              <option value="presa in carico" ${workflow === "presa in carico" ? "selected" : ""}>Presa in carico</option>
-              <option value="chiusa" ${workflow === "chiusa" ? "selected" : ""}>Chiusa</option>
-            </select>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <span class="${getWorkflowBadgeClass(workflow)}">${workflow}</span>
+              <select class="workflow-select" data-workflow-id="${id}">
+                <option value="nuova" ${workflow === "nuova" ? "selected" : ""}>Nuova</option>
+                <option value="presa in carico" ${workflow === "presa in carico" ? "selected" : ""}>Presa in carico</option>
+                <option value="chiusa" ${workflow === "chiusa" ? "selected" : ""}>Chiusa</option>
+              </select>
+            </div>
           </td>
-          <td>${luogo}</td>
+          <td class="cell-soft">${luogo || "—"}</td>
+          <td><div class="desc-box">${descrizione || "—"}</div></td>
+          <td class="cell-soft">${nomeSegnalante || "—"}</td>
+          <td class="cell-soft">${contattoSegnalante || "—"}</td>
           <td>
-            <button class="btn btn-light btn-small" data-save-id="${id}" type="button">Salva</button>
-            <button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina</button>
+            <div class="action-stack">
+              <button class="btn btn-light btn-small" data-save-id="${id}" type="button">Salva</button>
+              <button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina</button>
+            </div>
           </td>
         `;
         tableBody.appendChild(tr);
@@ -665,6 +885,7 @@
             return;
           }
 
+          setAdminMessage("Workflow aggiornato correttamente.", "ok");
           await loadData();
         });
       });
@@ -691,6 +912,7 @@
             await client.storage.from("foto").remove(filesToDelete);
           }
 
+          setAdminMessage("Segnalazione eliminata correttamente.", "ok");
           await loadData();
         });
       });
