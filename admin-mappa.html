@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Mappa v5 - NessunOstacolo</title>
+  <title>Admin Mappa v6 - NessunOstacolo</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,7 +15,6 @@
       --accent:#f2b705;
       --bg:#eef3f8;
       --panel:#ffffff;
-      --panel-soft:#f8fbff;
       --text:#0f172a;
       --muted:#5b6673;
       --line:#d8e2ee;
@@ -38,14 +37,12 @@
     }
 
     *{box-sizing:border-box}
-
     body{
       margin:0;
       font-family:Arial, Helvetica, sans-serif;
       background:linear-gradient(180deg,#eef3f8 0%,#f8fbff 100%);
       color:var(--text);
     }
-
     .hidden{display:none !important}
 
     .btn{
@@ -75,7 +72,6 @@
       justify-content:center;
       padding:24px;
     }
-
     .login-card{
       width:100%;
       max-width:560px;
@@ -85,13 +81,11 @@
       box-shadow:var(--shadow);
       padding:26px;
     }
-
     .login-card h1{
       margin:0 0 8px 0;
       font-size:2rem;
       color:var(--brand-dark);
     }
-
     .login-card p{
       margin:0 0 20px 0;
       color:var(--muted);
@@ -104,13 +98,11 @@
       gap:8px;
       margin-bottom:16px;
     }
-
     .field label{
       font-size:.95rem;
       color:var(--muted);
       font-weight:700;
     }
-
     .field input,
     .field select,
     .field textarea{
@@ -123,7 +115,6 @@
       background:#fff;
       color:var(--text);
     }
-
     .field input:focus,
     .field select:focus,
     .field textarea:focus{
@@ -145,7 +136,6 @@
       grid-template-columns:280px 1fr;
       min-height:100vh;
     }
-
     .sidebar{
       background:linear-gradient(180deg,var(--brand-dark),var(--brand));
       color:#fff;
@@ -158,28 +148,24 @@
       gap:18px;
       box-shadow:var(--shadow);
     }
-
     .brand-box h2{
       margin:0;
       font-size:2rem;
       line-height:1;
       letter-spacing:-.02em;
     }
-
     .brand-box p{
       margin:8px 0 0 0;
       opacity:.95;
       line-height:1.4;
       font-size:.96rem;
     }
-
     .menu{
       display:flex;
       flex-direction:column;
       gap:10px;
       margin-top:10px;
     }
-
     .menu-btn{
       width:100%;
       text-align:left;
@@ -193,21 +179,18 @@
       cursor:pointer;
       transition:.15s ease;
     }
-
     .menu-btn:hover,
     .menu-btn.active{
       background:#fff;
       color:var(--brand-dark);
       transform:translateX(2px);
     }
-
     .sidebar-footer{
       margin-top:auto;
       display:flex;
       flex-direction:column;
       gap:10px;
     }
-
     .sidebar-note{
       font-size:.88rem;
       line-height:1.4;
@@ -217,10 +200,7 @@
       padding:12px;
     }
 
-    .main{
-      padding:22px;
-    }
-
+    .main{padding:22px;}
     .top-actions{
       display:flex;
       justify-content:flex-end;
@@ -237,7 +217,6 @@
       padding:22px;
       margin-bottom:20px;
     }
-
     .section-head{
       display:flex;
       justify-content:space-between;
@@ -246,13 +225,11 @@
       flex-wrap:wrap;
       margin-bottom:16px;
     }
-
     .section-head h2{
       margin:0;
       font-size:1.45rem;
       letter-spacing:-.02em;
     }
-
     .section-head p{
       margin:6px 0 0 0;
       color:var(--muted);
@@ -265,7 +242,6 @@
       grid-template-columns:repeat(4,minmax(0,1fr));
       gap:16px;
     }
-
     .stat{
       border-radius:22px;
       padding:18px;
@@ -275,7 +251,6 @@
       position:relative;
       overflow:hidden;
     }
-
     .stat::after{
       content:"";
       position:absolute;
@@ -283,7 +258,6 @@
       background:linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0));
       pointer-events:none;
     }
-
     .stat-top{
       display:flex;
       justify-content:space-between;
@@ -292,14 +266,12 @@
       position:relative;
       z-index:1;
     }
-
     .stat strong{
       display:block;
       font-size:2.5rem;
       line-height:1;
       letter-spacing:-.03em;
     }
-
     .stat-label{
       margin-top:10px;
       font-size:1rem;
@@ -308,7 +280,6 @@
       position:relative;
       z-index:1;
     }
-
     .stat-icon{
       width:50px;
       height:50px;
@@ -322,7 +293,6 @@
       position:relative;
       z-index:1;
     }
-
     .stat-total{background:linear-gradient(135deg,#dbeafe,#bfdbfe); border-color:#93c5fd; color:#0b3a8f;}
     .stat-red{background:linear-gradient(135deg,#ffd7d7,#ffbdbd); border-color:#ff8f8f; color:#8f1020;}
     .stat-orange{background:linear-gradient(135deg,#ffe2b0,#ffd08c); border-color:#ffba5a; color:#92400e;}
@@ -335,7 +305,6 @@
       grid-template-columns:repeat(4,minmax(0,1fr));
       gap:12px;
     }
-
     .legend-item{
       display:flex;
       gap:10px;
@@ -345,7 +314,6 @@
       border-radius:18px;
       background:#fff;
     }
-
     .legend-badge{
       min-width:40px;
       height:40px;
@@ -356,17 +324,8 @@
       font-weight:900;
       font-size:1rem;
     }
-
-    .legend-title{
-      font-weight:800;
-      margin-bottom:4px;
-    }
-
-    .legend-text{
-      color:var(--muted);
-      font-size:.92rem;
-      line-height:1.35;
-    }
+    .legend-title{font-weight:800; margin-bottom:4px;}
+    .legend-text{color:var(--muted); font-size:.92rem; line-height:1.35;}
 
     .coherence-grid,
     .kpi-grid{
@@ -374,7 +333,6 @@
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:14px;
     }
-
     .coherence-box,
     .kpi-box{
       border-radius:18px;
@@ -383,21 +341,18 @@
       background:#fff;
       box-shadow:var(--shadow-soft);
     }
-
     .coherence-box strong,
     .kpi-box strong{
       display:block;
       font-size:1.9rem;
       margin-bottom:6px;
     }
-
     .coherence-box span,
     .kpi-box span{
       color:var(--muted);
       font-weight:700;
       line-height:1.35;
     }
-
     .coherence-ok{background:linear-gradient(135deg,#ecfdf3,#d1fae5); border-color:#86efac;}
     .coherence-warn{background:linear-gradient(135deg,#fff7ed,#ffedd5); border-color:#fdba74;}
     .kpi-box{background:linear-gradient(180deg,#fff,#fbfdff);}
@@ -408,14 +363,12 @@
       gap:14px;
       align-items:end;
     }
-
     .toolbar{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       margin-top:16px;
     }
-
     .meta-row{
       display:flex;
       justify-content:space-between;
@@ -424,7 +377,6 @@
       margin-top:16px;
       flex-wrap:wrap;
     }
-
     .results-count{
       display:inline-flex;
       align-items:center;
@@ -441,6 +393,9 @@
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:18px;
     }
+    .cards-grid.compact{
+      grid-template-columns:1fr;
+    }
 
     .report-card{
       border:1px solid var(--line);
@@ -451,13 +406,24 @@
       display:flex;
       flex-direction:column;
     }
+    .report-card.compact .report-body{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      padding:14px;
+    }
+    .report-card.compact .info-box{
+      min-height:auto;
+      padding:10px 11px;
+    }
+    .report-card.compact .desc-box{
+      grid-column:1 / -1;
+    }
 
     .report-head{
       padding:18px 18px 12px;
       background:linear-gradient(180deg,#fbfdff,#f8fbff);
       border-bottom:1px solid #edf2f7;
     }
-
     .report-code{
       display:inline-flex;
       align-items:center;
@@ -470,7 +436,6 @@
       font-size:.82rem;
       margin-bottom:10px;
     }
-
     .report-title{
       font-size:1.15rem;
       font-weight:800;
@@ -478,7 +443,6 @@
       margin:0 0 10px 0;
       color:#132238;
     }
-
     .report-badges{
       display:flex;
       flex-wrap:wrap;
@@ -496,12 +460,10 @@
       font-weight:800;
       white-space:nowrap;
     }
-
     .state-red{ background:var(--red-bg); color:var(--red-text); }
     .state-orange{ background:var(--orange-bg); color:var(--orange-text); }
     .state-green{ background:var(--green-bg); color:var(--green-text); }
     .state-default{ background:var(--gray-bg); color:var(--gray-text); }
-
     .wf-new{ background:var(--blue-bg); color:var(--blue-text); }
     .wf-progress{ background:var(--orange-bg); color:var(--orange-text); }
     .wf-closed{ background:var(--green-bg); color:var(--green-text); }
@@ -512,7 +474,6 @@
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:14px;
     }
-
     .info-box{
       border:1px solid #edf2f7;
       border-radius:16px;
@@ -520,7 +481,6 @@
       padding:12px 13px;
       min-height:82px;
     }
-
     .info-label{
       display:block;
       font-size:.78rem;
@@ -530,14 +490,12 @@
       color:#64748b;
       margin-bottom:7px;
     }
-
     .info-value{
       color:#1f2937;
       line-height:1.45;
       font-size:.96rem;
       word-break:break-word;
     }
-
     .desc-box{
       grid-column:1 / -1;
       background:linear-gradient(180deg,#fff,#fbfdff);
@@ -553,14 +511,12 @@
       gap:14px;
       flex-wrap:wrap;
     }
-
     .workflow-editor{
       display:flex;
       flex-direction:column;
       gap:8px;
       min-width:220px;
     }
-
     .workflow-editor label{
       font-size:.8rem;
       font-weight:800;
@@ -568,7 +524,6 @@
       text-transform:uppercase;
       letter-spacing:.04em;
     }
-
     .workflow-select{
       min-width:220px;
       padding:11px 12px;
@@ -578,7 +533,6 @@
       background:#fff;
       color:var(--text);
     }
-
     .actions{
       display:flex;
       gap:10px;
@@ -590,7 +544,6 @@
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:16px;
     }
-
     .chart-card{
       background:#fff;
       border:1px solid var(--line);
@@ -599,25 +552,13 @@
       box-shadow:var(--shadow-soft);
       min-height:360px;
     }
-
     .chart-card h3{
       margin:0 0 14px 0;
       font-size:1rem;
     }
-
     .chart-box{
       position:relative;
       height:280px;
-    }
-
-    .empty-state{
-      border:2px dashed var(--line);
-      border-radius:24px;
-      padding:28px;
-      background:#fff;
-      text-align:center;
-      color:var(--muted);
-      font-weight:700;
     }
 
     .report-output{
@@ -636,7 +577,6 @@
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:16px;
     }
-
     .setting-box{
       border:1px solid var(--line);
       border-radius:18px;
@@ -644,90 +584,50 @@
       padding:18px;
       box-shadow:var(--shadow-soft);
     }
+    .setting-box h3{
+      margin:0 0 10px 0;
+      font-size:1.1rem;
+    }
+    .setting-box p{
+      margin:0 0 12px 0;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .empty-state{
+      border:2px dashed var(--line);
+      border-radius:24px;
+      padding:28px;
+      background:#fff;
+      text-align:center;
+      color:var(--muted);
+      font-weight:700;
+    }
 
     @media print{
-      body{
-        background:#fff;
-      }
-      .sidebar,
-      .top-actions,
-      .toolbar,
-      .topbar-actions,
-      .no-print{
-        display:none !important;
-      }
-      .app{
-        display:block;
-      }
-      .main{
-        padding:0;
-      }
-      .panel{
-        box-shadow:none;
-        border:1px solid #ccc;
-        page-break-inside:avoid;
-      }
+      body{background:#fff}
+      .sidebar, .top-actions, .toolbar, .no-print{display:none !important}
+      .app{display:block}
+      .main{padding:0}
+      .panel{box-shadow:none; border:1px solid #ccc; page-break-inside:avoid}
     }
 
     @media (max-width: 1400px){
-      .app{
-        grid-template-columns:240px 1fr;
-      }
-      .grid,
-      .legend-grid{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
-      .coherence-grid,
-      .kpi-grid{
-        grid-template-columns:1fr;
-      }
-      .filters,
-      .charts-grid,
-      .cards-grid,
-      .settings-grid{
-        grid-template-columns:1fr;
-      }
+      .app{grid-template-columns:240px 1fr;}
+      .grid, .legend-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .coherence-grid, .kpi-grid{grid-template-columns:1fr;}
+      .filters, .charts-grid, .cards-grid, .settings-grid{grid-template-columns:1fr;}
     }
 
     @media (max-width: 900px){
-      .app{
-        grid-template-columns:1fr;
-      }
-      .sidebar{
-        position:relative;
-        height:auto;
-      }
-      .main{
-        padding:12px;
-      }
-      .panel{
-        padding:16px;
-        border-radius:20px;
-      }
-      .grid,
-      .legend-grid,
-      .coherence-grid,
-      .kpi-grid,
-      .filters,
-      .charts-grid,
-      .cards-grid,
-      .settings-grid{
-        grid-template-columns:1fr;
-      }
-      .report-body{
-        grid-template-columns:1fr;
-      }
-      .report-footer{
-        flex-direction:column;
-        align-items:stretch;
-      }
-      .workflow-editor,
-      .workflow-select{
-        min-width:100%;
-      }
-      .topbar-actions{
-        width:100%;
-      }
+      .app{grid-template-columns:1fr;}
+      .sidebar{position:relative; height:auto;}
+      .main{padding:12px;}
+      .panel{padding:16px; border-radius:20px;}
+      .grid, .legend-grid, .coherence-grid, .kpi-grid, .filters, .charts-grid, .cards-grid, .settings-grid{grid-template-columns:1fr;}
+      .report-body{grid-template-columns:1fr;}
+      .report-footer{flex-direction:column; align-items:stretch;}
+      .workflow-editor, .workflow-select{min-width:100%;}
     }
   </style>
 </head>
@@ -736,7 +636,7 @@
   <section id="loginSection" class="login-shell">
     <div class="login-card">
       <h1>Admin Mappa</h1>
-      <p>Accesso riservato alla gestione segnalazioni, analisi, grafici e report esportabili.</p>
+      <p>Accesso riservato alla gestione segnalazioni, analisi, grafici, report ed impostazioni operative.</p>
 
       <div class="field">
         <label for="email">Email</label>
@@ -756,8 +656,8 @@
   <section id="appSection" class="app hidden">
     <aside class="sidebar">
       <div class="brand-box">
-        <h2>Admin v5</h2>
-        <p>NessunOstacolo<br>Cruscotto modulare per gestione, analisi e report.</p>
+        <h2>Admin v6</h2>
+        <p>NessunOstacolo<br>Cruscotto operativo per gestione, analisi, report e manutenzione.</p>
       </div>
 
       <nav class="menu">
@@ -770,7 +670,7 @@
 
       <div class="sidebar-footer">
         <div class="sidebar-note">
-          Usa il menu per aprire solo il blocco che ti serve e mantenere il lavoro pulito e ordinato.
+          In Impostazioni puoi decidere vista card, modalità predefinite e strumenti di manutenzione.
         </div>
         <button id="btnLogoutSide" class="btn btn-danger" type="button">Esci</button>
       </div>
@@ -793,66 +693,35 @@
 
           <div class="grid">
             <div class="stat stat-total">
-              <div class="stat-top">
-                <strong id="statTotale">0</strong>
-                <div class="stat-icon">#</div>
-              </div>
+              <div class="stat-top"><strong id="statTotale">0</strong><div class="stat-icon">#</div></div>
               <div class="stat-label">Totale segnalazioni</div>
             </div>
-
             <div class="stat stat-red">
-              <div class="stat-top">
-                <strong id="statRosso">0</strong>
-                <div class="stat-icon">!</div>
-              </div>
+              <div class="stat-top"><strong id="statRosso">0</strong><div class="stat-icon">!</div></div>
               <div class="stat-label">Rosso = criticità grave</div>
             </div>
-
             <div class="stat stat-orange">
-              <div class="stat-top">
-                <strong id="statArancione">0</strong>
-                <div class="stat-icon">~</div>
-              </div>
+              <div class="stat-top"><strong id="statArancione">0</strong><div class="stat-icon">~</div></div>
               <div class="stat-label">Arancione = criticità media</div>
             </div>
-
             <div class="stat stat-green">
-              <div class="stat-top">
-                <strong id="statVerde">0</strong>
-                <div class="stat-icon">✓</div>
-              </div>
+              <div class="stat-top"><strong id="statVerde">0</strong><div class="stat-icon">✓</div></div>
               <div class="stat-label">Verde = accessibile</div>
             </div>
-
             <div class="stat stat-blue">
-              <div class="stat-top">
-                <strong id="statNuova">0</strong>
-                <div class="stat-icon">N</div>
-              </div>
+              <div class="stat-top"><strong id="statNuova">0</strong><div class="stat-icon">N</div></div>
               <div class="stat-label">Nuova = appena inserita</div>
             </div>
-
             <div class="stat stat-orange">
-              <div class="stat-top">
-                <strong id="statPresa">0</strong>
-                <div class="stat-icon">P</div>
-              </div>
+              <div class="stat-top"><strong id="statPresa">0</strong><div class="stat-icon">P</div></div>
               <div class="stat-label">Presa in carico = in lavorazione</div>
             </div>
-
             <div class="stat stat-green">
-              <div class="stat-top">
-                <strong id="statChiusa">0</strong>
-                <div class="stat-icon">C</div>
-              </div>
+              <div class="stat-top"><strong id="statChiusa">0</strong><div class="stat-icon">C</div></div>
               <div class="stat-label">Chiusa = risolta o conclusa</div>
             </div>
-
             <div class="stat stat-purple">
-              <div class="stat-top">
-                <strong id="statSenzaWorkflow">0</strong>
-                <div class="stat-icon">?</div>
-              </div>
+              <div class="stat-top"><strong id="statSenzaWorkflow">0</strong><div class="stat-icon">?</div></div>
               <div class="stat-label">Record senza workflow valido</div>
             </div>
           </div>
@@ -861,52 +730,8 @@
         <div class="panel">
           <div class="section-head">
             <div>
-              <h2>Legenda rapida</h2>
-              <p>Significato di lettere, colori e famiglie di dati.</p>
-            </div>
-          </div>
-
-          <div class="legend-grid">
-            <div class="legend-item">
-              <div class="legend-badge" style="background:#dbeafe;color:#1d4ed8;">#</div>
-              <div><div class="legend-title">Totale</div><div class="legend-text">Numero complessivo delle segnalazioni.</div></div>
-            </div>
-            <div class="legend-item">
-              <div class="legend-badge" style="background:#ffe2e2;color:#b00020;">!</div>
-              <div><div class="legend-title">Rosso</div><div class="legend-text">Criticità grave.</div></div>
-            </div>
-            <div class="legend-item">
-              <div class="legend-badge" style="background:#ffe7c2;color:#b85c00;">~</div>
-              <div><div class="legend-title">Arancione</div><div class="legend-text">Criticità media.</div></div>
-            </div>
-            <div class="legend-item">
-              <div class="legend-badge" style="background:#d8f7e6;color:#0f8a4b;">✓</div>
-              <div><div class="legend-title">Verde</div><div class="legend-text">Situazione accessibile.</div></div>
-            </div>
-            <div class="legend-item">
-              <div class="legend-badge" style="background:#dfe8ff;color:#1f4ed8;">N</div>
-              <div><div class="legend-title">Nuova</div><div class="legend-text">Ancora non lavorata.</div></div>
-            </div>
-            <div class="legend-item">
-              <div class="legend-badge" style="background:#ffe7c2;color:#b85c00;">P</div>
-              <div><div class="legend-title">Presa in carico</div><div class="legend-text">In gestione.</div></div>
-            </div>
-            <div class="legend-item">
-              <div class="legend-badge" style="background:#d8f7e6;color:#0f8a4b;">C</div>
-              <div><div class="legend-title">Chiusa</div><div class="legend-text">Conclusa o risolta.</div></div>
-            </div>
-            <div class="legend-item">
-              <div class="legend-badge" style="background:#efe1ff;color:#6b21a8;">?</div>
-              <div><div class="legend-title">Anomalia</div><div class="legend-text">Workflow vuoto o non valido.</div></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="section-head">
-            <div>
               <h2>Controllo coerenza dati</h2>
-              <p>Verifica se i numeri tornano e se esistono record incompleti.</p>
+              <p>Verifica se i numeri tornano e se ci sono record incompleti.</p>
             </div>
           </div>
 
@@ -930,7 +755,7 @@
           <div class="section-head">
             <div>
               <h2>KPI strategici</h2>
-              <p>Indicatori utili per studio, relazioni, presentazioni e priorità operative.</p>
+              <p>Indicatori per studio, relazioni, priorità e presentazioni.</p>
             </div>
           </div>
 
@@ -997,6 +822,7 @@
             <button id="btnRefresh" class="btn btn-light" type="button">Aggiorna dati</button>
             <button id="btnExportCsv" class="btn btn-light" type="button">Esporta CSV</button>
             <button id="btnExportXlsx" class="btn btn-accent" type="button">Esporta Excel</button>
+            <button id="btnResetFilters" class="btn btn-light" type="button">Reset filtri</button>
           </div>
 
           <div class="meta-row">
@@ -1009,7 +835,7 @@
           <div class="section-head">
             <div>
               <h2>Elenco segnalazioni</h2>
-              <p>Vista operativa a schede per lettura, aggiornamento workflow ed eliminazione.</p>
+              <p>Vista operativa a schede con date di creazione e ultimo aggiornamento.</p>
             </div>
           </div>
           <div id="cardsGrid" class="cards-grid"></div>
@@ -1021,7 +847,7 @@
           <div class="section-head">
             <div>
               <h2>Analisi e grafici</h2>
-              <p>I grafici si generano a comando. Puoi scegliere risultati filtrati o database completo.</p>
+              <p>I grafici si generano a comando, su dati filtrati oppure sul database completo.</p>
             </div>
           </div>
 
@@ -1066,7 +892,7 @@
           <div class="section-head">
             <div>
               <h2>Report elaborato</h2>
-              <p>Report testuale ordinato, studiabile, stampabile e base per relazioni, presentazioni e documenti.</p>
+              <p>Report ordinato, editabile, stampabile ed esportabile per relazioni e presentazioni.</p>
             </div>
           </div>
 
@@ -1082,10 +908,8 @@
             <div id="reportBaseInfo" class="results-count">Nessun report generato</div>
           </div>
 
-          <div id="reportOutput" class="report-output">
-Nessun report generato.
-Clicca su “Crea report filtrato” oppure “Crea report completo”.
-          </div>
+          <div id="reportOutput" class="report-output">Nessun report generato.
+Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         </div>
       </section>
 
@@ -1093,32 +917,71 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
         <div class="panel">
           <div class="section-head">
             <div>
-              <h2>Impostazioni e note operative</h2>
-              <p>Area organizzativa per tenere il pannello ordinato e pronto a crescere.</p>
+              <h2>Impostazioni operative</h2>
+              <p>Qui puoi davvero cambiare il comportamento del pannello.</p>
             </div>
           </div>
 
           <div class="settings-grid">
             <div class="setting-box">
-              <h3>Modalità analisi</h3>
-              <p class="section-note">I grafici e i report possono lavorare su dati filtrati oppure su database completo.</p>
+              <h3>Vista card</h3>
+              <p>Scegli la modalità di visualizzazione delle segnalazioni.</p>
+              <div class="field">
+                <label for="settingCardView">Layout schede</label>
+                <select id="settingCardView">
+                  <option value="standard">Standard a due colonne</option>
+                  <option value="compact">Compatta a colonna singola</option>
+                </select>
+              </div>
             </div>
 
             <div class="setting-box">
-              <h3>Esportazioni</h3>
-              <p class="section-note">CSV, Excel, report TXT e report HTML stampabile sono già disponibili.</p>
+              <h3>Grafici predefiniti</h3>
+              <p>Decidi quale base usare di default quando fai analisi.</p>
+              <div class="field">
+                <label for="settingChartMode">Modalità grafici</label>
+                <select id="settingChartMode">
+                  <option value="filtered">Risultati filtrati</option>
+                  <option value="all">Database completo</option>
+                </select>
+              </div>
             </div>
 
             <div class="setting-box">
-              <h3>Proiezioni temporali</h3>
-              <p class="section-note">Per proiezioni serie nel tempo servirà aggiungere una colonna data affidabile, per esempio <strong>created_at</strong>.</p>
+              <h3>Report predefinito</h3>
+              <p>Definisci quale tipo di report generare più rapidamente.</p>
+              <div class="field">
+                <label for="settingReportMode">Base report</label>
+                <select id="settingReportMode">
+                  <option value="filtered">Report filtrato</option>
+                  <option value="all">Report completo</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="settingReportStyle">Stile report</label>
+                <select id="settingReportStyle">
+                  <option value="complete">Completo</option>
+                  <option value="summary">Sintetico</option>
+                </select>
+              </div>
             </div>
 
             <div class="setting-box">
-              <h3>Espansione futura</h3>
-              <p class="section-note">Questa struttura è pronta per ruoli operatore, note interne, confronto periodi e report avanzati.</p>
+              <h3>Manutenzione dati</h3>
+              <p>Strumenti per tenere pulito il database e velocizzare il lavoro.</p>
+              <div class="toolbar no-print" style="margin-top:0;">
+                <button id="btnNormalizeWorkflow" class="btn btn-light" type="button">Workflow vuoti → Nuova</button>
+                <button id="btnReloadDashboard" class="btn btn-light" type="button">Ricarica dashboard</button>
+              </div>
             </div>
           </div>
+
+          <div class="toolbar no-print">
+            <button id="btnSaveSettings" class="btn btn-brand" type="button">Salva impostazioni</button>
+            <button id="btnApplyDefaults" class="btn btn-light" type="button">Applica predefiniti</button>
+          </div>
+
+          <div id="settingsMsg" class="msg"></div>
         </div>
       </section>
     </main>
@@ -1127,6 +990,8 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
   <script>
     const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
     const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
+
+    const STORAGE_KEY = "admin_mappa_v6_settings";
 
     if (!window.supabase || !window.supabase.createClient) {
       alert("Errore: libreria Supabase non caricata.");
@@ -1140,10 +1005,18 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
     let lastReportHtml = "";
     let lastReportText = "";
 
+    let settings = {
+      cardView: "standard",
+      chartMode: "filtered",
+      reportMode: "filtered",
+      reportStyle: "complete"
+    };
+
     const loginSection = document.getElementById("loginSection");
     const appSection = document.getElementById("appSection");
     const loginMsg = document.getElementById("loginMsg");
     const adminMsg = document.getElementById("adminMsg");
+    const settingsMsg = document.getElementById("settingsMsg");
 
     const btnLogin = document.getElementById("btnLogin");
     const btnRefresh = document.getElementById("btnRefresh");
@@ -1159,6 +1032,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
     const btnExportReportHtml = document.getElementById("btnExportReportHtml");
     const btnExportReportTxt = document.getElementById("btnExportReportTxt");
     const btnPrintPage = document.getElementById("btnPrintPage");
+    const btnResetFilters = document.getElementById("btnResetFilters");
+    const btnNormalizeWorkflow = document.getElementById("btnNormalizeWorkflow");
+    const btnReloadDashboard = document.getElementById("btnReloadDashboard");
+    const btnSaveSettings = document.getElementById("btnSaveSettings");
+    const btnApplyDefaults = document.getElementById("btnApplyDefaults");
 
     const searchText = document.getElementById("searchText");
     const filterComune = document.getElementById("filterComune");
@@ -1171,6 +1049,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
     const chartBaseInfo = document.getElementById("chartBaseInfo");
     const reportBaseInfo = document.getElementById("reportBaseInfo");
     const reportOutput = document.getElementById("reportOutput");
+
+    const settingCardView = document.getElementById("settingCardView");
+    const settingChartMode = document.getElementById("settingChartMode");
+    const settingReportMode = document.getElementById("settingReportMode");
+    const settingReportStyle = document.getElementById("settingReportStyle");
 
     function normalizeText(value) {
       return (value ?? "").toString().trim();
@@ -1231,6 +1114,52 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
       return "workflow-badge wf-new";
     }
 
+    function loadSettings() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          settings = { ...settings, ...JSON.parse(saved) };
+        }
+      } catch (e) {}
+      settingCardView.value = settings.cardView;
+      settingChartMode.value = settings.chartMode;
+      settingReportMode.value = settings.reportMode;
+      settingReportStyle.value = settings.reportStyle;
+      applySettingsToUI();
+    }
+
+    function saveSettings() {
+      settings.cardView = settingCardView.value;
+      settings.chartMode = settingChartMode.value;
+      settings.reportMode = settingReportMode.value;
+      settings.reportStyle = settingReportStyle.value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      applySettingsToUI();
+      setMsg(settingsMsg, "Impostazioni salvate correttamente.", "ok");
+    }
+
+    function applySettingsToUI() {
+      if (settings.cardView === "compact") {
+        cardsGrid.classList.add("compact");
+      } else {
+        cardsGrid.classList.remove("compact");
+      }
+    }
+
+    function applyDefaultsAction() {
+      if (settings.chartMode === "filtered") {
+        buildCharts(getFilteredRows(), "risultati filtrati");
+      } else {
+        buildCharts(rowsCache, "database completo");
+      }
+
+      if (settings.reportMode === "filtered") {
+        buildReport(getFilteredRows(), "risultati filtrati", settings.reportStyle);
+      } else {
+        buildReport(rowsCache, "database completo", settings.reportStyle);
+      }
+    }
+
     async function isAdminUser() {
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError) return false;
@@ -1280,6 +1209,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
 
       setMsg(loginMsg, "");
       showApp();
+      loadSettings();
       await loadData();
     }
 
@@ -1289,6 +1219,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
         const admin = await isAdminUser();
         if (admin) {
           showApp();
+          loadSettings();
           await loadData();
         } else {
           await client.auth.signOut();
@@ -1304,6 +1235,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
       hideApp();
       setMsg(loginMsg, "");
       setAdminMessage("");
+      setMsg(settingsMsg, "");
       reportOutput.textContent = "Nessun report generato.";
       reportBaseInfo.textContent = "Nessun report generato";
       chartBaseInfo.textContent = "Base analisi non ancora generata";
@@ -1363,17 +1295,32 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
 
       const criticitaPerc = total ? Math.round((rosso / total) * 100) : 0;
       const nuovePerc = total ? Math.round((nuova / total) * 100) : 0;
-      const priorita = (rosso * 3) + (arancione * 2) + (nuova * 1);
+      const priorita = (rosso * 3) + (arancione * 2) + nuova;
 
       document.getElementById("kpiCriticita").textContent = criticitaPerc + "%";
       document.getElementById("kpiNuove").textContent = nuovePerc + "%";
       document.getElementById("kpiPriorita").textContent = priorita;
     }
 
+    function formatDate(value) {
+      if (!value) return "—";
+      try {
+        return new Date(value).toLocaleString("it-IT");
+      } catch {
+        return value;
+      }
+    }
+
     function renderCards() {
       const rows = getFilteredRows();
       resultsCount.textContent = `${rows.length} schede mostrate`;
       cardsGrid.innerHTML = "";
+
+      if (settings.cardView === "compact") {
+        cardsGrid.classList.add("compact");
+      } else {
+        cardsGrid.classList.remove("compact");
+      }
 
       if (!rows.length) {
         cardsGrid.innerHTML = `<div class="empty-state">Nessuna segnalazione trovata con i filtri attuali.</div>`;
@@ -1392,9 +1339,13 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
         const descrizione = getField(row, "Descrizione", "descrizione");
         const nomeSegnalante = getField(row, "nomesegnalante", "NomeSegnalante");
         const contattoSegnalante = getField(row, "contattosegnalante", "ContattoSegnalante");
+        const createdAt = getField(row, "created_at", "creato_il");
+        const updatedAt = getField(row, "updated_at", "aggiornato_alle");
+
+        const compactClass = settings.cardView === "compact" ? "compact" : "";
 
         const card = document.createElement("article");
-        card.className = "report-card";
+        card.className = `report-card ${compactClass}`;
         card.innerHTML = `
           <div class="report-head">
             <div class="report-code">ID ${id}${codice ? ` • ${codice}` : ""}</div>
@@ -1412,6 +1363,8 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
             <div class="info-box"><span class="info-label">Contatto segnalante</span><div class="info-value">${contattoSegnalante || "—"}</div></div>
             <div class="info-box"><span class="info-label">Segnalante</span><div class="info-value">${nomeSegnalante || "—"}</div></div>
             <div class="info-box"><span class="info-label">Codice</span><div class="info-value">${codice || "—"}</div></div>
+            <div class="info-box"><span class="info-label">Creato il</span><div class="info-value">${formatDate(createdAt)}</div></div>
+            <div class="info-box"><span class="info-label">Aggiornato il</span><div class="info-value">${formatDate(updatedAt)}</div></div>
             <div class="info-box desc-box"><span class="info-label">Descrizione</span><div class="info-value">${descrizione || "Nessuna descrizione disponibile."}</div></div>
           </div>
 
@@ -1570,7 +1523,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
       setAdminMessage("Grafici generati correttamente.", "ok");
     }
 
-    function buildSummary(rows) {
+    function buildSummary(rows, style = "complete") {
       const total = rows.length;
       const rosso = rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "rosso").length;
       const arancione = rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length;
@@ -1591,6 +1544,33 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
       const criticitaPerc = total ? ((rosso / total) * 100).toFixed(1) : "0.0";
       const nuovePerc = total ? ((nuova / total) * 100).toFixed(1) : "0.0";
       const priorita = (rosso * 3) + (arancione * 2) + nuova;
+
+      if (style === "summary") {
+        const text = [
+          "REPORT SINTETICO - MAPPA ACCESSIBILITÀ",
+          "",
+          `Totale segnalazioni: ${total}`,
+          `Rosso: ${rosso} | Arancione: ${arancione} | Verde: ${verde}`,
+          `Nuova: ${nuova} | Presa in carico: ${presa} | Chiusa: ${chiusa} | Senza workflow: ${senzaWorkflow}`,
+          `Criticità gravi: ${criticitaPerc}%`,
+          `Segnalazioni nuove: ${nuovePerc}%`,
+          `Indice priorità: ${priorita}`,
+          "",
+          "Top comuni:",
+          ...topComune.map(([k,v]) => `- ${k}: ${v}`),
+          "",
+          "Top categorie:",
+          ...topCategoria.map(([k,v]) => `- ${k}: ${v}`)
+        ].join("\n");
+
+        const html = `
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8"><title>Report sintetico</title>
+<style>body{font-family:Arial,Helvetica,sans-serif;margin:40px;line-height:1.6}h1{color:#1f4b7a}</style>
+</head><body><h1>Report sintetico - Mappa Accessibilità</h1><pre>${text}</pre></body></html>`;
+
+        return { text, html };
+      }
 
       const text = [
         "REPORT ANALITICO - MAPPA ACCESSIBILITÀ",
@@ -1624,7 +1604,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.
         "",
         "7. LETTURA SINTETICA",
         criticitaPerc > 40
-          ? "- Il livello di criticità grave è alto e richiede una priorità operativa elevata."
+          ? "- Il livello di criticità grave è alto e richiede priorità operativa elevata."
           : "- Il livello di criticità grave è contenuto o medio.",
         nuovePerc > 50
           ? "- Più della metà delle segnalazioni risulta ancora nuova: serve accelerare la presa in carico."
@@ -1650,62 +1630,34 @@ ul{margin:8px 0 0 18px}
 <body>
   <h1>Report analitico - Mappa Accessibilità</h1>
   <div class="box"><strong>Totale segnalazioni analizzate:</strong> ${total}</div>
-
   <h2>1. Stato accessibilità</h2>
-  <ul>
-    <li>Rosso: ${rosso}</li>
-    <li>Arancione: ${arancione}</li>
-    <li>Verde: ${verde}</li>
-  </ul>
-
+  <ul><li>Rosso: ${rosso}</li><li>Arancione: ${arancione}</li><li>Verde: ${verde}</li></ul>
   <h2>2. Workflow gestionale</h2>
-  <ul>
-    <li>Nuova: ${nuova}</li>
-    <li>Presa in carico: ${presa}</li>
-    <li>Chiusa: ${chiusa}</li>
-    <li>Senza workflow valido: ${senzaWorkflow}</li>
-  </ul>
-
+  <ul><li>Nuova: ${nuova}</li><li>Presa in carico: ${presa}</li><li>Chiusa: ${chiusa}</li><li>Senza workflow valido: ${senzaWorkflow}</li></ul>
   <h2>3. KPI strategici</h2>
-  <ul>
-    <li>Percentuale criticità gravi: ${criticitaPerc}%</li>
-    <li>Percentuale segnalazioni nuove: ${nuovePerc}%</li>
-    <li>Indice sintetico di priorità operativa: ${priorita}</li>
-  </ul>
-
+  <ul><li>Percentuale criticità gravi: ${criticitaPerc}%</li><li>Percentuale segnalazioni nuove: ${nuovePerc}%</li><li>Indice sintetico di priorità operativa: ${priorita}</li></ul>
   <h2>4. Top comuni</h2>
   <ul>${topComune.map(([k,v]) => `<li>${k}: ${v}</li>`).join("")}</ul>
-
   <h2>5. Top categorie</h2>
   <ul>${topCategoria.map(([k,v]) => `<li>${k}: ${v}</li>`).join("")}</ul>
-
   <h2>6. Top luoghi</h2>
   <ul>${topLuogo.map(([k,v]) => `<li>${k}: ${v}</li>`).join("")}</ul>
-
-  <h2>7. Lettura sintetica</h2>
-  <ul>
-    <li>${criticitaPerc > 40 ? "Il livello di criticità grave è alto e richiede una priorità operativa elevata." : "Il livello di criticità grave è contenuto o medio."}</li>
-    <li>${nuovePerc > 50 ? "Più della metà delle segnalazioni risulta ancora nuova: serve accelerare la presa in carico." : "Il numero di segnalazioni nuove è sotto controllo o in equilibrio."}</li>
-    <li>${senzaWorkflow > 0 ? `Sono presenti ${senzaWorkflow} record senza workflow valido: è necessario uniformare i dati.` : "Tutti i record hanno un workflow valido."}</li>
-  </ul>
 </body>
 </html>`;
 
       return { text, html };
     }
 
-    function buildReport(rows, label) {
+    function buildReport(rows, label, style = "complete") {
       if (!rows.length) {
         alert("Nessun dato disponibile per generare il report.");
         return;
       }
-
-      const summary = buildSummary(rows);
+      const summary = buildSummary(rows, style);
       lastReportText = summary.text;
       lastReportHtml = summary.html;
-
       reportOutput.textContent = summary.text;
-      reportBaseInfo.textContent = `Base report: ${rows.length} segnalazioni (${label})`;
+      reportBaseInfo.textContent = `Base report: ${rows.length} segnalazioni (${label}) - stile ${style === "summary" ? "sintetico" : "completo"}`;
       setAdminMessage("Report generato correttamente.", "ok");
     }
 
@@ -1717,6 +1669,27 @@ ul{margin:8px 0 0 18px}
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
+    }
+
+    async function normalizeEmptyWorkflow() {
+      const empties = rowsCache.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "");
+      if (!empties.length) {
+        setMsg(settingsMsg, "Nessun workflow vuoto da correggere.", "ok");
+        return;
+      }
+
+      const { error } = await client
+        .from("segnalazioni")
+        .update({ statosegnalazione: "nuova" })
+        .is("statosegnalazione", null);
+
+      if (error) {
+        setMsg(settingsMsg, "Errore normalizzazione: " + error.message, "error");
+        return;
+      }
+
+      setMsg(settingsMsg, "Workflow vuoti normalizzati in 'nuova'.", "ok");
+      await loadData();
     }
 
     async function loadData() {
@@ -1733,11 +1706,19 @@ ul{margin:8px 0 0 18px}
       rowsCache = data || [];
       updateDashboardStats(rowsCache);
       renderCards();
-
       destroyCharts();
       chartsWrap.classList.add("hidden");
       chartsEmpty.classList.remove("hidden");
       chartBaseInfo.textContent = "Base analisi non ancora generata";
+    }
+
+    function resetFilters() {
+      searchText.value = "";
+      filterComune.value = "tutti";
+      filterStatus.value = "tutti";
+      filterWorkflow.value = "tutti";
+      renderCards();
+      setAdminMessage("Filtri reimpostati.", "ok");
     }
 
     function exportCSV() {
@@ -1795,8 +1776,8 @@ ul{margin:8px 0 0 18px}
     btnExportXlsx.onclick = exportXLSX;
     btnBuildChartsFiltered.onclick = () => buildCharts(getFilteredRows(), "risultati filtrati");
     btnBuildChartsAll.onclick = () => buildCharts(rowsCache, "database completo");
-    btnBuildReportFiltered.onclick = () => buildReport(getFilteredRows(), "risultati filtrati");
-    btnBuildReportAll.onclick = () => buildReport(rowsCache, "database completo");
+    btnBuildReportFiltered.onclick = () => buildReport(getFilteredRows(), "risultati filtrati", settings.reportStyle);
+    btnBuildReportAll.onclick = () => buildReport(rowsCache, "database completo", settings.reportStyle);
     btnPrintReport.onclick = printReport;
     btnExportReportHtml.onclick = () => {
       if (!lastReportHtml) return alert("Genera prima un report.");
@@ -1807,6 +1788,11 @@ ul{margin:8px 0 0 18px}
       exportFile("report-mappa-accessibilita.txt", lastReportText, "text/plain;charset=utf-8;");
     };
     btnPrintPage.onclick = () => window.print();
+    btnResetFilters.onclick = resetFilters;
+    btnNormalizeWorkflow.onclick = normalizeEmptyWorkflow;
+    btnReloadDashboard.onclick = loadData;
+    btnSaveSettings.onclick = saveSettings;
+    btnApplyDefaults.onclick = applyDefaultsAction;
 
     searchText.addEventListener("input", renderCards);
     filterComune.addEventListener("change", renderCards);
