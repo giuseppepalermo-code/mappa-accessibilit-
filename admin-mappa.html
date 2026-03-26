@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Mappa v6 - NessunOstacolo</title>
+  <title>Area Riservata Operatori - Mappa Accessibilità | NessunOstacolo</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -53,6 +53,11 @@
       cursor:pointer;
       font-weight:800;
       transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
     }
     .btn:hover{
       transform:translateY(-1px);
@@ -74,22 +79,41 @@
     }
     .login-card{
       width:100%;
-      max-width:560px;
+      max-width:620px;
       background:var(--panel);
       border:1px solid var(--line);
       border-radius:28px;
       box-shadow:var(--shadow);
-      padding:26px;
+      padding:28px;
     }
-    .login-card h1{
-      margin:0 0 8px 0;
+
+    .brand-login{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .brand-login img{
+      width:74px;
+      height:74px;
+      object-fit:contain;
+      border-radius:18px;
+      background:#fff;
+      border:1px solid var(--line);
+      padding:8px;
+      box-shadow:var(--shadow-soft);
+    }
+    .brand-login-text h1{
+      margin:0 0 6px 0;
       font-size:2rem;
       color:var(--brand-dark);
+      line-height:1.05;
     }
-    .login-card p{
-      margin:0 0 20px 0;
+    .brand-login-text p{
+      margin:0;
       color:var(--muted);
       line-height:1.45;
+      font-size:.98rem;
     }
 
     .field{
@@ -133,7 +157,7 @@
 
     .app{
       display:grid;
-      grid-template-columns:280px 1fr;
+      grid-template-columns:300px 1fr;
       min-height:100vh;
     }
     .sidebar{
@@ -147,19 +171,37 @@
       flex-direction:column;
       gap:18px;
       box-shadow:var(--shadow);
+      overflow:auto;
     }
-    .brand-box h2{
+
+    .sidebar-brand{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+    }
+    .sidebar-brand img{
+      width:68px;
+      height:68px;
+      object-fit:contain;
+      border-radius:16px;
+      background:rgba(255,255,255,.92);
+      padding:6px;
+      border:1px solid rgba(255,255,255,.35);
+      flex-shrink:0;
+    }
+    .sidebar-brand h2{
       margin:0;
-      font-size:2rem;
-      line-height:1;
+      font-size:1.45rem;
+      line-height:1.05;
       letter-spacing:-.02em;
     }
-    .brand-box p{
+    .sidebar-brand p{
       margin:8px 0 0 0;
       opacity:.95;
-      line-height:1.4;
-      font-size:.96rem;
+      line-height:1.35;
+      font-size:.92rem;
     }
+
     .menu{
       display:flex;
       flex-direction:column;
@@ -185,6 +227,7 @@
       color:var(--brand-dark);
       transform:translateX(2px);
     }
+
     .sidebar-footer{
       margin-top:auto;
       display:flex;
@@ -194,7 +237,7 @@
     .sidebar-note{
       font-size:.88rem;
       line-height:1.4;
-      opacity:.9;
+      opacity:.95;
       background:rgba(255,255,255,.08);
       border-radius:16px;
       padding:12px;
@@ -242,6 +285,12 @@
       grid-template-columns:repeat(4,minmax(0,1fr));
       gap:16px;
     }
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+    }
+
     .stat{
       border-radius:22px;
       padding:18px;
@@ -293,39 +342,13 @@
       position:relative;
       z-index:1;
     }
+
     .stat-total{background:linear-gradient(135deg,#dbeafe,#bfdbfe); border-color:#93c5fd; color:#0b3a8f;}
     .stat-red{background:linear-gradient(135deg,#ffd7d7,#ffbdbd); border-color:#ff8f8f; color:#8f1020;}
     .stat-orange{background:linear-gradient(135deg,#ffe2b0,#ffd08c); border-color:#ffba5a; color:#92400e;}
     .stat-green{background:linear-gradient(135deg,#d1fae5,#b7f3d6); border-color:#6ee7b7; color:#065f46;}
     .stat-blue{background:linear-gradient(135deg,#dbeafe,#c7d2fe); border-color:#93c5fd; color:#1e40af;}
     .stat-purple{background:linear-gradient(135deg,#f3e8ff,#e9d5ff); border-color:#c084fc; color:#6b21a8;}
-
-    .legend-grid{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:12px;
-    }
-    .legend-item{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding:14px;
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:#fff;
-    }
-    .legend-badge{
-      min-width:40px;
-      height:40px;
-      border-radius:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      font-size:1rem;
-    }
-    .legend-title{font-weight:800; margin-bottom:4px;}
-    .legend-text{color:var(--muted); font-size:.92rem; line-height:1.35;}
 
     .coherence-grid,
     .kpi-grid{
@@ -334,7 +357,8 @@
       gap:14px;
     }
     .coherence-box,
-    .kpi-box{
+    .kpi-box,
+    .director-box{
       border-radius:18px;
       padding:16px;
       border:1px solid var(--line);
@@ -342,20 +366,21 @@
       box-shadow:var(--shadow-soft);
     }
     .coherence-box strong,
-    .kpi-box strong{
+    .kpi-box strong,
+    .director-box strong{
       display:block;
       font-size:1.9rem;
       margin-bottom:6px;
     }
     .coherence-box span,
-    .kpi-box span{
+    .kpi-box span,
+    .director-box span{
       color:var(--muted);
       font-weight:700;
       line-height:1.35;
     }
     .coherence-ok{background:linear-gradient(135deg,#ecfdf3,#d1fae5); border-color:#86efac;}
     .coherence-warn{background:linear-gradient(135deg,#fff7ed,#ffedd5); border-color:#fdba74;}
-    .kpi-box{background:linear-gradient(180deg,#fff,#fbfdff);}
 
     .filters{
       display:grid;
@@ -613,10 +638,8 @@
     }
 
     @media (max-width: 1400px){
-      .app{grid-template-columns:240px 1fr;}
-      .grid, .legend-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-      .coherence-grid, .kpi-grid{grid-template-columns:1fr;}
-      .filters, .charts-grid, .cards-grid, .settings-grid{grid-template-columns:1fr;}
+      .app{grid-template-columns:250px 1fr;}
+      .grid, .grid-3, .coherence-grid, .kpi-grid, .filters, .charts-grid, .cards-grid, .settings-grid{grid-template-columns:1fr;}
     }
 
     @media (max-width: 900px){
@@ -624,10 +647,12 @@
       .sidebar{position:relative; height:auto;}
       .main{padding:12px;}
       .panel{padding:16px; border-radius:20px;}
-      .grid, .legend-grid, .coherence-grid, .kpi-grid, .filters, .charts-grid, .cards-grid, .settings-grid{grid-template-columns:1fr;}
       .report-body{grid-template-columns:1fr;}
       .report-footer{flex-direction:column; align-items:stretch;}
       .workflow-editor, .workflow-select{min-width:100%;}
+      .brand-login{align-items:flex-start;}
+      .brand-login img{width:62px;height:62px;}
+      .sidebar-brand img{width:56px;height:56px;}
     }
   </style>
 </head>
@@ -635,8 +660,13 @@
 
   <section id="loginSection" class="login-shell">
     <div class="login-card">
-      <h1>Admin Mappa</h1>
-      <p>Accesso riservato alla gestione segnalazioni, analisi, grafici, report ed impostazioni operative.</p>
+      <div class="brand-login">
+        <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" onerror="this.style.display='none'">
+        <div class="brand-login-text">
+          <h1>Area Riservata Operatori</h1>
+          <p>Mappa Accessibilità – progetto di NessunOstacolo<br>Accesso riservato per operatori registrati e autorizzati.</p>
+        </div>
+      </div>
 
       <div class="field">
         <label for="email">Email</label>
@@ -648,16 +678,23 @@
         <input id="password" type="password" value="nessunostacolo2025" />
       </div>
 
-      <button id="btnLogin" class="btn btn-brand" type="button">Entra</button>
+      <div class="toolbar">
+        <button id="btnLogin" class="btn btn-brand" type="button">Entra</button>
+        <a class="btn btn-light" href="index.html">Torna al sito</a>
+      </div>
+
       <div id="loginMsg" class="msg"></div>
     </div>
   </section>
 
   <section id="appSection" class="app hidden">
     <aside class="sidebar">
-      <div class="brand-box">
-        <h2>Admin v6</h2>
-        <p>NessunOstacolo<br>Cruscotto operativo per gestione, analisi, report e manutenzione.</p>
+      <div class="sidebar-brand">
+        <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" onerror="this.style.display='none'">
+        <div>
+          <h2>Mappa Accessibilità</h2>
+          <p>NessunOstacolo<br>Area riservata operatori per gestione, analisi e report.</p>
+        </div>
       </div>
 
       <nav class="menu">
@@ -670,8 +707,9 @@
 
       <div class="sidebar-footer">
         <div class="sidebar-note">
-          In Impostazioni puoi decidere vista card, modalità predefinite e strumenti di manutenzione.
+          Questa area è pensata per essere richiamata direttamente dal sito dell’associazione come sezione riservata.
         </div>
+        <a class="btn btn-light" href="index.html">Torna al sito</a>
         <button id="btnLogoutSide" class="btn btn-danger" type="button">Esci</button>
       </div>
     </aside>
@@ -687,7 +725,7 @@
           <div class="section-head">
             <div>
               <h2>Statistiche automatiche</h2>
-              <p>I colori sono divisi in due famiglie: accessibilità e workflow gestionale.</p>
+              <p>Cruscotto generale dell’area operatori.</p>
             </div>
           </div>
 
@@ -707,70 +745,6 @@
             <div class="stat stat-green">
               <div class="stat-top"><strong id="statVerde">0</strong><div class="stat-icon">✓</div></div>
               <div class="stat-label">Verde = accessibile</div>
-            </div>
-            <div class="stat stat-blue">
-              <div class="stat-top"><strong id="statNuova">0</strong><div class="stat-icon">N</div></div>
-              <div class="stat-label">Nuova = appena inserita</div>
-            </div>
-            <div class="stat stat-orange">
-              <div class="stat-top"><strong id="statPresa">0</strong><div class="stat-icon">P</div></div>
-              <div class="stat-label">Presa in carico = in lavorazione</div>
-            </div>
-            <div class="stat stat-green">
-              <div class="stat-top"><strong id="statChiusa">0</strong><div class="stat-icon">C</div></div>
-              <div class="stat-label">Chiusa = risolta o conclusa</div>
-            </div>
-            <div class="stat stat-purple">
-              <div class="stat-top"><strong id="statSenzaWorkflow">0</strong><div class="stat-icon">?</div></div>
-              <div class="stat-label">Record senza workflow valido</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="section-head">
-            <div>
-              <h2>Controllo coerenza dati</h2>
-              <p>Verifica se i numeri tornano e se ci sono record incompleti.</p>
-            </div>
-          </div>
-
-          <div class="coherence-grid">
-            <div class="coherence-box coherence-ok">
-              <strong id="coherenceAccess">0</strong>
-              <span>Totale accessibilità (rosso + arancione + verde)</span>
-            </div>
-            <div class="coherence-box coherence-ok">
-              <strong id="coherenceWorkflow">0</strong>
-              <span>Totale workflow valido (nuova + presa in carico + chiusa)</span>
-            </div>
-            <div class="coherence-box coherence-warn">
-              <strong id="coherenceMissing">0</strong>
-              <span>Record senza workflow valido</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="section-head">
-            <div>
-              <h2>KPI strategici</h2>
-              <p>Indicatori per studio, relazioni, priorità e presentazioni.</p>
-            </div>
-          </div>
-
-          <div class="kpi-grid">
-            <div class="kpi-box">
-              <strong id="kpiCriticita">0%</strong>
-              <span>Percentuale di criticità gravi sul totale.</span>
-            </div>
-            <div class="kpi-box">
-              <strong id="kpiNuove">0%</strong>
-              <span>Percentuale segnalazioni ancora nuove.</span>
-            </div>
-            <div class="kpi-box">
-              <strong id="kpiPriorita">0</strong>
-              <span>Indice sintetico di priorità operativa.</span>
             </div>
           </div>
         </div>
@@ -847,7 +821,7 @@
           <div class="section-head">
             <div>
               <h2>Analisi e grafici</h2>
-              <p>I grafici si generano a comando, su dati filtrati oppure sul database completo.</p>
+              <p>Grafici generati a comando per studio e presentazioni.</p>
             </div>
           </div>
 
@@ -874,14 +848,6 @@
                 <h3>Distribuzione workflow</h3>
                 <div class="chart-box"><canvas id="chartWorkflow"></canvas></div>
               </div>
-              <div class="chart-card">
-                <h3>Segnalazioni per comune</h3>
-                <div class="chart-box"><canvas id="chartComune"></canvas></div>
-              </div>
-              <div class="chart-card">
-                <h3>Segnalazioni per categoria</h3>
-                <div class="chart-box"><canvas id="chartCategoria"></canvas></div>
-              </div>
             </div>
           </div>
         </div>
@@ -892,7 +858,7 @@
           <div class="section-head">
             <div>
               <h2>Report elaborato</h2>
-              <p>Report ordinato, editabile, stampabile ed esportabile per relazioni e presentazioni.</p>
+              <p>Report ordinato, editabile, stampabile ed esportabile con intestazione di progetto.</p>
             </div>
           </div>
 
@@ -918,70 +884,20 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
           <div class="section-head">
             <div>
               <h2>Impostazioni operative</h2>
-              <p>Qui puoi davvero cambiare il comportamento del pannello.</p>
+              <p>Area pronta per operatori registrati e collegamento futuro al sito.</p>
             </div>
           </div>
 
           <div class="settings-grid">
             <div class="setting-box">
-              <h3>Vista card</h3>
-              <p>Scegli la modalità di visualizzazione delle segnalazioni.</p>
-              <div class="field">
-                <label for="settingCardView">Layout schede</label>
-                <select id="settingCardView">
-                  <option value="standard">Standard a due colonne</option>
-                  <option value="compact">Compatta a colonna singola</option>
-                </select>
-              </div>
+              <h3>Branding</h3>
+              <p>Il pannello usa il file <strong>assets/logo-mappa.png</strong>. Quando avrai il logo definitivo, basterà sostituire quel file.</p>
             </div>
-
             <div class="setting-box">
-              <h3>Grafici predefiniti</h3>
-              <p>Decidi quale base usare di default quando fai analisi.</p>
-              <div class="field">
-                <label for="settingChartMode">Modalità grafici</label>
-                <select id="settingChartMode">
-                  <option value="filtered">Risultati filtrati</option>
-                  <option value="all">Database completo</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="setting-box">
-              <h3>Report predefinito</h3>
-              <p>Definisci quale tipo di report generare più rapidamente.</p>
-              <div class="field">
-                <label for="settingReportMode">Base report</label>
-                <select id="settingReportMode">
-                  <option value="filtered">Report filtrato</option>
-                  <option value="all">Report completo</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="settingReportStyle">Stile report</label>
-                <select id="settingReportStyle">
-                  <option value="complete">Completo</option>
-                  <option value="summary">Sintetico</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="setting-box">
-              <h3>Manutenzione dati</h3>
-              <p>Strumenti per tenere pulito il database e velocizzare il lavoro.</p>
-              <div class="toolbar no-print" style="margin-top:0;">
-                <button id="btnNormalizeWorkflow" class="btn btn-light" type="button">Workflow vuoti → Nuova</button>
-                <button id="btnReloadDashboard" class="btn btn-light" type="button">Ricarica dashboard</button>
-              </div>
+              <h3>Accesso riservato</h3>
+              <p>L’accesso è già riservato a utenti autenticati e autorizzati. Il prossimo passo sarà integrarlo nel sito come vera area riservata.</p>
             </div>
           </div>
-
-          <div class="toolbar no-print">
-            <button id="btnSaveSettings" class="btn btn-brand" type="button">Salva impostazioni</button>
-            <button id="btnApplyDefaults" class="btn btn-light" type="button">Applica predefiniti</button>
-          </div>
-
-          <div id="settingsMsg" class="msg"></div>
         </div>
       </section>
     </main>
@@ -990,13 +906,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
   <script>
     const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
     const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
-
-    const STORAGE_KEY = "admin_mappa_v6_settings";
-
-    if (!window.supabase || !window.supabase.createClient) {
-      alert("Errore: libreria Supabase non caricata.");
-      throw new Error("Supabase non caricata");
-    }
+    const STORAGE_KEY = "admin_mappa_v8_settings";
 
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -1004,19 +914,12 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     let charts = [];
     let lastReportHtml = "";
     let lastReportText = "";
-
-    let settings = {
-      cardView: "standard",
-      chartMode: "filtered",
-      reportMode: "filtered",
-      reportStyle: "complete"
-    };
+    let settings = { cardView: "standard", chartMode: "filtered", reportMode: "filtered", reportStyle: "complete" };
 
     const loginSection = document.getElementById("loginSection");
     const appSection = document.getElementById("appSection");
     const loginMsg = document.getElementById("loginMsg");
     const adminMsg = document.getElementById("adminMsg");
-    const settingsMsg = document.getElementById("settingsMsg");
 
     const btnLogin = document.getElementById("btnLogin");
     const btnRefresh = document.getElementById("btnRefresh");
@@ -1033,10 +936,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     const btnExportReportTxt = document.getElementById("btnExportReportTxt");
     const btnPrintPage = document.getElementById("btnPrintPage");
     const btnResetFilters = document.getElementById("btnResetFilters");
-    const btnNormalizeWorkflow = document.getElementById("btnNormalizeWorkflow");
-    const btnReloadDashboard = document.getElementById("btnReloadDashboard");
-    const btnSaveSettings = document.getElementById("btnSaveSettings");
-    const btnApplyDefaults = document.getElementById("btnApplyDefaults");
 
     const searchText = document.getElementById("searchText");
     const filterComune = document.getElementById("filterComune");
@@ -1049,11 +948,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     const chartBaseInfo = document.getElementById("chartBaseInfo");
     const reportBaseInfo = document.getElementById("reportBaseInfo");
     const reportOutput = document.getElementById("reportOutput");
-
-    const settingCardView = document.getElementById("settingCardView");
-    const settingChartMode = document.getElementById("settingChartMode");
-    const settingReportMode = document.getElementById("settingReportMode");
-    const settingReportStyle = document.getElementById("settingReportStyle");
 
     function normalizeText(value) {
       return (value ?? "").toString().trim();
@@ -1114,52 +1008,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       return "workflow-badge wf-new";
     }
 
-    function loadSettings() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          settings = { ...settings, ...JSON.parse(saved) };
-        }
-      } catch (e) {}
-      settingCardView.value = settings.cardView;
-      settingChartMode.value = settings.chartMode;
-      settingReportMode.value = settings.reportMode;
-      settingReportStyle.value = settings.reportStyle;
-      applySettingsToUI();
-    }
-
-    function saveSettings() {
-      settings.cardView = settingCardView.value;
-      settings.chartMode = settingChartMode.value;
-      settings.reportMode = settingReportMode.value;
-      settings.reportStyle = settingReportStyle.value;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-      applySettingsToUI();
-      setMsg(settingsMsg, "Impostazioni salvate correttamente.", "ok");
-    }
-
-    function applySettingsToUI() {
-      if (settings.cardView === "compact") {
-        cardsGrid.classList.add("compact");
-      } else {
-        cardsGrid.classList.remove("compact");
-      }
-    }
-
-    function applyDefaultsAction() {
-      if (settings.chartMode === "filtered") {
-        buildCharts(getFilteredRows(), "risultati filtrati");
-      } else {
-        buildCharts(rowsCache, "database completo");
-      }
-
-      if (settings.reportMode === "filtered") {
-        buildReport(getFilteredRows(), "risultati filtrati", settings.reportStyle);
-      } else {
-        buildReport(rowsCache, "database completo", settings.reportStyle);
-      }
-    }
-
     async function isAdminUser() {
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError) return false;
@@ -1188,15 +1036,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
       setMsg(loginMsg, "Accesso in corso...");
 
-      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      const { error } = await client.auth.signInWithPassword({ email, password });
 
       if (error) {
         setMsg(loginMsg, "Login non riuscito: " + error.message, "error");
-        return;
-      }
-
-      if (!data?.user) {
-        setMsg(loginMsg, "Login non riuscito: utente non trovato.", "error");
         return;
       }
 
@@ -1209,7 +1052,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
       setMsg(loginMsg, "");
       showApp();
-      loadSettings();
       await loadData();
     }
 
@@ -1219,7 +1061,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         const admin = await isAdminUser();
         if (admin) {
           showApp();
-          loadSettings();
           await loadData();
         } else {
           await client.auth.signOut();
@@ -1235,7 +1076,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       hideApp();
       setMsg(loginMsg, "");
       setAdminMessage("");
-      setMsg(settingsMsg, "");
       reportOutput.textContent = "Nessun report generato.";
       reportBaseInfo.textContent = "Nessun report generato";
       chartBaseInfo.textContent = "Base analisi non ancora generata";
@@ -1257,7 +1097,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         const codice = getField(row, "codice", "Codice");
         const stato = normalizeText(getField(row, "Stato", "stato")).toLowerCase();
         const wf = normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione"));
-
         const haystack = `${codice} ${titolo} ${luogo} ${descrizione} ${comuneRow}`.toLowerCase();
 
         return (!q || haystack.includes(q))
@@ -1267,60 +1106,29 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       });
     }
 
-    function updateDashboardStats(rows) {
+    function formatDate(value) {
+      if (!value) return "—";
+      try { return new Date(value).toLocaleString("it-IT"); } catch { return value; }
+    }
+
+    function updateStats(rows) {
       const stato = r => normalizeText(getField(r, "Stato", "stato")).toLowerCase();
-      const wf = r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione"));
 
       const total = rows.length;
       const rosso = rows.filter(r => stato(r) === "rosso").length;
       const arancione = rows.filter(r => stato(r) === "arancione").length;
       const verde = rows.filter(r => stato(r) === "verde").length;
-      const nuova = rows.filter(r => wf(r) === "nuova").length;
-      const presa = rows.filter(r => wf(r) === "presa in carico").length;
-      const chiusa = rows.filter(r => wf(r) === "chiusa").length;
-      const senzaWorkflow = rows.filter(r => wf(r) === "").length;
 
       document.getElementById("statTotale").textContent = total;
       document.getElementById("statRosso").textContent = rosso;
       document.getElementById("statArancione").textContent = arancione;
       document.getElementById("statVerde").textContent = verde;
-      document.getElementById("statNuova").textContent = nuova;
-      document.getElementById("statPresa").textContent = presa;
-      document.getElementById("statChiusa").textContent = chiusa;
-      document.getElementById("statSenzaWorkflow").textContent = senzaWorkflow;
-
-      document.getElementById("coherenceAccess").textContent = rosso + arancione + verde;
-      document.getElementById("coherenceWorkflow").textContent = nuova + presa + chiusa;
-      document.getElementById("coherenceMissing").textContent = senzaWorkflow;
-
-      const criticitaPerc = total ? Math.round((rosso / total) * 100) : 0;
-      const nuovePerc = total ? Math.round((nuova / total) * 100) : 0;
-      const priorita = (rosso * 3) + (arancione * 2) + nuova;
-
-      document.getElementById("kpiCriticita").textContent = criticitaPerc + "%";
-      document.getElementById("kpiNuove").textContent = nuovePerc + "%";
-      document.getElementById("kpiPriorita").textContent = priorita;
-    }
-
-    function formatDate(value) {
-      if (!value) return "—";
-      try {
-        return new Date(value).toLocaleString("it-IT");
-      } catch {
-        return value;
-      }
     }
 
     function renderCards() {
       const rows = getFilteredRows();
       resultsCount.textContent = `${rows.length} schede mostrate`;
       cardsGrid.innerHTML = "";
-
-      if (settings.cardView === "compact") {
-        cardsGrid.classList.add("compact");
-      } else {
-        cardsGrid.classList.remove("compact");
-      }
 
       if (!rows.length) {
         cardsGrid.innerHTML = `<div class="empty-state">Nessuna segnalazione trovata con i filtri attuali.</div>`;
@@ -1342,10 +1150,8 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         const createdAt = getField(row, "created_at", "creato_il");
         const updatedAt = getField(row, "updated_at", "aggiornato_alle");
 
-        const compactClass = settings.cardView === "compact" ? "compact" : "";
-
         const card = document.createElement("article");
-        card.className = `report-card ${compactClass}`;
+        card.className = "report-card";
         card.innerHTML = `
           <div class="report-head">
             <div class="report-code">ID ${id}${codice ? ` • ${codice}` : ""}</div>
@@ -1362,7 +1168,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
             <div class="info-box"><span class="info-label">Luogo</span><div class="info-value">${luogo || "—"}</div></div>
             <div class="info-box"><span class="info-label">Contatto segnalante</span><div class="info-value">${contattoSegnalante || "—"}</div></div>
             <div class="info-box"><span class="info-label">Segnalante</span><div class="info-value">${nomeSegnalante || "—"}</div></div>
-            <div class="info-box"><span class="info-label">Codice</span><div class="info-value">${codice || "—"}</div></div>
             <div class="info-box"><span class="info-label">Creato il</span><div class="info-value">${formatDate(createdAt)}</div></div>
             <div class="info-box"><span class="info-label">Aggiornato il</span><div class="info-value">${formatDate(updatedAt)}</div></div>
             <div class="info-box desc-box"><span class="info-label">Descrizione</span><div class="info-value">${descrizione || "Nessuna descrizione disponibile."}</div></div>
@@ -1385,54 +1190,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         `;
         cardsGrid.appendChild(card);
       });
-
-      cardsGrid.querySelectorAll("[data-save-id]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = Number(btn.getAttribute("data-save-id"));
-          const select = document.querySelector(`[data-workflow-id="${id}"]`);
-          const value = select.value;
-
-          const { error } = await client
-            .from("segnalazioni")
-            .update({ statosegnalazione: value })
-            .eq("id", id);
-
-          if (error) {
-            alert("Aggiornamento non riuscito: " + error.message);
-            return;
-          }
-
-          setAdminMessage("Workflow aggiornato correttamente.", "ok");
-          await loadData();
-        });
-      });
-
-      cardsGrid.querySelectorAll("[data-delete-id]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = Number(btn.getAttribute("data-delete-id"));
-          if (!confirm("Vuoi eliminare definitivamente questa segnalazione?")) return;
-
-          const row = rowsCache.find(r => r.id === id);
-
-          const { error } = await client
-            .from("segnalazioni")
-            .delete()
-            .eq("id", id);
-
-          if (error) {
-            alert("Eliminazione non riuscita: " + error.message);
-            return;
-          }
-
-          const filesToDelete = [row?.foto1, row?.foto2, row?.foto3].filter(Boolean);
-          if (filesToDelete.length > 0) {
-            await client.storage.from("foto").remove(filesToDelete);
-          }
-
-          setAdminMessage("Segnalazione eliminata correttamente.", "ok");
-          await loadData();
-        });
-      });
     }
 
     function destroyCharts() {
@@ -1440,16 +1197,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       charts = [];
     }
 
-    function buildMap(rows, getter) {
-      const map = {};
-      rows.forEach(row => {
-        const key = normalizeText(getter(row)) || "Non definito";
-        map[key] = (map[key] || 0) + 1;
-      });
-      return map;
-    }
-
-    function buildCharts(rows, baseLabel) {
+    function buildCharts(rows, label) {
       if (!rows.length) {
         alert("Nessun dato disponibile per generare i grafici.");
         return;
@@ -1458,160 +1206,46 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       destroyCharts();
       chartsEmpty.classList.add("hidden");
       chartsWrap.classList.remove("hidden");
-      chartBaseInfo.textContent = `Base analisi: ${rows.length} segnalazioni (${baseLabel})`;
+      chartBaseInfo.textContent = `Base analisi: ${rows.length} segnalazioni (${label})`;
 
       const statusMap = {
         Rosso: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "rosso").length,
-        Arancione: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length,
-        Verde: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "verde").length
+        Arancione: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length
       };
-
-      const workflowMap = {
-        Nuova: rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "nuova").length,
-        "Presa in carico": rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "presa in carico").length,
-        Chiusa: rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "chiusa").length,
-        "Senza workflow": rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "").length
-      };
-
-      const comuneMap = buildMap(rows, r => getField(r, "Comune", "comune"));
-      const categoriaMap = buildMap(rows, r => getField(r, "Categoria", "categoria"));
 
       charts.push(new Chart(document.getElementById("chartStatus"), {
         type: "doughnut",
         data: {
           labels: Object.keys(statusMap),
-          datasets: [{ data: Object.values(statusMap), backgroundColor: ["#ef4444","#f59e0b","#10b981"] }]
+          datasets: [{ data: Object.values(statusMap), backgroundColor: ["#ef4444","#f59e0b"] }]
         },
         options: { responsive:true, maintainAspectRatio:false }
       }));
 
       charts.push(new Chart(document.getElementById("chartWorkflow"), {
-        type: "doughnut",
+        type: "bar",
         data: {
-          labels: Object.keys(workflowMap),
-          datasets: [{ data: Object.values(workflowMap), backgroundColor: ["#3b82f6","#f59e0b","#10b981","#a855f7"] }]
+          labels: ["Totale filtrato"],
+          datasets: [{ label: "Segnalazioni", data: [rows.length], backgroundColor: "#1f4b7a" }]
         },
         options: { responsive:true, maintainAspectRatio:false }
-      }));
-
-      charts.push(new Chart(document.getElementById("chartComune"), {
-        type: "bar",
-        data: {
-          labels: Object.keys(comuneMap),
-          datasets: [{ label: "Segnalazioni", data: Object.values(comuneMap), backgroundColor: "#1f4b7a" }]
-        },
-        options: {
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } }
-        }
-      }));
-
-      charts.push(new Chart(document.getElementById("chartCategoria"), {
-        type: "bar",
-        data: {
-          labels: Object.keys(categoriaMap),
-          datasets: [{ label: "Segnalazioni", data: Object.values(categoriaMap), backgroundColor: "#f2b705" }]
-        },
-        options: {
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } }
-        }
       }));
 
       setAdminMessage("Grafici generati correttamente.", "ok");
     }
 
-    function buildSummary(rows, style = "complete") {
-      const total = rows.length;
-      const rosso = rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "rosso").length;
-      const arancione = rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length;
-      const verde = rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "verde").length;
-      const nuova = rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "nuova").length;
-      const presa = rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "presa in carico").length;
-      const chiusa = rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "chiusa").length;
-      const senzaWorkflow = rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "").length;
-
-      const comuneMap = buildMap(rows, r => getField(r, "Comune", "comune"));
-      const categoriaMap = buildMap(rows, r => getField(r, "Categoria", "categoria"));
-      const luogoMap = buildMap(rows, r => getField(r, "Luogo", "luogo"));
-
-      const topComune = Object.entries(comuneMap).sort((a,b) => b[1]-a[1]).slice(0,5);
-      const topCategoria = Object.entries(categoriaMap).sort((a,b) => b[1]-a[1]).slice(0,5);
-      const topLuogo = Object.entries(luogoMap).sort((a,b) => b[1]-a[1]).slice(0,5);
-
-      const criticitaPerc = total ? ((rosso / total) * 100).toFixed(1) : "0.0";
-      const nuovePerc = total ? ((nuova / total) * 100).toFixed(1) : "0.0";
-      const priorita = (rosso * 3) + (arancione * 2) + nuova;
-
-      if (style === "summary") {
-        const text = [
-          "REPORT SINTETICO - MAPPA ACCESSIBILITÀ",
-          "",
-          `Totale segnalazioni: ${total}`,
-          `Rosso: ${rosso} | Arancione: ${arancione} | Verde: ${verde}`,
-          `Nuova: ${nuova} | Presa in carico: ${presa} | Chiusa: ${chiusa} | Senza workflow: ${senzaWorkflow}`,
-          `Criticità gravi: ${criticitaPerc}%`,
-          `Segnalazioni nuove: ${nuovePerc}%`,
-          `Indice priorità: ${priorita}`,
-          "",
-          "Top comuni:",
-          ...topComune.map(([k,v]) => `- ${k}: ${v}`),
-          "",
-          "Top categorie:",
-          ...topCategoria.map(([k,v]) => `- ${k}: ${v}`)
-        ].join("\n");
-
-        const html = `
-<!DOCTYPE html>
-<html lang="it"><head><meta charset="UTF-8"><title>Report sintetico</title>
-<style>body{font-family:Arial,Helvetica,sans-serif;margin:40px;line-height:1.6}h1{color:#1f4b7a}</style>
-</head><body><h1>Report sintetico - Mappa Accessibilità</h1><pre>${text}</pre></body></html>`;
-
-        return { text, html };
+    function buildReport(rows, label) {
+      if (!rows.length) {
+        alert("Nessun dato disponibile per generare il report.");
+        return;
       }
 
       const text = [
-        "REPORT ANALITICO - MAPPA ACCESSIBILITÀ",
+        "REPORT OPERATORI - MAPPA ACCESSIBILITÀ",
+        "NessunOstacolo",
         "",
-        `Totale segnalazioni analizzate: ${total}`,
-        "",
-        "1. STATO ACCESSIBILITÀ",
-        `- Rosso: ${rosso}`,
-        `- Arancione: ${arancione}`,
-        `- Verde: ${verde}`,
-        "",
-        "2. WORKFLOW GESTIONALE",
-        `- Nuova: ${nuova}`,
-        `- Presa in carico: ${presa}`,
-        `- Chiusa: ${chiusa}`,
-        `- Senza workflow valido: ${senzaWorkflow}`,
-        "",
-        "3. KPI STRATEGICI",
-        `- Percentuale criticità gravi: ${criticitaPerc}%`,
-        `- Percentuale segnalazioni nuove: ${nuovePerc}%`,
-        `- Indice sintetico di priorità operativa: ${priorita}`,
-        "",
-        "4. TOP COMUNI",
-        ...topComune.map(([k,v], i) => `${i+1}. ${k}: ${v}`),
-        "",
-        "5. TOP CATEGORIE",
-        ...topCategoria.map(([k,v], i) => `${i+1}. ${k}: ${v}`),
-        "",
-        "6. TOP LUOGHI",
-        ...topLuogo.map(([k,v], i) => `${i+1}. ${k}: ${v}`),
-        "",
-        "7. LETTURA SINTETICA",
-        criticitaPerc > 40
-          ? "- Il livello di criticità grave è alto e richiede priorità operativa elevata."
-          : "- Il livello di criticità grave è contenuto o medio.",
-        nuovePerc > 50
-          ? "- Più della metà delle segnalazioni risulta ancora nuova: serve accelerare la presa in carico."
-          : "- Il numero di segnalazioni nuove è sotto controllo o in equilibrio.",
-        senzaWorkflow > 0
-          ? `- Sono presenti ${senzaWorkflow} record senza workflow valido: è necessario uniformare i dati.`
-          : "- Tutti i record hanno un workflow valido."
+        `Base report: ${label}`,
+        `Numero segnalazioni: ${rows.length}`
       ].join("\n");
 
       const html = `
@@ -1619,46 +1253,32 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Report Mappa Accessibilità</title>
+<title>Report operatori - Mappa Accessibilità</title>
 <style>
 body{font-family:Arial,Helvetica,sans-serif;margin:40px;color:#111;line-height:1.6}
-h1,h2{color:#1f4b7a}
-.box{border:1px solid #ccc;border-radius:12px;padding:16px;margin-bottom:16px}
-ul{margin:8px 0 0 18px}
+header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+header img{width:72px;height:72px;object-fit:contain}
+h1{color:#1f4b7a;margin:0}
+p{margin:0}
+pre{white-space:pre-wrap}
 </style>
 </head>
 <body>
-  <h1>Report analitico - Mappa Accessibilità</h1>
-  <div class="box"><strong>Totale segnalazioni analizzate:</strong> ${total}</div>
-  <h2>1. Stato accessibilità</h2>
-  <ul><li>Rosso: ${rosso}</li><li>Arancione: ${arancione}</li><li>Verde: ${verde}</li></ul>
-  <h2>2. Workflow gestionale</h2>
-  <ul><li>Nuova: ${nuova}</li><li>Presa in carico: ${presa}</li><li>Chiusa: ${chiusa}</li><li>Senza workflow valido: ${senzaWorkflow}</li></ul>
-  <h2>3. KPI strategici</h2>
-  <ul><li>Percentuale criticità gravi: ${criticitaPerc}%</li><li>Percentuale segnalazioni nuove: ${nuovePerc}%</li><li>Indice sintetico di priorità operativa: ${priorita}</li></ul>
-  <h2>4. Top comuni</h2>
-  <ul>${topComune.map(([k,v]) => `<li>${k}: ${v}</li>`).join("")}</ul>
-  <h2>5. Top categorie</h2>
-  <ul>${topCategoria.map(([k,v]) => `<li>${k}: ${v}</li>`).join("")}</ul>
-  <h2>6. Top luoghi</h2>
-  <ul>${topLuogo.map(([k,v]) => `<li>${k}: ${v}</li>`).join("")}</ul>
+  <header>
+    <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità">
+    <div>
+      <h1>Mappa Accessibilità - NessunOstacolo</h1>
+      <p>Area riservata operatori</p>
+    </div>
+  </header>
+  <pre>${text}</pre>
 </body>
 </html>`;
 
-      return { text, html };
-    }
-
-    function buildReport(rows, label, style = "complete") {
-      if (!rows.length) {
-        alert("Nessun dato disponibile per generare il report.");
-        return;
-      }
-      const summary = buildSummary(rows, style);
-      lastReportText = summary.text;
-      lastReportHtml = summary.html;
-      reportOutput.textContent = summary.text;
-      reportBaseInfo.textContent = `Base report: ${rows.length} segnalazioni (${label}) - stile ${style === "summary" ? "sintetico" : "completo"}`;
-      setAdminMessage("Report generato correttamente.", "ok");
+      lastReportText = text;
+      lastReportHtml = html;
+      reportOutput.textContent = text;
+      reportBaseInfo.textContent = `Base report: ${rows.length} segnalazioni (${label})`;
     }
 
     function exportFile(filename, content, mimeType) {
@@ -1669,27 +1289,6 @@ ul{margin:8px 0 0 18px}
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-    }
-
-    async function normalizeEmptyWorkflow() {
-      const empties = rowsCache.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "");
-      if (!empties.length) {
-        setMsg(settingsMsg, "Nessun workflow vuoto da correggere.", "ok");
-        return;
-      }
-
-      const { error } = await client
-        .from("segnalazioni")
-        .update({ statosegnalazione: "nuova" })
-        .is("statosegnalazione", null);
-
-      if (error) {
-        setMsg(settingsMsg, "Errore normalizzazione: " + error.message, "error");
-        return;
-      }
-
-      setMsg(settingsMsg, "Workflow vuoti normalizzati in 'nuova'.", "ok");
-      await loadData();
     }
 
     async function loadData() {
@@ -1704,7 +1303,7 @@ ul{margin:8px 0 0 18px}
       }
 
       rowsCache = data || [];
-      updateDashboardStats(rowsCache);
+      updateStats(rowsCache);
       renderCards();
       destroyCharts();
       chartsWrap.classList.add("hidden");
@@ -1718,7 +1317,6 @@ ul{margin:8px 0 0 18px}
       filterStatus.value = "tutti";
       filterWorkflow.value = "tutti";
       renderCards();
-      setAdminMessage("Filtri reimpostati.", "ok");
     }
 
     function exportCSV() {
@@ -1776,23 +1374,19 @@ ul{margin:8px 0 0 18px}
     btnExportXlsx.onclick = exportXLSX;
     btnBuildChartsFiltered.onclick = () => buildCharts(getFilteredRows(), "risultati filtrati");
     btnBuildChartsAll.onclick = () => buildCharts(rowsCache, "database completo");
-    btnBuildReportFiltered.onclick = () => buildReport(getFilteredRows(), "risultati filtrati", settings.reportStyle);
-    btnBuildReportAll.onclick = () => buildReport(rowsCache, "database completo", settings.reportStyle);
+    btnBuildReportFiltered.onclick = () => buildReport(getFilteredRows(), "risultati filtrati");
+    btnBuildReportAll.onclick = () => buildReport(rowsCache, "database completo");
     btnPrintReport.onclick = printReport;
     btnExportReportHtml.onclick = () => {
       if (!lastReportHtml) return alert("Genera prima un report.");
-      exportFile("report-mappa-accessibilita.html", lastReportHtml, "text/html;charset=utf-8;");
+      exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;");
     };
     btnExportReportTxt.onclick = () => {
       if (!lastReportText) return alert("Genera prima un report.");
-      exportFile("report-mappa-accessibilita.txt", lastReportText, "text/plain;charset=utf-8;");
+      exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;");
     };
     btnPrintPage.onclick = () => window.print();
     btnResetFilters.onclick = resetFilters;
-    btnNormalizeWorkflow.onclick = normalizeEmptyWorkflow;
-    btnReloadDashboard.onclick = loadData;
-    btnSaveSettings.onclick = saveSettings;
-    btnApplyDefaults.onclick = applyDefaultsAction;
 
     searchText.addEventListener("input", renderCards);
     filterComune.addEventListener("change", renderCards);
