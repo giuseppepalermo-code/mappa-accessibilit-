@@ -623,3 +623,23 @@ body{
     align-items:stretch;
   }
 }
+.admin-link-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:14px 20px;
+  border-radius:18px;
+  background:#163a5f;
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+  border:2px solid rgba(255,255,255,.15);
+  transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+}
+
+.admin-link-btn:hover{
+  transform:translateY(-1px);
+  background:#1f4b7a;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+}
