@@ -9,655 +9,98 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
-      --brand:#1f4b7a;
-      --brand-dark:#163a5f;
-      --brand-soft:#eaf2fb;
-      --accent:#f2b705;
-      --bg:#eef3f8;
-      --panel:#ffffff;
-      --text:#0f172a;
-      --muted:#5b6673;
-      --line:#d8e2ee;
-      --radius:20px;
-      --shadow:0 14px 34px rgba(15, 23, 42, .08);
-      --shadow-soft:0 8px 22px rgba(15, 23, 42, .06);
-
-      --red-bg:#ffe2e2;
-      --red-text:#b00020;
-      --orange-bg:#ffe7c2;
-      --orange-text:#b85c00;
-      --green-bg:#d8f7e6;
-      --green-text:#0f8a4b;
-      --blue-bg:#dfe8ff;
-      --blue-text:#1f4ed8;
-      --purple-bg:#efe1ff;
-      --purple-text:#6b21a8;
-      --gray-bg:#edf3f8;
-      --gray-text:#334155;
+      --brand:#1f4b7a; --brand-dark:#163a5f; --brand-soft:#eaf2fb; --accent:#f2b705;
+      --bg:#eef3f8; --panel:#ffffff; --text:#0f172a; --muted:#5b6673; --line:#d8e2ee;
+      --radius:20px; --shadow:0 14px 34px rgba(15,23,42,.08); --shadow-soft:0 8px 22px rgba(15,23,42,.06);
+      --red-bg:#ffe2e2; --red-text:#b00020; --orange-bg:#ffe7c2; --orange-text:#b85c00;
+      --green-bg:#d8f7e6; --green-text:#0f8a4b; --blue-bg:#dfe8ff; --blue-text:#1f4ed8;
+      --purple-bg:#efe1ff; --purple-text:#6b21a8; --gray-bg:#edf3f8; --gray-text:#334155;
     }
-
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Arial, Helvetica, sans-serif;
-      background:linear-gradient(180deg,#eef3f8 0%,#f8fbff 100%);
-      color:var(--text);
-    }
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#eef3f8 0%,#f8fbff 100%);color:var(--text);}
     .hidden{display:none !important}
-
-    .btn{
-      border:none;
-      border-radius:16px;
-      padding:12px 16px;
-      font-size:.96rem;
-      cursor:pointer;
-      font-weight:800;
-      transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-    }
-    .btn:hover{
-      transform:translateY(-1px);
-      box-shadow:var(--shadow-soft);
-    }
-    .btn-brand{background:var(--brand); color:#fff;}
-    .btn-light{background:#edf3f8; color:#223;}
-    .btn-danger{background:#ffe6e6; color:#b42318;}
-    .btn-accent{background:var(--accent); color:#111827;}
-    .btn-purple{background:#6b21a8; color:#fff;}
-    .btn-small{padding:10px 12px; border-radius:12px; font-size:.86rem;}
-
-    .login-shell{
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px;
-    }
-    .login-card{
-      width:100%;
-      max-width:620px;
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:28px;
-      box-shadow:var(--shadow);
-      padding:28px;
-    }
-
-    .brand-login{
-      display:flex;
-      align-items:center;
-      gap:16px;
-      margin-bottom:18px;
-    }
-    .brand-login img{
-      width:74px;
-      height:74px;
-      object-fit:contain;
-      border-radius:18px;
-      background:#fff;
-      border:1px solid var(--line);
-      padding:8px;
-      box-shadow:var(--shadow-soft);
-    }
-    .brand-login-text h1{
-      margin:0 0 6px 0;
-      font-size:2rem;
-      color:var(--brand-dark);
-      line-height:1.05;
-    }
-    .brand-login-text p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.45;
-      font-size:.98rem;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      margin-bottom:16px;
-    }
-    .field label{
-      font-size:.95rem;
-      color:var(--muted);
-      font-weight:700;
-    }
-    .field input,
-    .field select,
-    .field textarea{
-      width:100%;
-      padding:14px 15px;
-      border:1px solid var(--line);
-      border-radius:16px;
-      font-size:1rem;
-      outline:none;
-      background:#fff;
-      color:var(--text);
-    }
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus{
-      border-color:var(--brand);
-      box-shadow:0 0 0 4px rgba(31,75,122,.10);
-    }
-
-    .msg{
-      margin-top:12px;
-      font-size:.95rem;
-      min-height:22px;
-      font-weight:700;
-    }
-    .msg.error{color:var(--red-text)}
-    .msg.ok{color:var(--green-text)}
-
-    .app{
-      display:grid;
-      grid-template-columns:300px 1fr;
-      min-height:100vh;
-    }
-    .sidebar{
-      background:linear-gradient(180deg,var(--brand-dark),var(--brand));
-      color:#fff;
-      padding:22px 16px;
-      position:sticky;
-      top:0;
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-      box-shadow:var(--shadow);
-      overflow:auto;
-    }
-
-    .sidebar-brand{
-      display:flex;
-      gap:14px;
-      align-items:flex-start;
-    }
-    .sidebar-brand img{
-      width:68px;
-      height:68px;
-      object-fit:contain;
-      border-radius:16px;
-      background:rgba(255,255,255,.92);
-      padding:6px;
-      border:1px solid rgba(255,255,255,.35);
-      flex-shrink:0;
-    }
-    .sidebar-brand h2{
-      margin:0;
-      font-size:1.45rem;
-      line-height:1.05;
-      letter-spacing:-.02em;
-    }
-    .sidebar-brand p{
-      margin:8px 0 0 0;
-      opacity:.95;
-      line-height:1.35;
-      font-size:.92rem;
-    }
-
-    .menu{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top:10px;
-    }
-    .menu-btn{
-      width:100%;
-      text-align:left;
-      background:rgba(255,255,255,.08);
-      color:#fff;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:14px 14px;
-      font-size:1rem;
-      font-weight:800;
-      cursor:pointer;
-      transition:.15s ease;
-    }
-    .menu-btn:hover,
-    .menu-btn.active{
-      background:#fff;
-      color:var(--brand-dark);
-      transform:translateX(2px);
-    }
-
-    .sidebar-footer{
-      margin-top:auto;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .sidebar-note{
-      font-size:.88rem;
-      line-height:1.4;
-      opacity:.95;
-      background:rgba(255,255,255,.08);
-      border-radius:16px;
-      padding:12px;
-    }
-
-    .main{padding:22px;}
-    .top-actions{
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:18px;
-    }
-
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:28px;
-      box-shadow:var(--shadow);
-      padding:22px;
-      margin-bottom:20px;
-    }
-    .section-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
-    }
-    .section-head h2{
-      margin:0;
-      font-size:1.45rem;
-      letter-spacing:-.02em;
-    }
-    .section-head p{
-      margin:6px 0 0 0;
-      color:var(--muted);
-      line-height:1.4;
-      font-size:.96rem;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:16px;
-    }
-    .grid-3{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:16px;
-    }
-
-    .stat{
-      border-radius:22px;
-      padding:18px;
-      border:2px solid transparent;
-      box-shadow:var(--shadow-soft);
-      min-height:128px;
-      position:relative;
-      overflow:hidden;
-    }
-    .stat::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0));
-      pointer-events:none;
-    }
-    .stat-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      position:relative;
-      z-index:1;
-    }
-    .stat strong{
-      display:block;
-      font-size:2.5rem;
-      line-height:1;
-      letter-spacing:-.03em;
-    }
-    .stat-label{
-      margin-top:10px;
-      font-size:1rem;
-      font-weight:800;
-      line-height:1.3;
-      position:relative;
-      z-index:1;
-    }
-    .stat-icon{
-      width:50px;
-      height:50px;
-      border-radius:16px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      font-size:1.2rem;
-      background:rgba(255,255,255,.35);
-      position:relative;
-      z-index:1;
-    }
-
-    .stat-total{background:linear-gradient(135deg,#dbeafe,#bfdbfe); border-color:#93c5fd; color:#0b3a8f;}
-    .stat-red{background:linear-gradient(135deg,#ffd7d7,#ffbdbd); border-color:#ff8f8f; color:#8f1020;}
-    .stat-orange{background:linear-gradient(135deg,#ffe2b0,#ffd08c); border-color:#ffba5a; color:#92400e;}
-    .stat-green{background:linear-gradient(135deg,#d1fae5,#b7f3d6); border-color:#6ee7b7; color:#065f46;}
-    .stat-blue{background:linear-gradient(135deg,#dbeafe,#c7d2fe); border-color:#93c5fd; color:#1e40af;}
-    .stat-purple{background:linear-gradient(135deg,#f3e8ff,#e9d5ff); border-color:#c084fc; color:#6b21a8;}
-
-    .coherence-grid,
-    .kpi-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:14px;
-    }
-    .coherence-box,
-    .kpi-box,
-    .director-box{
-      border-radius:18px;
-      padding:16px;
-      border:1px solid var(--line);
-      background:#fff;
-      box-shadow:var(--shadow-soft);
-    }
-    .coherence-box strong,
-    .kpi-box strong,
-    .director-box strong{
-      display:block;
-      font-size:1.9rem;
-      margin-bottom:6px;
-    }
-    .coherence-box span,
-    .kpi-box span,
-    .director-box span{
-      color:var(--muted);
-      font-weight:700;
-      line-height:1.35;
-    }
-    .coherence-ok{background:linear-gradient(135deg,#ecfdf3,#d1fae5); border-color:#86efac;}
-    .coherence-warn{background:linear-gradient(135deg,#fff7ed,#ffedd5); border-color:#fdba74;}
-
-    .filters{
-      display:grid;
-      grid-template-columns:2fr 1fr 1fr 1fr;
-      gap:14px;
-      align-items:end;
-    }
-    .toolbar{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:16px;
-    }
-    .meta-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-top:16px;
-      flex-wrap:wrap;
-    }
-    .results-count{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 14px;
-      border-radius:999px;
-      background:var(--blue-bg);
-      color:var(--blue-text);
-      font-weight:800;
-    }
-
-    .cards-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:18px;
-    }
-    .cards-grid.compact{
-      grid-template-columns:1fr;
-    }
-
-    .report-card{
-      border:1px solid var(--line);
-      border-radius:24px;
-      background:#fff;
-      box-shadow:var(--shadow-soft);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-    }
-    .report-card.compact .report-body{
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-      padding:14px;
-    }
-    .report-card.compact .info-box{
-      min-height:auto;
-      padding:10px 11px;
-    }
-    .report-card.compact .desc-box{
-      grid-column:1 / -1;
-    }
-
-    .report-head{
-      padding:18px 18px 12px;
-      background:linear-gradient(180deg,#fbfdff,#f8fbff);
-      border-bottom:1px solid #edf2f7;
-    }
-    .report-code{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 12px;
-      border-radius:999px;
-      background:#edf3f8;
-      color:#23364d;
-      font-weight:800;
-      font-size:.82rem;
-      margin-bottom:10px;
-    }
-    .report-title{
-      font-size:1.15rem;
-      font-weight:800;
-      line-height:1.3;
-      margin:0 0 10px 0;
-      color:#132238;
-    }
-    .report-badges{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    .state-badge,
-    .workflow-badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:7px 12px;
-      border-radius:999px;
-      font-size:.83rem;
-      font-weight:800;
-      white-space:nowrap;
-    }
-    .state-red{ background:var(--red-bg); color:var(--red-text); }
-    .state-orange{ background:var(--orange-bg); color:var(--orange-text); }
-    .state-green{ background:var(--green-bg); color:var(--green-text); }
-    .state-default{ background:var(--gray-bg); color:var(--gray-text); }
-    .wf-new{ background:var(--blue-bg); color:var(--blue-text); }
-    .wf-progress{ background:var(--orange-bg); color:var(--orange-text); }
-    .wf-closed{ background:var(--green-bg); color:var(--green-text); }
-
-    .report-body{
-      padding:18px;
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:14px;
-    }
-    .info-box{
-      border:1px solid #edf2f7;
-      border-radius:16px;
-      background:#fcfdff;
-      padding:12px 13px;
-      min-height:82px;
-    }
-    .info-label{
-      display:block;
-      font-size:.78rem;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      color:#64748b;
-      margin-bottom:7px;
-    }
-    .info-value{
-      color:#1f2937;
-      line-height:1.45;
-      font-size:.96rem;
-      word-break:break-word;
-    }
-    .desc-box{
-      grid-column:1 / -1;
-      background:linear-gradient(180deg,#fff,#fbfdff);
-    }
-
-    .report-footer{
-      padding:16px 18px 18px;
-      border-top:1px solid #edf2f7;
-      background:#fbfdff;
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:14px;
-      flex-wrap:wrap;
-    }
-    .workflow-editor{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-width:220px;
-    }
-    .workflow-editor label{
-      font-size:.8rem;
-      font-weight:800;
-      color:#64748b;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-    }
-    .workflow-select{
-      min-width:220px;
-      padding:11px 12px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      font-size:.95rem;
-      background:#fff;
-      color:var(--text);
-    }
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .charts-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:16px;
-    }
-    .chart-card{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:20px;
-      padding:18px;
-      box-shadow:var(--shadow-soft);
-      min-height:360px;
-    }
-    .chart-card h3{
-      margin:0 0 14px 0;
-      font-size:1rem;
-    }
-    .chart-box{
-      position:relative;
-      height:280px;
-    }
-
-    .report-output{
-      border:1px solid var(--line);
-      border-radius:20px;
-      background:#fff;
-      padding:18px;
-      line-height:1.6;
-      color:#1f2937;
-      white-space:pre-wrap;
-      min-height:220px;
-    }
-
-    .settings-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:16px;
-    }
-    .setting-box{
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:#fff;
-      padding:18px;
-      box-shadow:var(--shadow-soft);
-    }
-    .setting-box h3{
-      margin:0 0 10px 0;
-      font-size:1.1rem;
-    }
-    .setting-box p{
-      margin:0 0 12px 0;
-      color:var(--muted);
-      line-height:1.45;
-    }
-
-    .empty-state{
-      border:2px dashed var(--line);
-      border-radius:24px;
-      padding:28px;
-      background:#fff;
-      text-align:center;
-      color:var(--muted);
-      font-weight:700;
-    }
-
-    @media print{
-      body{background:#fff}
-      .sidebar, .top-actions, .toolbar, .no-print{display:none !important}
-      .app{display:block}
-      .main{padding:0}
-      .panel{box-shadow:none; border:1px solid #ccc; page-break-inside:avoid}
-    }
-
-    @media (max-width: 1400px){
-      .app{grid-template-columns:250px 1fr;}
-      .grid, .grid-3, .coherence-grid, .kpi-grid, .filters, .charts-grid, .cards-grid, .settings-grid{grid-template-columns:1fr;}
-    }
-
-    @media (max-width: 900px){
-      .app{grid-template-columns:1fr;}
-      .sidebar{position:relative; height:auto;}
-      .main{padding:12px;}
-      .panel{padding:16px; border-radius:20px;}
-      .report-body{grid-template-columns:1fr;}
-      .report-footer{flex-direction:column; align-items:stretch;}
-      .workflow-editor, .workflow-select{min-width:100%;}
-      .brand-login{align-items:flex-start;}
-      .brand-login img{width:62px;height:62px;}
-      .sidebar-brand img{width:56px;height:56px;}
-    }
+    .btn{border:none;border-radius:16px;padding:12px 16px;font-size:.96rem;cursor:pointer;font-weight:800;transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-soft)}
+    .btn-brand{background:var(--brand);color:#fff}.btn-light{background:#edf3f8;color:#223}.btn-danger{background:#ffe6e6;color:#b42318}.btn-accent{background:var(--accent);color:#111827}.btn-purple{background:#6b21a8;color:#fff}.btn-small{padding:10px 12px;border-radius:12px;font-size:.86rem}
+    .login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .login-card{width:100%;max-width:620px;background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:28px}
+    .brand-login{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .brand-login img{width:74px;height:74px;object-fit:contain;border-radius:18px;background:#fff;border:1px solid var(--line);padding:8px;box-shadow:var(--shadow-soft)}
+    .brand-login-text h1{margin:0 0 6px 0;font-size:2rem;color:var(--brand-dark);line-height:1.05}
+    .brand-login-text p{margin:0;color:var(--muted);line-height:1.45;font-size:.98rem}
+    .field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .field label{font-size:.95rem;color:var(--muted);font-weight:700}
+    .field input,.field select,.field textarea{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:16px;font-size:1rem;outline:none;background:#fff;color:var(--text)}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(31,75,122,.10)}
+    .msg{margin-top:12px;font-size:.95rem;min-height:22px;font-weight:700}
+    .msg.error{color:var(--red-text)} .msg.ok{color:var(--green-text)}
+    .app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+    .sidebar{background:linear-gradient(180deg,var(--brand-dark),var(--brand));color:#fff;padding:22px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow);overflow:auto}
+    .sidebar-brand{display:flex;gap:14px;align-items:flex-start}
+    .sidebar-brand img{width:68px;height:68px;object-fit:contain;border-radius:16px;background:rgba(255,255,255,.92);padding:6px;border:1px solid rgba(255,255,255,.35);flex-shrink:0}
+    .sidebar-brand h2{margin:0;font-size:1.45rem;line-height:1.05;letter-spacing:-.02em}
+    .sidebar-brand p{margin:8px 0 0 0;opacity:.95;line-height:1.35;font-size:.92rem}
+    .menu{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .menu-btn{width:100%;text-align:left;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:14px 14px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s ease}
+    .menu-btn:hover,.menu-btn.active{background:#fff;color:var(--brand-dark);transform:translateX(2px)}
+    .sidebar-footer{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+    .sidebar-note{font-size:.88rem;line-height:1.4;opacity:.95;background:rgba(255,255,255,.08);border-radius:16px;padding:12px}
+    .main{padding:22px}
+    .top-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:22px;margin-bottom:20px}
+    .section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .section-head h2{margin:0;font-size:1.45rem;letter-spacing:-.02em}
+    .section-head p{margin:6px 0 0 0;color:var(--muted);line-height:1.4;font-size:.96rem}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:14px;align-items:end}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .meta-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+    .results-count{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:var(--blue-bg);color:var(--blue-text);font-weight:800}
+    .cards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .stat{border-radius:22px;padding:18px;border:2px solid transparent;box-shadow:var(--shadow-soft);min-height:128px;position:relative;overflow:hidden}
+    .stat::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0));pointer-events:none}
+    .stat-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;position:relative;z-index:1}
+    .stat strong{display:block;font-size:2.5rem;line-height:1;letter-spacing:-.03em}
+    .stat-label{margin-top:10px;font-size:1rem;font-weight:800;line-height:1.3;position:relative;z-index:1}
+    .stat-icon{width:50px;height:50px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;background:rgba(255,255,255,.35);position:relative;z-index:1}
+    .stat-total{background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-color:#93c5fd;color:#0b3a8f}
+    .stat-red{background:linear-gradient(135deg,#ffd7d7,#ffbdbd);border-color:#ff8f8f;color:#8f1020}
+    .stat-orange{background:linear-gradient(135deg,#ffe2b0,#ffd08c);border-color:#ffba5a;color:#92400e}
+    .stat-green{background:linear-gradient(135deg,#d1fae5,#b7f3d6);border-color:#6ee7b7;color:#065f46}
+    .report-card{border:1px solid var(--line);border-radius:24px;background:#fff;box-shadow:var(--shadow-soft);overflow:hidden;display:flex;flex-direction:column}
+    .report-head{padding:18px 18px 12px;background:linear-gradient(180deg,#fbfdff,#f8fbff);border-bottom:1px solid #edf2f7}
+    .report-code{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:#edf3f8;color:#23364d;font-weight:800;font-size:.82rem;margin-bottom:10px}
+    .report-title{font-size:1.15rem;font-weight:800;line-height:1.3;margin:0 0 10px 0;color:#132238}
+    .report-badges{display:flex;flex-wrap:wrap;gap:8px}
+    .state-badge,.workflow-badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;border-radius:999px;font-size:.83rem;font-weight:800;white-space:nowrap}
+    .state-red{background:var(--red-bg);color:var(--red-text)} .state-orange{background:var(--orange-bg);color:var(--orange-text)} .state-green{background:var(--green-bg);color:var(--green-text)} .state-default{background:var(--gray-bg);color:var(--gray-text)}
+    .wf-new{background:var(--blue-bg);color:var(--blue-text)} .wf-progress{background:var(--orange-bg);color:var(--orange-text)} .wf-closed{background:var(--green-bg);color:var(--green-text)}
+    .report-body{padding:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .info-box{border:1px solid #edf2f7;border-radius:16px;background:#fcfdff;padding:12px 13px;min-height:82px}
+    .info-label{display:block;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#64748b;margin-bottom:7px}
+    .info-value{color:#1f2937;line-height:1.45;font-size:.96rem;word-break:break-word}
+    .desc-box{grid-column:1 / -1;background:linear-gradient(180deg,#fff,#fbfdff)}
+    .report-footer{padding:16px 18px 18px;border-top:1px solid #edf2f7;background:#fbfdff;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+    .workflow-editor{display:flex;flex-direction:column;gap:8px;min-width:220px}
+    .workflow-editor label{font-size:.8rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+    .workflow-select{min-width:220px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:.95rem;background:#fff;color:var(--text)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .chart-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow-soft);min-height:360px}
+    .chart-card h3{margin:0 0 14px 0;font-size:1rem}
+    .chart-box{position:relative;height:280px}
+    .report-output{border:1px solid var(--line);border-radius:20px;background:#fff;padding:18px;line-height:1.6;color:#1f2937;white-space:pre-wrap;min-height:220px}
+    .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .setting-box{border:1px solid var(--line);border-radius:18px;background:#fff;padding:18px;box-shadow:var(--shadow-soft)}
+    .setting-box h3{margin:0 0 10px 0;font-size:1.1rem}
+    .setting-box p{margin:0 0 12px 0;color:var(--muted);line-height:1.45}
+    .empty-state{border:2px dashed var(--line);border-radius:24px;padding:28px;background:#fff;text-align:center;color:var(--muted);font-weight:700}
+    @media print{body{background:#fff}.sidebar,.top-actions,.toolbar,.no-print{display:none !important}.app{display:block}.main{padding:0}.panel{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}}
+    @media (max-width:1400px){.app{grid-template-columns:250px 1fr}.grid,.filters,.charts-grid,.cards-grid,.settings-grid{grid-template-columns:1fr}}
+    @media (max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.main{padding:12px}.panel{padding:16px;border-radius:20px}.report-body{grid-template-columns:1fr}.report-footer{flex-direction:column;align-items:stretch}.workflow-editor,.workflow-select{min-width:100%}.brand-login{align-items:flex-start}.brand-login img{width:62px;height:62px}.sidebar-brand img{width:56px;height:56px}}
   </style>
 </head>
 <body>
-
   <section id="loginSection" class="login-shell">
     <div class="login-card">
       <div class="brand-login">
@@ -667,22 +110,19 @@
           <p>Mappa Accessibilità – progetto di NessunOstacolo<br>Accesso riservato per operatori registrati e autorizzati.</p>
         </div>
       </div>
-
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" type="email" value="nessunostacolo@virgilio.it" />
+        <input id="email" type="email" placeholder="Inserisci email operatore" autocomplete="username" />
       </div>
-
       <div class="field">
         <label for="password">Password</label>
-        <input id="password" type="password" value="nessunostacolo2025" />
+        <input id="password" type="password" placeholder="Inserisci password" autocomplete="current-password" />
       </div>
-
       <div class="toolbar">
         <button id="btnLogin" class="btn btn-brand" type="button">Entra</button>
-        <a class="btn btn-light" href="index.html">Torna al sito</a>
+        <a class="btn btn-light" href="index.html">Torna alla mappa</a>
+        <a class="btn btn-light" href="https://www.nessunostacolo.org" target="_blank" rel="noopener">Vai al sito</a>
       </div>
-
       <div id="loginMsg" class="msg"></div>
     </div>
   </section>
@@ -696,7 +136,6 @@
           <p>NessunOstacolo<br>Area riservata operatori per gestione, analisi e report.</p>
         </div>
       </div>
-
       <nav class="menu">
         <button class="menu-btn active" data-section="dashboardSection">Dashboard</button>
         <button class="menu-btn" data-section="segnalazioniSection">Segnalazioni</button>
@@ -704,13 +143,11 @@
         <button class="menu-btn" data-section="reportSection">Report</button>
         <button class="menu-btn" data-section="impostazioniSection">Impostazioni</button>
       </nav>
-
       <div class="sidebar-footer">
-        <div class="sidebar-note">
-          Questa area è pensata per essere richiamata direttamente dal sito dell’associazione come sezione riservata.
-        </div>
-        <a class="btn btn-light" href="index.html">Torna al sito</a>
-        <button id="btnLogoutSide" class="btn btn-danger" type="button">Esci</button>
+        <div class="sidebar-note">Su dispositivi condivisi esci sempre dalla sessione. Il login resta solo nella scheda aperta del browser.</div>
+        <a class="btn btn-light" href="index.html">← Torna alla mappa pubblica</a>
+        <a class="btn btn-light" href="https://www.nessunostacolo.org" target="_blank" rel="noopener">🌐 Vai al sito NessunOstacolo</a>
+        <button id="btnLogoutSide" class="btn btn-danger" type="button">Esci e chiudi sessione</button>
       </div>
     </aside>
 
@@ -722,132 +159,55 @@
 
       <section id="dashboardSection" class="app-section">
         <div class="panel">
-          <div class="section-head">
-            <div>
-              <h2>Statistiche automatiche</h2>
-              <p>Cruscotto generale dell’area operatori.</p>
-            </div>
-          </div>
-
+          <div class="section-head"><div><h2>Statistiche automatiche</h2><p>Cruscotto generale dell’area operatori.</p></div></div>
           <div class="grid">
-            <div class="stat stat-total">
-              <div class="stat-top"><strong id="statTotale">0</strong><div class="stat-icon">#</div></div>
-              <div class="stat-label">Totale segnalazioni</div>
-            </div>
-            <div class="stat stat-red">
-              <div class="stat-top"><strong id="statRosso">0</strong><div class="stat-icon">!</div></div>
-              <div class="stat-label">Rosso = criticità grave</div>
-            </div>
-            <div class="stat stat-orange">
-              <div class="stat-top"><strong id="statArancione">0</strong><div class="stat-icon">~</div></div>
-              <div class="stat-label">Arancione = criticità media</div>
-            </div>
-            <div class="stat stat-green">
-              <div class="stat-top"><strong id="statVerde">0</strong><div class="stat-icon">✓</div></div>
-              <div class="stat-label">Verde = accessibile</div>
-            </div>
+            <div class="stat stat-total"><div class="stat-top"><strong id="statTotale">0</strong><div class="stat-icon">#</div></div><div class="stat-label">Totale segnalazioni</div></div>
+            <div class="stat stat-red"><div class="stat-top"><strong id="statRosso">0</strong><div class="stat-icon">!</div></div><div class="stat-label">Rosso = criticità grave</div></div>
+            <div class="stat stat-orange"><div class="stat-top"><strong id="statArancione">0</strong><div class="stat-icon">~</div></div><div class="stat-label">Arancione = criticità media</div></div>
+            <div class="stat stat-green"><div class="stat-top"><strong id="statVerde">0</strong><div class="stat-icon">✓</div></div><div class="stat-label">Verde = accessibile</div></div>
           </div>
         </div>
       </section>
 
       <section id="segnalazioniSection" class="app-section hidden">
         <div class="panel">
-          <div class="section-head">
-            <div>
-              <h2>Filtri e strumenti</h2>
-              <p>Ricerca veloce, filtri dinamici ed esportazione dei risultati visibili.</p>
-            </div>
-          </div>
-
+          <div class="section-head"><div><h2>Filtri e strumenti</h2><p>Ricerca veloce, filtri dinamici ed esportazione dei risultati visibili.</p></div></div>
           <div class="filters">
-            <div class="field">
-              <label for="searchText">Ricerca</label>
-              <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo, comune, descrizione" />
-            </div>
-            <div class="field">
-              <label for="filterComune">Comune</label>
-              <select id="filterComune">
-                <option value="tutti">Tutti</option>
-                <option value="San Cataldo">San Cataldo</option>
-                <option value="Caltanissetta">Caltanissetta</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="filterStatus">Stato accessibilità</label>
-              <select id="filterStatus">
-                <option value="tutti">Tutti</option>
-                <option value="rosso">Rosso</option>
-                <option value="arancione">Arancione</option>
-                <option value="verde">Verde</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="filterWorkflow">Stato segnalazione</label>
-              <select id="filterWorkflow">
-                <option value="tutti">Tutti</option>
-                <option value="nuova">Nuova</option>
-                <option value="presa in carico">Presa in carico</option>
-                <option value="chiusa">Chiusa</option>
-              </select>
-            </div>
+            <div class="field"><label for="searchText">Ricerca</label><input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo, comune, descrizione" /></div>
+            <div class="field"><label for="filterComune">Comune</label><select id="filterComune"><option value="tutti">Tutti</option><option value="San Cataldo">San Cataldo</option><option value="Caltanissetta">Caltanissetta</option></select></div>
+            <div class="field"><label for="filterStatus">Stato accessibilità</label><select id="filterStatus"><option value="tutti">Tutti</option><option value="rosso">Rosso</option><option value="arancione">Arancione</option><option value="verde">Verde</option></select></div>
+            <div class="field"><label for="filterWorkflow">Stato segnalazione</label><select id="filterWorkflow"><option value="tutti">Tutti</option><option value="nuova">Nuova</option><option value="presa in carico">Presa in carico</option><option value="chiusa">Chiusa</option></select></div>
           </div>
-
           <div class="toolbar no-print">
             <button id="btnRefresh" class="btn btn-light" type="button">Aggiorna dati</button>
             <button id="btnExportCsv" class="btn btn-light" type="button">Esporta CSV</button>
             <button id="btnExportXlsx" class="btn btn-accent" type="button">Esporta Excel</button>
             <button id="btnResetFilters" class="btn btn-light" type="button">Reset filtri</button>
           </div>
-
           <div class="meta-row">
             <div id="resultsCount" class="results-count">0 schede mostrate</div>
             <div id="adminMsg" class="msg"></div>
           </div>
         </div>
-
         <div class="panel">
-          <div class="section-head">
-            <div>
-              <h2>Elenco segnalazioni</h2>
-              <p>Vista operativa a schede con date di creazione e ultimo aggiornamento.</p>
-            </div>
-          </div>
+          <div class="section-head"><div><h2>Elenco segnalazioni</h2><p>Vista operativa a schede con date di creazione e ultimo aggiornamento.</p></div></div>
           <div id="cardsGrid" class="cards-grid"></div>
         </div>
       </section>
 
       <section id="analisiSection" class="app-section hidden">
         <div class="panel">
-          <div class="section-head">
-            <div>
-              <h2>Analisi e grafici</h2>
-              <p>Grafici generati a comando per studio e presentazioni.</p>
-            </div>
-          </div>
-
+          <div class="section-head"><div><h2>Analisi e grafici</h2><p>Grafici generati a comando per studio e presentazioni.</p></div></div>
           <div class="toolbar no-print">
             <button id="btnBuildChartsFiltered" class="btn btn-purple" type="button">Grafici risultati filtrati</button>
             <button id="btnBuildChartsAll" class="btn btn-light" type="button">Grafici database completo</button>
           </div>
-
-          <div class="meta-row">
-            <div id="chartBaseInfo" class="results-count">Base analisi non ancora generata</div>
-          </div>
-
-          <div id="chartsEmpty" class="empty-state">
-            Nessun grafico ancora generato. Seleziona una modalità di analisi.
-          </div>
-
+          <div class="meta-row"><div id="chartBaseInfo" class="results-count">Base analisi non ancora generata</div></div>
+          <div id="chartsEmpty" class="empty-state">Nessun grafico ancora generato. Seleziona una modalità di analisi.</div>
           <div id="chartsWrap" class="hidden">
             <div class="charts-grid">
-              <div class="chart-card">
-                <h3>Distribuzione stato accessibilità</h3>
-                <div class="chart-box"><canvas id="chartStatus"></canvas></div>
-              </div>
-              <div class="chart-card">
-                <h3>Distribuzione workflow</h3>
-                <div class="chart-box"><canvas id="chartWorkflow"></canvas></div>
-              </div>
+              <div class="chart-card"><h3>Distribuzione stato accessibilità</h3><div class="chart-box"><canvas id="chartStatus"></canvas></div></div>
+              <div class="chart-card"><h3>Distribuzione workflow</h3><div class="chart-box"><canvas id="chartWorkflow"></canvas></div></div>
             </div>
           </div>
         </div>
@@ -855,13 +215,7 @@
 
       <section id="reportSection" class="app-section hidden">
         <div class="panel">
-          <div class="section-head">
-            <div>
-              <h2>Report elaborato</h2>
-              <p>Report ordinato, editabile, stampabile ed esportabile con intestazione di progetto.</p>
-            </div>
-          </div>
-
+          <div class="section-head"><div><h2>Report elaborato</h2><p>Report ordinato, editabile, stampabile ed esportabile con intestazione di progetto.</p></div></div>
           <div class="toolbar no-print">
             <button id="btnBuildReportFiltered" class="btn btn-purple" type="button">Crea report filtrato</button>
             <button id="btnBuildReportAll" class="btn btn-light" type="button">Crea report completo</button>
@@ -869,11 +223,7 @@
             <button id="btnExportReportHtml" class="btn btn-accent" type="button">Esporta report HTML</button>
             <button id="btnExportReportTxt" class="btn btn-light" type="button">Esporta report TXT</button>
           </div>
-
-          <div class="meta-row">
-            <div id="reportBaseInfo" class="results-count">Nessun report generato</div>
-          </div>
-
+          <div class="meta-row"><div id="reportBaseInfo" class="results-count">Nessun report generato</div></div>
           <div id="reportOutput" class="report-output">Nessun report generato.
 Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         </div>
@@ -881,22 +231,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
       <section id="impostazioniSection" class="app-section hidden">
         <div class="panel">
-          <div class="section-head">
-            <div>
-              <h2>Impostazioni operative</h2>
-              <p>Area pronta per operatori registrati e collegamento futuro al sito.</p>
-            </div>
-          </div>
-
+          <div class="section-head"><div><h2>Impostazioni operative</h2><p>Area pronta per operatori registrati e collegamento futuro al sito.</p></div></div>
           <div class="settings-grid">
-            <div class="setting-box">
-              <h3>Branding</h3>
-              <p>Il pannello usa il file <strong>assets/logo-mappa.png</strong>. Quando avrai il logo definitivo, basterà sostituire quel file.</p>
-            </div>
-            <div class="setting-box">
-              <h3>Accesso riservato</h3>
-              <p>L’accesso è già riservato a utenti autenticati e autorizzati. Il prossimo passo sarà integrarlo nel sito come vera area riservata.</p>
-            </div>
+            <div class="setting-box"><h3>Branding</h3><p>Il pannello usa il file <strong>assets/logo-mappa.png</strong>. Quando avrai il logo definitivo, basterà sostituire quel file.</p></div>
+            <div class="setting-box"><h3>Accesso riservato</h3><p>L’accesso è riservato a utenti autenticati e autorizzati presenti in <strong>Authentication</strong> e nella tabella <strong>admin_utenti</strong>.</p></div>
           </div>
         </div>
       </section>
@@ -906,21 +244,17 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
   <script>
     const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
     const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
-    const STORAGE_KEY = "admin_mappa_v8_settings";
-
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let rowsCache = [];
     let charts = [];
     let lastReportHtml = "";
     let lastReportText = "";
-    let settings = { cardView: "standard", chartMode: "filtered", reportMode: "filtered", reportStyle: "complete" };
 
     const loginSection = document.getElementById("loginSection");
     const appSection = document.getElementById("appSection");
     const loginMsg = document.getElementById("loginMsg");
     const adminMsg = document.getElementById("adminMsg");
-
     const btnLogin = document.getElementById("btnLogin");
     const btnRefresh = document.getElementById("btnRefresh");
     const btnRefreshTop = document.getElementById("btnRefreshTop");
@@ -949,127 +283,69 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     const reportBaseInfo = document.getElementById("reportBaseInfo");
     const reportOutput = document.getElementById("reportOutput");
 
-    function normalizeText(value) {
-      return (value ?? "").toString().trim();
-    }
+    function normalizeText(value){ return (value ?? "").toString().trim(); }
+    function getField(row, ...keys){ for(const key of keys){ if(row[key] !== undefined && row[key] !== null) return row[key]; } return ""; }
+    function normalizeWorkflowValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nuova") return "nuova"; if(v === "presa in carico") return "presa in carico"; if(v === "chiusa") return "chiusa"; return ""; }
+    function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
+    function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 2600); } }
+    function showApp(){ loginSection.classList.add("hidden"); appSection.classList.remove("hidden"); }
+    function hideApp(){ loginSection.classList.remove("hidden"); appSection.classList.add("hidden"); }
+    function getStateBadgeClass(value){ const v = normalizeText(value).toLowerCase(); if(v === "rosso") return "state-badge state-red"; if(v === "arancione") return "state-badge state-orange"; if(v === "verde") return "state-badge state-green"; return "state-badge state-default"; }
+    function getWorkflowBadgeClass(value){ const v = normalizeText(value).toLowerCase(); if(v === "chiusa") return "workflow-badge wf-closed"; if(v === "presa in carico") return "workflow-badge wf-progress"; return "workflow-badge wf-new"; }
 
-    function getField(row, ...keys) {
-      for (const key of keys) {
-        if (row[key] !== undefined && row[key] !== null) return row[key];
-      }
-      return "";
-    }
-
-    function normalizeWorkflowValue(value) {
-      const v = normalizeText(value).toLowerCase();
-      if (v === "nuova") return "nuova";
-      if (v === "presa in carico") return "presa in carico";
-      if (v === "chiusa") return "chiusa";
-      return "";
-    }
-
-    function setMsg(el, text, type = "") {
-      el.textContent = text || "";
-      el.className = "msg";
-      if (type) el.classList.add(type);
-    }
-
-    function setAdminMessage(text, type = "") {
-      setMsg(adminMsg, text, type);
-      if (text) {
-        setTimeout(() => {
-          if (adminMsg.textContent === text) setMsg(adminMsg, "");
-        }, 2600);
-      }
-    }
-
-    function showApp() {
-      loginSection.classList.add("hidden");
-      appSection.classList.remove("hidden");
-    }
-
-    function hideApp() {
-      loginSection.classList.remove("hidden");
-      appSection.classList.add("hidden");
-    }
-
-    function getStateBadgeClass(value) {
-      const v = normalizeText(value).toLowerCase();
-      if (v === "rosso") return "state-badge state-red";
-      if (v === "arancione") return "state-badge state-orange";
-      if (v === "verde") return "state-badge state-green";
-      return "state-badge state-default";
-    }
-
-    function getWorkflowBadgeClass(value) {
-      const v = normalizeText(value).toLowerCase();
-      if (v === "chiusa") return "workflow-badge wf-closed";
-      if (v === "presa in carico") return "workflow-badge wf-progress";
-      return "workflow-badge wf-new";
-    }
-
-    async function isAdminUser() {
+    async function isAdminUser(){
       const { data: authData, error: authError } = await client.auth.getUser();
-      if (authError) return false;
+      if(authError) return false;
       const user = authData?.user;
       const userEmail = normalizeText(user?.email).toLowerCase();
-      if (!userEmail) return false;
-
-      const { data, error } = await client
-        .from("admin_utenti")
-        .select("email, attivo, ruolo")
-        .eq("email", userEmail)
-        .maybeSingle();
-
-      if (error || !data || data.attivo === false) return false;
+      if(!userEmail) return false;
+      const { data, error } = await client.from("admin_utenti").select("email, attivo, ruolo").eq("email", userEmail).maybeSingle();
+      if(error || !data || data.attivo === false) return false;
       return true;
     }
 
-    async function login() {
+    async function login(){
       const email = normalizeText(document.getElementById("email").value).toLowerCase();
       const password = document.getElementById("password").value;
-
-      if (!email || !password) {
-        setMsg(loginMsg, "Inserisci email e password.", "error");
-        return;
-      }
-
+      if(!email || !password){ setMsg(loginMsg, "Inserisci email e password.", "error"); return; }
       setMsg(loginMsg, "Accesso in corso...");
-
       const { error } = await client.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        setMsg(loginMsg, "Login non riuscito: " + error.message, "error");
-        return;
-      }
-
+      if(error){ setMsg(loginMsg, "Login non riuscito: " + error.message, "error"); return; }
       const admin = await isAdminUser();
-      if (!admin) {
+      if(!admin){
         await client.auth.signOut();
+        sessionStorage.removeItem("adminLogged");
         setMsg(loginMsg, "Utente non autorizzato.", "error");
         return;
       }
-
+      sessionStorage.setItem("adminLogged", "true");
       setMsg(loginMsg, "");
       showApp();
       await loadData();
     }
 
-    async function checkSession() {
+    async function checkSession(){
+      const remember = sessionStorage.getItem("adminLogged");
+      if(remember !== "true"){
+        await client.auth.signOut();
+        return;
+      }
       const { data } = await client.auth.getSession();
-      if (data?.session?.user) {
+      if(data?.session?.user){
         const admin = await isAdminUser();
-        if (admin) {
+        if(admin){
           showApp();
           await loadData();
-        } else {
+        }else{
           await client.auth.signOut();
+          sessionStorage.removeItem("adminLogged");
         }
       }
     }
 
-    async function logout() {
+    async function logout(){
       await client.auth.signOut();
+      sessionStorage.removeItem("adminLogged");
       rowsCache = [];
       cardsGrid.innerHTML = "";
       destroyCharts();
@@ -1083,12 +359,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       chartsEmpty.classList.remove("hidden");
     }
 
-    function getFilteredRows() {
+    function getFilteredRows(){
       const q = normalizeText(searchText.value).toLowerCase();
       const comune = filterComune.value;
       const status = filterStatus.value;
       const workflow = filterWorkflow.value;
-
       return rowsCache.filter(row => {
         const titolo = getField(row, "Titolo", "titolo");
         const luogo = getField(row, "Luogo", "luogo");
@@ -1098,7 +373,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         const stato = normalizeText(getField(row, "Stato", "stato")).toLowerCase();
         const wf = normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione"));
         const haystack = `${codice} ${titolo} ${luogo} ${descrizione} ${comuneRow}`.toLowerCase();
-
         return (!q || haystack.includes(q))
           && (comune === "tutti" || comuneRow === comune)
           && (status === "tutti" || stato === status)
@@ -1106,35 +380,24 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       });
     }
 
-    function formatDate(value) {
-      if (!value) return "—";
-      try { return new Date(value).toLocaleString("it-IT"); } catch { return value; }
-    }
+    function formatDate(value){ if(!value) return "—"; try{ return new Date(value).toLocaleString("it-IT"); } catch { return value; } }
 
-    function updateStats(rows) {
+    function updateStats(rows){
       const stato = r => normalizeText(getField(r, "Stato", "stato")).toLowerCase();
-
-      const total = rows.length;
-      const rosso = rows.filter(r => stato(r) === "rosso").length;
-      const arancione = rows.filter(r => stato(r) === "arancione").length;
-      const verde = rows.filter(r => stato(r) === "verde").length;
-
-      document.getElementById("statTotale").textContent = total;
-      document.getElementById("statRosso").textContent = rosso;
-      document.getElementById("statArancione").textContent = arancione;
-      document.getElementById("statVerde").textContent = verde;
+      document.getElementById("statTotale").textContent = rows.length;
+      document.getElementById("statRosso").textContent = rows.filter(r => stato(r) === "rosso").length;
+      document.getElementById("statArancione").textContent = rows.filter(r => stato(r) === "arancione").length;
+      document.getElementById("statVerde").textContent = rows.filter(r => stato(r) === "verde").length;
     }
 
-    function renderCards() {
+    function renderCards(){
       const rows = getFilteredRows();
       resultsCount.textContent = `${rows.length} schede mostrate`;
       cardsGrid.innerHTML = "";
-
-      if (!rows.length) {
+      if(!rows.length){
         cardsGrid.innerHTML = `<div class="empty-state">Nessuna segnalazione trovata con i filtri attuali.</div>`;
         return;
       }
-
       rows.forEach(row => {
         const id = row.id;
         const codice = getField(row, "codice", "Codice");
@@ -1149,7 +412,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         const contattoSegnalante = getField(row, "contattosegnalante", "ContattoSegnalante");
         const createdAt = getField(row, "created_at", "creato_il");
         const updatedAt = getField(row, "updated_at", "aggiornato_alle");
-
         const card = document.createElement("article");
         card.className = "report-card";
         card.innerHTML = `
@@ -1161,7 +423,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
               <span class="${getWorkflowBadgeClass(workflow)}">${workflow}</span>
             </div>
           </div>
-
           <div class="report-body">
             <div class="info-box"><span class="info-label">Comune</span><div class="info-value">${comune || "—"}</div></div>
             <div class="info-box"><span class="info-label">Categoria</span><div class="info-value">${categoria || "—"}</div></div>
@@ -1172,7 +433,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
             <div class="info-box"><span class="info-label">Aggiornato il</span><div class="info-value">${formatDate(updatedAt)}</div></div>
             <div class="info-box desc-box"><span class="info-label">Descrizione</span><div class="info-value">${descrizione || "Nessuna descrizione disponibile."}</div></div>
           </div>
-
           <div class="report-footer">
             <div class="workflow-editor">
               <label for="workflow-${id}">Aggiorna workflow</label>
@@ -1186,103 +446,76 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
               <button class="btn btn-light btn-small" data-save-id="${id}" type="button">Salva</button>
               <button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina</button>
             </div>
-          </div>
-        `;
+          </div>`;
         cardsGrid.appendChild(card);
       });
     }
 
-    function destroyCharts() {
-      charts.forEach(chart => chart.destroy());
-      charts = [];
-    }
+    function destroyCharts(){ charts.forEach(chart => chart.destroy()); charts = []; }
 
-    function buildCharts(rows, label) {
-      if (!rows.length) {
-        alert("Nessun dato disponibile per generare i grafici.");
-        return;
-      }
-
+    function buildCharts(rows, label){
+      if(!rows.length){ alert("Nessun dato disponibile per generare i grafici."); return; }
       destroyCharts();
       chartsEmpty.classList.add("hidden");
       chartsWrap.classList.remove("hidden");
       chartBaseInfo.textContent = `Base analisi: ${rows.length} segnalazioni (${label})`;
-
       const statusMap = {
         Rosso: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "rosso").length,
-        Arancione: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length
+        Arancione: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length,
+        Verde: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "verde").length
       };
-
+      const workflowMap = {
+        Nuova: rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "nuova").length,
+        "Presa in carico": rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "presa in carico").length,
+        Chiusa: rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "chiusa").length
+      };
       charts.push(new Chart(document.getElementById("chartStatus"), {
-        type: "doughnut",
-        data: {
-          labels: Object.keys(statusMap),
-          datasets: [{ data: Object.values(statusMap), backgroundColor: ["#ef4444","#f59e0b"] }]
-        },
-        options: { responsive:true, maintainAspectRatio:false }
+        type:"doughnut",
+        data:{ labels:Object.keys(statusMap), datasets:[{ data:Object.values(statusMap), backgroundColor:["#ef4444","#f59e0b","#10b981"] }] },
+        options:{ responsive:true, maintainAspectRatio:false }
       }));
-
       charts.push(new Chart(document.getElementById("chartWorkflow"), {
-        type: "bar",
-        data: {
-          labels: ["Totale filtrato"],
-          datasets: [{ label: "Segnalazioni", data: [rows.length], backgroundColor: "#1f4b7a" }]
-        },
-        options: { responsive:true, maintainAspectRatio:false }
+        type:"bar",
+        data:{ labels:Object.keys(workflowMap), datasets:[{ label:"Segnalazioni", data:Object.values(workflowMap), backgroundColor:["#3b82f6","#f59e0b","#10b981"] }] },
+        options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
       }));
-
       setAdminMessage("Grafici generati correttamente.", "ok");
     }
 
-    function buildReport(rows, label) {
-      if (!rows.length) {
-        alert("Nessun dato disponibile per generare il report.");
-        return;
-      }
-
-      const text = [
-        "REPORT OPERATORI - MAPPA ACCESSIBILITÀ",
-        "NessunOstacolo",
-        "",
-        `Base report: ${label}`,
-        `Numero segnalazioni: ${rows.length}`
-      ].join("\n");
-
-      const html = `
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<title>Report operatori - Mappa Accessibilità</title>
-<style>
-body{font-family:Arial,Helvetica,sans-serif;margin:40px;color:#111;line-height:1.6}
-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
-header img{width:72px;height:72px;object-fit:contain}
-h1{color:#1f4b7a;margin:0}
-p{margin:0}
-pre{white-space:pre-wrap}
-</style>
-</head>
-<body>
-  <header>
-    <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità">
-    <div>
-      <h1>Mappa Accessibilità - NessunOstacolo</h1>
-      <p>Area riservata operatori</p>
-    </div>
-  </header>
-  <pre>${text}</pre>
-</body>
-</html>`;
-
+    function buildReport(rows, label){
+      if(!rows.length){ alert("Nessun dato disponibile per generare il report."); return; }
+      const lines = [];
+      lines.push("REPORT OPERATORI - MAPPA ACCESSIBILITÀ");
+      lines.push("NessunOstacolo");
+      lines.push("");
+      lines.push(`Base report: ${label}`);
+      lines.push(`Numero segnalazioni: ${rows.length}`);
+      lines.push("");
+      rows.forEach((row, index) => {
+        lines.push(`Scheda ${index + 1}`);
+        lines.push(`ID: ${row.id}`);
+        lines.push(`Titolo: ${getField(row, "Titolo", "titolo") || "—"}`);
+        lines.push(`Comune: ${getField(row, "Comune", "comune") || "—"}`);
+        lines.push(`Categoria: ${getField(row, "Categoria", "categoria") || "—"}`);
+        lines.push(`Luogo: ${getField(row, "Luogo", "luogo") || "—"}`);
+        lines.push(`Stato: ${getField(row, "Stato", "stato") || "—"}`);
+        lines.push(`Workflow: ${normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "—"}`);
+        lines.push(`Creato il: ${formatDate(getField(row, "created_at", "creato_il"))}`);
+        lines.push(`Aggiornato il: ${formatDate(getField(row, "updated_at", "aggiornato_alle"))}`);
+        lines.push(`Descrizione: ${getField(row, "Descrizione", "descrizione") || "—"}`);
+        lines.push("");
+      });
+      const text = lines.join("\n");
+      const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Report operatori - Mappa Accessibilità</title><style>body{font-family:Arial,Helvetica,sans-serif;margin:40px;color:#111;line-height:1.6}header{display:flex;align-items:center;gap:16px;margin-bottom:24px}header img{width:72px;height:72px;object-fit:contain}h1{color:#1f4b7a;margin:0}p{margin:0}pre{white-space:pre-wrap}</style></head><body><header><img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità"><div><h1>Mappa Accessibilità - NessunOstacolo</h1><p>Area riservata operatori</p></div></header><pre>${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></body></html>`;
       lastReportText = text;
       lastReportHtml = html;
       reportOutput.textContent = text;
       reportBaseInfo.textContent = `Base report: ${rows.length} segnalazioni (${label})`;
+      setAdminMessage("Report generato correttamente.", "ok");
     }
 
-    function exportFile(filename, content, mimeType) {
-      const blob = new Blob([content], { type: mimeType });
+    function exportFile(filename, content, mimeType){
+      const blob = new Blob([content], { type:mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -1291,17 +524,9 @@ pre{white-space:pre-wrap}
       URL.revokeObjectURL(url);
     }
 
-    async function loadData() {
-      const { data, error } = await client
-        .from("segnalazioni")
-        .select("*")
-        .order("id", { ascending: true });
-
-      if (error) {
-        alert("Errore caricamento dati: " + error.message);
-        return;
-      }
-
+    async function loadData(){
+      const { data, error } = await client.from("segnalazioni").select("*").order("id", { ascending:true });
+      if(error){ alert("Errore caricamento dati: " + error.message); return; }
       rowsCache = data || [];
       updateStats(rowsCache);
       renderCards();
@@ -1311,45 +536,34 @@ pre{white-space:pre-wrap}
       chartBaseInfo.textContent = "Base analisi non ancora generata";
     }
 
-    function resetFilters() {
+    function resetFilters(){
       searchText.value = "";
       filterComune.value = "tutti";
       filterStatus.value = "tutti";
       filterWorkflow.value = "tutti";
       renderCards();
+      setAdminMessage("Filtri azzerati.", "ok");
     }
 
-    function exportCSV() {
+    function exportCSV(){
       const rows = getFilteredRows();
-      if (!rows.length) {
-        alert("Nessun dato da esportare");
-        return;
-      }
+      if(!rows.length){ alert("Nessun dato da esportare"); return; }
       const headers = Object.keys(rows[0]);
-      const csv = [
-        headers.join(","),
-        ...rows.map(row => headers.map(h => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","))
-      ].join("\n");
+      const csv = [headers.join(","), ...rows.map(row => headers.map(h => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
       exportFile("segnalazioni-mappa.csv", csv, "text/csv;charset=utf-8;");
     }
 
-    function exportXLSX() {
+    function exportXLSX(){
       const rows = getFilteredRows();
-      if (!rows.length) {
-        alert("Nessun dato da esportare");
-        return;
-      }
+      if(!rows.length){ alert("Nessun dato da esportare"); return; }
       const worksheet = XLSX.utils.json_to_sheet(rows);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Segnalazioni");
       XLSX.writeFile(workbook, "segnalazioni-mappa.xlsx");
     }
 
-    function printReport() {
-      if (!lastReportHtml) {
-        alert("Genera prima un report.");
-        return;
-      }
+    function printReport(){
+      if(!lastReportHtml){ alert("Genera prima un report."); return; }
       const w = window.open("", "_blank");
       w.document.open();
       w.document.write(lastReportHtml);
@@ -1358,13 +572,38 @@ pre{white-space:pre-wrap}
       w.print();
     }
 
-    function switchSection(sectionId) {
+    function switchSection(sectionId){
       document.querySelectorAll(".app-section").forEach(sec => sec.classList.add("hidden"));
       document.getElementById(sectionId).classList.remove("hidden");
       document.querySelectorAll(".menu-btn").forEach(btn => btn.classList.remove("active"));
       document.querySelector(`.menu-btn[data-section="${sectionId}"]`).classList.add("active");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top:0, behavior:"smooth" });
     }
+
+    document.addEventListener("click", async (event) => {
+      const saveBtn = event.target.closest("[data-save-id]");
+      const deleteBtn = event.target.closest("[data-delete-id]");
+
+      if(saveBtn){
+        const id = saveBtn.dataset.saveId;
+        const workflowSelect = document.querySelector(`[data-workflow-id="${id}"]`);
+        const nuovoWorkflow = workflowSelect.value;
+        const { error } = await client.from("segnalazioni").update({ statosegnalazione: nuovoWorkflow }).eq("id", id);
+        if(error){ setAdminMessage("Errore nel salvataggio workflow.", "error"); return; }
+        setAdminMessage("Workflow aggiornato correttamente.", "ok");
+        await loadData();
+      }
+
+      if(deleteBtn){
+        const id = deleteBtn.dataset.deleteId;
+        const conferma = confirm("Vuoi eliminare definitivamente questa segnalazione?");
+        if(!conferma) return;
+        const { error } = await client.from("segnalazioni").delete().eq("id", id);
+        if(error){ setAdminMessage("Errore durante eliminazione.", "error"); return; }
+        setAdminMessage("Segnalazione eliminata.", "ok");
+        await loadData();
+      }
+    });
 
     btnLogin.onclick = login;
     btnRefresh.onclick = loadData;
@@ -1377,14 +616,8 @@ pre{white-space:pre-wrap}
     btnBuildReportFiltered.onclick = () => buildReport(getFilteredRows(), "risultati filtrati");
     btnBuildReportAll.onclick = () => buildReport(rowsCache, "database completo");
     btnPrintReport.onclick = printReport;
-    btnExportReportHtml.onclick = () => {
-      if (!lastReportHtml) return alert("Genera prima un report.");
-      exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;");
-    };
-    btnExportReportTxt.onclick = () => {
-      if (!lastReportText) return alert("Genera prima un report.");
-      exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;");
-    };
+    btnExportReportHtml.onclick = () => { if(!lastReportHtml) return alert("Genera prima un report."); exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;"); };
+    btnExportReportTxt.onclick = () => { if(!lastReportText) return alert("Genera prima un report."); exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;"); };
     btnPrintPage.onclick = () => window.print();
     btnResetFilters.onclick = resetFilters;
 
