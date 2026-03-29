@@ -8,190 +8,13 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="style.css" />
-
-  <style>
-    .site-brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-    }
-
-    .site-logo{
-      width:68px;
-      height:68px;
-      object-fit:contain;
-      background:#ffffff;
-      border-radius:16px;
-      padding:6px;
-      border:1px solid rgba(255,255,255,.18);
-      box-shadow:0 8px 20px rgba(0,0,0,.12);
-      flex-shrink:0;
-    }
-
-    .site-brand-text h1{
-      margin:0;
-    }
-
-    .site-brand-text p{
-      margin:6px 0 0 0;
-    }
-
-    .admin-link-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:14px 20px;
-      border-radius:18px;
-      background:#163a5f;
-      color:#fff;
-      text-decoration:none;
-      font-weight:800;
-      border:2px solid rgba(255,255,255,.15);
-      transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
-    }
-
-    .admin-link-btn:hover{
-      transform:translateY(-1px);
-      background:#1f4b7a;
-      box-shadow:0 8px 20px rgba(0,0,0,.12);
-    }
-
-    .site-link-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:14px 20px;
-      border-radius:18px;
-      background:#f3f6fa;
-      color:#163a5f;
-      text-decoration:none;
-      font-weight:800;
-      border:2px solid rgba(255,255,255,.15);
-      transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
-    }
-
-    .site-link-btn:hover{
-      transform:translateY(-1px);
-      background:#e8eef6;
-      box-shadow:0 8px 20px rgba(0,0,0,.10);
-    }
-
-    .intro-guide-box{
-      margin:16px;
-      background:#ffffff;
-      border:1px solid #dbe4ef;
-      border-radius:20px;
-      box-shadow:0 12px 30px rgba(0,0,0,.08);
-      padding:18px;
-    }
-
-    .intro-guide-box h2{
-      margin:0 0 10px 0;
-      font-size:1.2rem;
-      color:#163a5f;
-    }
-
-    .intro-guide-box p{
-      margin:0 0 10px 0;
-      color:#334155;
-      line-height:1.5;
-    }
-
-    .intro-guide-list{
-      margin:0;
-      padding-left:18px;
-      color:#334155;
-      line-height:1.6;
-    }
-
-    .guide-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-
-    .guide-badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 12px;
-      border-radius:999px;
-      font-size:.9rem;
-      font-weight:700;
-    }
-
-    .guide-red{ background:#ffe2e2; color:#b00020; }
-    .guide-orange{ background:#ffe7c2; color:#b85c00; }
-    .guide-green{ background:#d8f7e6; color:#0f8a4b; }
-
-    .help-modal-text{
-      color:#334155;
-      line-height:1.6;
-      font-size:.98rem;
-    }
-
-    .help-modal-text ul{
-      padding-left:18px;
-      margin:10px 0;
-    }
-
-    .help-modal-text li{
-      margin-bottom:8px;
-    }
-
-    .welcome-modal .modal-card{
-      max-width:520px;
-    }
-
-    @media (max-width: 960px){
-      .site-brand{
-        align-items:flex-start;
-      }
-
-      .site-logo{
-        width:56px;
-        height:56px;
-        border-radius:14px;
-      }
-
-      .guide-actions{
-        flex-direction:column;
-      }
-
-      .guide-actions .btn,
-      .guide-actions .admin-link-btn,
-      .guide-actions .site-link-btn{
-        width:100%;
-      }
-
-      .intro-guide-box{
-        margin:12px;
-        padding:16px;
-      }
-
-      .topbar-actions{
-        width:100%;
-        display:flex;
-        flex-direction:column;
-      }
-
-      .topbar-actions .btn,
-      .topbar-actions .admin-link-btn,
-      .topbar-actions .site-link-btn{
-        width:100%;
-      }
-    }
-  </style>
 </head>
 <body>
 
 <header class="topbar">
   <div class="brand">
     <div class="site-brand">
-      <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
+      <img src="logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
       <div class="site-brand-text">
         <h1>Mappa dell’Accessibilità</h1>
         <p>Scopri, segnala e monitora accessibilità e barriere urbane</p>
@@ -203,29 +26,11 @@
     <a href="admin-mappa.html" class="admin-link-btn">🔐 Area operatori</a>
     <a href="https://www.nessunostacolo.org" class="site-link-btn" target="_blank" rel="noopener">🌐 Torna al sito</a>
     <button id="btnHowTo" class="btn btn-secondary" type="button">❓ Come segnalare</button>
+    <button id="btnTour" class="btn btn-secondary" type="button">🧭 Guida</button>
     <button id="btnLocate" class="btn btn-primary" type="button">📍 Mostra la mia posizione</button>
     <button id="btnLegend" class="btn btn-secondary" type="button">ℹ️ Legenda</button>
   </div>
 </header>
-
-<section class="intro-guide-box">
-  <h2>Come segnalare una barriera</h2>
-  <p>Usa questa mappa per segnalare barriere architettoniche, difficoltà di accesso o luoghi accessibili da valorizzare.</p>
-
-  <ol class="intro-guide-list">
-    <li>Cerca la zona o spostati sulla mappa.</li>
-    <li>Clicca sul punto esatto dove vuoi segnalare.</li>
-    <li>Apri la finestra di segnalazione.</li>
-    <li>Inserisci titolo, descrizione, eventuali foto e scegli il colore corretto.</li>
-    <li>Salva: la segnalazione sarà controllata dagli operatori di NessunOstacolo.</li>
-  </ol>
-
-  <div class="guide-actions">
-    <span class="guide-badge guide-red">🔴 Rosso = non accessibile</span>
-    <span class="guide-badge guide-orange">🟠 Arancione = accessibile con difficoltà</span>
-    <span class="guide-badge guide-green">🟢 Verde = accessibile</span>
-  </div>
-</section>
 
 <main class="layout">
   <aside class="sidebar">
@@ -298,9 +103,30 @@
 
   <section class="map-area">
     <div id="map"></div>
+
+    <!-- TOOLTIP PRIMO ACCESSO -->
+    <div id="mapHint" class="map-hint hidden">
+      👆 Clicca sulla mappa per iniziare una nuova segnalazione
+    </div>
+
+    <!-- TOUR GUIDATO -->
+    <div id="tourBox" class="tour-box hidden" aria-hidden="true">
+      <div class="tour-head">
+        <h3 id="tourTitle">Guida rapida</h3>
+        <button id="btnCloseTour" class="btn btn-close" type="button">✕</button>
+      </div>
+      <div class="tour-body">
+        <p id="tourText">Testo guida</p>
+      </div>
+      <div class="tour-footer">
+        <button id="btnPrevTour" class="btn btn-light" type="button">Indietro</button>
+        <button id="btnNextTour" class="btn btn-primary" type="button">Avanti</button>
+      </div>
+    </div>
   </section>
 </main>
 
+<!-- MODALE LEGENDA -->
 <div id="legendModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card small-modal">
     <div class="modal-header">
@@ -317,68 +143,68 @@
   </div>
 </div>
 
+<!-- MODALE COME SEGNALARE -->
 <div id="howToModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card small-modal">
     <div class="modal-header">
-      <h3>Guida rapida</h3>
+      <h3>Come segnalare</h3>
       <button id="btnCloseHowTo" class="btn btn-close" type="button">✕</button>
     </div>
     <div class="modal-body help-modal-text">
-      <p>La Mappa dell’Accessibilità ti permette di segnalare barriere architettoniche, difficoltà di accesso e luoghi accessibili.</p>
+      <p>La Mappa dell’Accessibilità serve per segnalare barriere architettoniche, difficoltà di accesso e luoghi accessibili da valorizzare.</p>
 
-      <ul>
-        <li>Apri la zona desiderata sulla mappa</li>
-        <li>Clicca sul punto esatto</li>
+      <ol class="help-list">
+        <li>Spostati sulla mappa nella zona interessata</li>
+        <li>Clicca sul punto preciso</li>
         <li>Apri la finestra di segnalazione</li>
-        <li>Compila i campi richiesti</li>
-        <li>Carica fino a 3 foto</li>
+        <li>Inserisci titolo, descrizione e foto</li>
         <li>Scegli il colore corretto</li>
         <li>Premi <strong>Salva</strong></li>
-      </ul>
+      </ol>
 
-      <p><strong>Colori:</strong></p>
-      <ul>
-        <li>🔴 Rosso = barriera grave / non accessibile</li>
-        <li>🟠 Arancione = accesso parziale / con difficoltà</li>
-        <li>🟢 Verde = accessibile</li>
-      </ul>
+      <div class="guide-actions">
+        <span class="guide-badge guide-red">🔴 Rosso = non accessibile</span>
+        <span class="guide-badge guide-orange">🟠 Arancione = accessibile con difficoltà</span>
+        <span class="guide-badge guide-green">🟢 Verde = accessibile</span>
+      </div>
 
-      <p>Le segnalazioni saranno verificate dagli operatori di NessunOstacolo.</p>
+      <p class="help-note">Le segnalazioni saranno poi verificate dagli operatori di NessunOstacolo.</p>
     </div>
   </div>
 </div>
 
-<div id="welcomeModal" class="modal hidden welcome-modal" aria-hidden="true">
-  <div class="modal-card">
+<!-- MODALE BENVENUTO -->
+<div id="welcomeModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card small-modal">
     <div class="modal-header">
       <h3>Benvenuto nella Mappa dell’Accessibilità</h3>
       <button id="btnCloseWelcome" class="btn btn-close" type="button">✕</button>
     </div>
     <div class="modal-body help-modal-text">
-      <p>Con questa mappa puoi segnalare barriere architettoniche, problemi di accessibilità e luoghi accessibili.</p>
-
-      <ul>
-        <li>Attiva la posizione del telefono se vuoi essere aiutato nella localizzazione</li>
-        <li>Premi sulla mappa nel punto desiderato</li>
-        <li>Aggiungi descrizione e foto</li>
-        <li>Scegli il colore corretto</li>
-        <li>Salva la segnalazione</li>
+      <p>Con questa mappa puoi segnalare:</p>
+      <ul class="help-list">
+        <li>barriere architettoniche</li>
+        <li>problemi di accesso</li>
+        <li>luoghi accessibili da valorizzare</li>
       </ul>
 
-      <p><strong>Legenda rapida:</strong></p>
-      <ul>
-        <li>🔴 Rosso = barriera grave</li>
-        <li>🟠 Arancione = difficoltà parziale</li>
-        <li>🟢 Verde = accessibile</li>
+      <p>Per iniziare:</p>
+      <ul class="help-list">
+        <li>attiva la posizione se vuoi aiutarti con la geolocalizzazione</li>
+        <li>clicca sul punto della mappa</li>
+        <li>compila il modulo</li>
+        <li>salva la segnalazione</li>
       </ul>
 
       <div class="guide-actions">
         <button id="btnWelcomeOk" class="btn btn-primary" type="button">Ho capito</button>
+        <button id="btnWelcomeTour" class="btn btn-light" type="button">Avvia guida</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- MODALE FORM -->
 <div id="formModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card form-modal">
     <div class="modal-header">
@@ -499,46 +325,135 @@
   const welcomeModal = document.getElementById("welcomeModal");
   const btnCloseWelcome = document.getElementById("btnCloseWelcome");
   const btnWelcomeOk = document.getElementById("btnWelcomeOk");
+  const btnWelcomeTour = document.getElementById("btnWelcomeTour");
 
-  function openModal(modal){
+  const btnTour = document.getElementById("btnTour");
+  const tourBox = document.getElementById("tourBox");
+  const tourTitle = document.getElementById("tourTitle");
+  const tourText = document.getElementById("tourText");
+  const btnCloseTour = document.getElementById("btnCloseTour");
+  const btnPrevTour = document.getElementById("btnPrevTour");
+  const btnNextTour = document.getElementById("btnNextTour");
+
+  const mapHint = document.getElementById("mapHint");
+
+  const TOUR_KEY = "mappa_accessibilita_tour_done";
+  const WELCOME_KEY = "mappa_accessibilita_welcome_seen";
+  const HINT_KEY = "mappa_accessibilita_hint_seen";
+
+  const tourSteps = [
+    {
+      title: "Benvenuto",
+      text: "Questa mappa ti aiuta a segnalare barriere architettoniche e luoghi accessibili."
+    },
+    {
+      title: "1. Guarda la mappa",
+      text: "Spostati sulla mappa e individua il punto preciso dove vuoi fare la segnalazione."
+    },
+    {
+      title: "2. Clicca sul punto",
+      text: "Premi sul punto esatto nella mappa. Da lì potrai aprire la finestra di inserimento."
+    },
+    {
+      title: "3. Compila il modulo",
+      text: "Inserisci titolo, comune, categoria, luogo, descrizione e foto."
+    },
+    {
+      title: "4. Scegli il colore giusto",
+      text: "Rosso = non accessibile. Arancione = accessibile con difficoltà. Verde = accessibile."
+    },
+    {
+      title: "5. Salva la segnalazione",
+      text: "Dopo il salvataggio, la segnalazione sarà visibile e potrà essere verificata dagli operatori."
+    }
+  ];
+
+  let currentTourStep = 0;
+
+  function openModal(modal) {
     if (!modal) return;
     modal.classList.remove("hidden");
     modal.setAttribute("aria-hidden", "false");
   }
 
-  function closeModal(modal){
+  function closeModal(modal) {
     if (!modal) return;
     modal.classList.add("hidden");
     modal.setAttribute("aria-hidden", "true");
   }
 
-  if (btnHowTo && howToModal) {
-    btnHowTo.addEventListener("click", () => openModal(howToModal));
+  function renderTourStep() {
+    const step = tourSteps[currentTourStep];
+    tourTitle.textContent = step.title;
+    tourText.textContent = step.text;
+    btnPrevTour.disabled = currentTourStep === 0;
+    btnNextTour.textContent = currentTourStep === tourSteps.length - 1 ? "Fine" : "Avanti";
   }
 
-  if (btnCloseHowTo && howToModal) {
-    btnCloseHowTo.addEventListener("click", () => closeModal(howToModal));
+  function openTour(startIndex = 0) {
+    currentTourStep = startIndex;
+    renderTourStep();
+    tourBox.classList.remove("hidden");
+    tourBox.setAttribute("aria-hidden", "false");
   }
 
-  if (btnCloseWelcome && welcomeModal) {
+  function closeTour() {
+    tourBox.classList.add("hidden");
+    tourBox.setAttribute("aria-hidden", "true");
+  }
+
+  if (btnHowTo) btnHowTo.addEventListener("click", () => openModal(howToModal));
+  if (btnCloseHowTo) btnCloseHowTo.addEventListener("click", () => closeModal(howToModal));
+
+  if (btnTour) {
+    btnTour.addEventListener("click", () => {
+      closeModal(welcomeModal);
+      openTour(0);
+    });
+  }
+
+  if (btnCloseTour) btnCloseTour.addEventListener("click", closeTour);
+
+  if (btnPrevTour) {
+    btnPrevTour.addEventListener("click", () => {
+      if (currentTourStep > 0) {
+        currentTourStep--;
+        renderTourStep();
+      }
+    });
+  }
+
+  if (btnNextTour) {
+    btnNextTour.addEventListener("click", () => {
+      if (currentTourStep < tourSteps.length - 1) {
+        currentTourStep++;
+        renderTourStep();
+      } else {
+        localStorage.setItem(TOUR_KEY, "true");
+        closeTour();
+      }
+    });
+  }
+
+  if (btnCloseWelcome) {
     btnCloseWelcome.addEventListener("click", () => {
-      localStorage.setItem("mappa_accessibilita_welcome_seen", "true");
+      localStorage.setItem(WELCOME_KEY, "true");
       closeModal(welcomeModal);
     });
   }
 
-  if (btnWelcomeOk && welcomeModal) {
+  if (btnWelcomeOk) {
     btnWelcomeOk.addEventListener("click", () => {
-      localStorage.setItem("mappa_accessibilita_welcome_seen", "true");
+      localStorage.setItem(WELCOME_KEY, "true");
       closeModal(welcomeModal);
     });
   }
 
-  if (!localStorage.getItem("mappa_accessibilita_welcome_seen")) {
-    window.addEventListener("load", () => {
-      setTimeout(() => {
-        openModal(welcomeModal);
-      }, 700);
+  if (btnWelcomeTour) {
+    btnWelcomeTour.addEventListener("click", () => {
+      localStorage.setItem(WELCOME_KEY, "true");
+      closeModal(welcomeModal);
+      openTour(0);
     });
   }
 
@@ -548,6 +463,30 @@
       if (e.target === modal) closeModal(modal);
     });
   });
+
+  window.addEventListener("load", () => {
+    if (!localStorage.getItem(WELCOME_KEY)) {
+      setTimeout(() => openModal(welcomeModal), 600);
+    }
+
+    if (!localStorage.getItem(HINT_KEY)) {
+      setTimeout(() => {
+        mapHint.classList.remove("hidden");
+        setTimeout(() => {
+          mapHint.classList.add("hidden");
+          localStorage.setItem(HINT_KEY, "true");
+        }, 5000);
+      }, 1200);
+    }
+  });
+
+  const mapElement = document.getElementById("map");
+  if (mapElement) {
+    mapElement.addEventListener("click", () => {
+      mapHint.classList.add("hidden");
+      localStorage.setItem(HINT_KEY, "true");
+    });
+  }
 </script>
 
 </body>
