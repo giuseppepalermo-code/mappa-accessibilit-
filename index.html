@@ -5,104 +5,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mappa dell'Accessibilità</title>
 
-  <link rel="stylesheet" href="lib/leaflet.css">
-  <link rel="stylesheet" href="lib/leaflet.markercluster.css">
-  <link rel="stylesheet" href="lib/pannellum.css">
+  <meta name="theme-color" content="#1f4b7a">
+  <link rel="manifest" href="manifest.json">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="topbar">
-  <div class="site-brand">
-    <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
-    <div class="site-brand-text">
-      <h1>Mappa dell’Accessibilità</h1>
-      <p>Scopri, segnala e monitora barriere e luoghi accessibili</p>
-    </div>
-  </div>
+  <header class="topbar">
+    <div class="site-brand">
+      <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
 
-  <div class="topbar-actions">
-    <a href="#" class="admin-link-btn">🔐 Area operatori</a>
-    <a href="https://www.nessunostacolo.org" class="site-link-btn" target="_blank">🌐 Sito</a>
-    <button id="btnHowTo" class="btn btn-secondary">❓ Guida</button>
-    <button id="btnLocate" class="btn btn-primary">📍 Posizione</button>
-    <button id="btnLegend" class="btn btn-secondary">ℹ️ Legenda</button>
-  </div>
-</header>
-
-<main class="layout">
-  <aside class="sidebar">
-    <div class="panel">
-      <h2>Filtri</h2>
-
-      <div class="field">
-        <span>Ricerca</span>
-        <input id="searchText" type="text" placeholder="Titolo o comune">
-      </div>
-
-      <div class="field">
-        <span>Comune</span>
-        <select id="filterComune">
-          <option value="tutti">Tutti</option>
-          <option value="San Cataldo">San Cataldo</option>
-          <option value="Caltanissetta">Caltanissetta</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <span>Accessibilità</span>
-        <select id="filterStatus">
-          <option value="tutti">Tutti</option>
-          <option value="rosso">🔴 Non accessibile</option>
-          <option value="arancione">🟠 Parziale</option>
-          <option value="verde">🟢 Accessibile</option>
-        </select>
+      <div class="site-brand-text">
+        <h1>Mappa dell’Accessibilità</h1>
+        <p>Scopri, segnala e monitora barriere e luoghi accessibili</p>
       </div>
     </div>
-  </aside>
 
-  <section class="map-area">
-    <div id="map"></div>
-  </section>
-</main>
+    <div class="topbar-actions">
+      <a href="#" class="admin-link-btn">🔐 Area operatori</a>
 
-<div id="legendModal" class="modal hidden">
-  <div class="modal-card small-modal">
-    <div class="modal-header">
-      <h3>Legenda</h3>
-      <button id="btnCloseLegend" class="btn btn-close">✕ Esci</button>
+      <a href="https://www.nessunostacolo.org" target="_blank" rel="noopener" class="site-link-btn">
+        🌐 Sito NessunOstacolo
+      </a>
+
+      <button id="btnHowTo" class="btn btn-secondary" type="button">
+        ❓ Come segnalare
+      </button>
+
+      <button id="btnLocate" class="btn btn-primary" type="button">
+        📍 Mostra la mia posizione
+      </button>
+
+      <button id="btnLegend" class="btn btn-secondary" type="button">
+        ℹ️ Legenda
+      </button>
     </div>
-    <div class="modal-body">
-      <div class="legend-row"><span>🔴 Non accessibile</span><strong id="countRosso">0</strong></div>
-      <div class="legend-row"><span>🟠 Parziale</span><strong id="countArancione">0</strong></div>
-      <div class="legend-row"><span>🟢 Accessibile</span><strong id="countVerde">0</strong></div>
-      <hr>
-      <div class="legend-row"><span>Totale</span><strong id="countTotale">0</strong></div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Filtri</h2>
+
+        <label class="field">
+          <span>Ricerca</span>
+          <input id="searchText" type="text" placeholder="Titolo, luogo o comune">
+        </label>
+
+        <label class="field">
+          <span>Comune</span>
+          <select id="filterComune">
+            <option value="tutti">Tutti</option>
+            <option value="San Cataldo">San Cataldo</option>
+            <option value="Caltanissetta">Caltanissetta</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Accessibilità</span>
+          <select id="filterStatus">
+            <option value="tutti">Tutti</option>
+            <option value="rosso">🔴 Non accessibile</option>
+            <option value="arancione">🟠 Parziale</option>
+            <option value="verde">🟢 Accessibile</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="panel">
+        <button id="toggleSegnalazioni" class="toggle-panel" type="button">
+          Segnalazioni ▼
+        </button>
+
+        <div id="contenitoreSegnalazioni">
+          <div id="listaSegnalazioni"></div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="map-area">
+      <div id="map"></div>
+    </section>
+  </main>
+
+  <!-- MODALE LEGENDA -->
+  <div id="legendModal" class="modal hidden">
+    <div class="modal-card small-modal">
+      <div class="modal-header">
+        <h3>Legenda</h3>
+        <button id="btnCloseLegend" class="btn-close" type="button">✕ Esci</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="legend-row">
+          <span>🔴 Non accessibile</span>
+          <strong id="countRosso">0</strong>
+        </div>
+
+        <div class="legend-row">
+          <span>🟠 Parziale</span>
+          <strong id="countArancione">0</strong>
+        </div>
+
+        <div class="legend-row">
+          <span>🟢 Accessibile</span>
+          <strong id="countVerde">0</strong>
+        </div>
+
+        <hr>
+
+        <div class="legend-row">
+          <span>Totale segnalazioni</span>
+          <strong id="countTotale">0</strong>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="howToModal" class="modal hidden">
-  <div class="modal-card small-modal">
-    <div class="modal-header">
-      <h3>Come segnalare</h3>
-      <button id="btnCloseHowTo" class="btn btn-close">✕ Esci</button>
-    </div>
-    <div class="modal-body">
-      <ul class="help-list">
-        <li>Apri la mappa nella zona interessata</li>
-        <li>Clicca il punto preciso</li>
-        <li>Compila la scheda</li>
-        <li>Scegli il livello di accessibilità corretto</li>
-        <li>Salva la segnalazione</li>
-      </ul>
+  <!-- MODALE GUIDA -->
+  <div id="howToModal" class="modal hidden">
+    <div class="modal-card small-modal">
+      <div class="modal-header">
+        <h3>Come segnalare</h3>
+        <button id="btnCloseHowTo" class="btn-close" type="button">✕ Esci</button>
+      </div>
+
+      <div class="modal-body">
+        <ul class="help-list">
+          <li>Apri la mappa nella zona interessata</li>
+          <li>Seleziona il punto desiderato</li>
+          <li>Compila i campi della segnalazione</li>
+          <li>Scegli il livello di accessibilità corretto</li>
+          <li>Salva la segnalazione</li>
+        </ul>
+      </div>
     </div>
   </div>
-</div>
 
-<script src="lib/leaflet.js"></script>
-<script src="lib/leaflet.markercluster.js"></script>
-<script src="lib/pannellum.js"></script>
-<script src="app.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
