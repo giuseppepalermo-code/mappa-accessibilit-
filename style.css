@@ -1,850 +1,493 @@
-:root{
-  --brand:#1f4b7a;
-  --brand-dark:#163a5f;
-  --accent:#f2b705;
-  --bg:#f6f8fb;
-  --text:#111827;
-  --muted:#5b6673;
-  --line:#dbe4ef;
-  --white:#ffffff;
-  --radius:18px;
-  --shadow:0 12px 30px rgba(0,0,0,.08);
-  --shadow-soft:0 6px 18px rgba(0,0,0,.06);
-}
-
-*{ box-sizing:border-box; }
-
-html, body{
-  margin:0;
-  padding:0;
-  height:100%;
-  font-family:Arial, Helvetica, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
-
-body{
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:16px;
-  padding:14px 20px;
-  background:linear-gradient(135deg, var(--brand), var(--brand-dark));
-  color:var(--white);
-  box-shadow:var(--shadow);
-  flex:0 0 auto;
-}
-
-.brand h1{
-  margin:0;
-  font-size:1.55rem;
-  line-height:1.1;
-}
-
-.brand p{
-  margin:8px 0 0 0;
-  opacity:.94;
-  font-size:1rem;
-}
-
-.site-brand{
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.site-logo{
-  width:68px;
-  height:68px;
-  object-fit:contain;
-  background:#ffffff;
-  border-radius:16px;
-  padding:6px;
-  border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 8px 20px rgba(0,0,0,.12);
-  flex-shrink:0;
-}
-
-.site-brand-text h1{
-  margin:0;
-}
-
-.site-brand-text p{
-  margin:6px 0 0 0;
-}
-
-.topbar-actions{
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  align-items:center;
-}
-
-.layout{
-  display:grid;
-  grid-template-columns:360px minmax(0,1fr);
-  gap:16px;
-  padding:16px;
-  height:calc(100vh - 96px);
-  min-height:calc(100vh - 96px);
-  overflow:hidden;
-}
-
-.sidebar{
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-  min-height:0;
-  overflow-y:auto;
-  padding-right:4px;
-}
-
-.sidebar::-webkit-scrollbar{ width:10px; }
-.sidebar::-webkit-scrollbar-thumb{ background:#cad7e6; border-radius:999px; }
-.sidebar::-webkit-scrollbar-track{ background:#eef3f8; border-radius:999px; }
-
-.panel{
-  background:var(--white);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:18px;
-  box-shadow:var(--shadow);
-}
-
-.panel h2{
-  margin:0 0 14px 0;
-  font-size:1.15rem;
-  color:var(--brand-dark);
-}
-
-.toggle-panel{
-  width:100%;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 16px;
-  border:1px solid var(--line);
-  border-radius:14px;
-  background:#f7fbff;
-  cursor:pointer;
-  font-size:1rem;
-  font-weight:700;
-  color:var(--brand);
-  transition:background .2s ease, transform .15s ease, box-shadow .15s ease;
-}
-
-.toggle-panel:hover{
-  background:#eef6ff;
-  box-shadow:var(--shadow-soft);
-}
-
-.field{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  margin-bottom:14px;
-}
-
-.field span{
-  font-size:.95rem;
-  color:var(--muted);
-  font-weight:600;
-}
-
-.field input,
-.field textarea,
-.field select{
-  width:100%;
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:12px 14px;
-  font-size:.96rem;
-  background:#fff;
-  outline:none;
-  transition:border-color .2s ease, box-shadow .2s ease;
-}
-
-.field input:focus,
-.field textarea:focus,
-.field select:focus{
-  border-color:var(--brand);
-  box-shadow:0 0 0 3px rgba(31,75,122,.12);
-}
-
-.field textarea{
-  resize:vertical;
-  min-height:96px;
-  line-height:1.45;
-}
-
-.field input[type="file"]{
-  padding:10px 12px;
-  background:#fafcff;
-  cursor:pointer;
-}
-
-.field input[readonly]{
-  background:#f7fafc;
-  color:#334155;
-}
-
-.small{
-  color:var(--muted);
-  font-size:.95rem;
-  line-height:1.55;
-  margin:0 0 12px 0;
-}
-
-.coords-box{
-  min-height:58px;
-  padding:14px;
-  border:1px dashed #cfdbea;
-  border-radius:14px;
-  background:#fafcff;
-  font-size:.94rem;
-  color:var(--muted);
-  margin-bottom:14px;
-}
-
-#contenitoreSegnalazioni{ margin-top:14px; }
-#contenitoreSegnalazioni.collapsed{ display:none; }
-
-#contenitoreNuovoPunto{ margin-top:14px; }
-#contenitoreNuovoPunto.collapsed{ display:none; }
-
-.map-area{
-  min-width:0;
-  min-height:0;
-  display:flex;
-  position:relative;
-}
-
-#map{
-  width:100%;
-  height:100%;
-  min-height:100%;
-  border-radius:22px;
-  overflow:hidden;
-  border:1px solid var(--line);
-  box-shadow:var(--shadow);
-  background:#e9eef5;
-}
-
-.btn{
-  border:none;
-  border-radius:14px;
-  padding:12px 16px;
-  font-size:.97rem;
-  cursor:pointer;
-  transition:transform .15s ease, opacity .15s ease, background .15s ease, box-shadow .15s ease;
-  font-weight:700;
-}
-
-.btn:hover{
-  transform:translateY(-1px);
-  opacity:.98;
-  box-shadow:var(--shadow-soft);
-}
-
-.btn-primary{
-  background:var(--accent);
-  color:#1b1b1b;
-}
-
-.btn-secondary{
-  background:#ffffff14;
-  color:var(--white);
-  border:1px solid #ffffff33;
-}
-
-.btn-light{
-  background:#eef3f8;
-  color:#223;
-  font-weight:700;
-}
-
-.btn-close{
-  background:#eef3f8;
-  color:#223;
-  padding:8px 12px;
-}
-
-.admin-link-btn,
-.site-link-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  padding:14px 20px;
-  border-radius:18px;
-  text-decoration:none;
-  font-weight:800;
-  transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
-}
-
-.admin-link-btn{
-  background:#163a5f;
-  color:#fff;
-  border:2px solid rgba(255,255,255,.15);
-}
-
-.admin-link-btn:hover{
-  transform:translateY(-1px);
-  background:#1f4b7a;
-  box-shadow:0 8px 20px rgba(0,0,0,.12);
-}
-
-.site-link-btn{
-  background:#f3f6fa;
-  color:#163a5f;
-  border:2px solid rgba(255,255,255,.15);
-}
-
-.site-link-btn:hover{
-  transform:translateY(-1px);
-  background:#e8eef6;
-  box-shadow:0 8px 20px rgba(0,0,0,.10);
-}
-
-#listaSegnalazioni{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  max-height:320px;
-  overflow-y:auto;
-  padding-right:6px;
-  margin-top:14px;
-}
-
-#listaSegnalazioni::-webkit-scrollbar{ width:10px; }
-#listaSegnalazioni::-webkit-scrollbar-thumb{ background:#cad7e6; border-radius:999px; }
-#listaSegnalazioni::-webkit-scrollbar-track{ background:#eef3f8; border-radius:999px; }
-
-.segnalazione-item{
-  padding:14px;
-  border:1px solid var(--line);
-  border-radius:14px;
-  background:#fff;
-  cursor:pointer;
-  transition:box-shadow .15s ease, transform .15s ease, border-color .15s ease;
-}
-
-.segnalazione-item:hover{
-  transform:translateY(-1px);
-  box-shadow:var(--shadow-soft);
-  border-color:#c7d7ea;
-}
-
-.segnalazione-item strong{
-  display:block;
-  margin-bottom:4px;
-  font-size:1rem;
-  line-height:1.25;
-}
-
-.segnalazione-item small{
-  display:block;
-  color:var(--muted);
-  line-height:1.5;
-}
-
-.segnalazione-code{
-  display:inline-block;
-  margin-bottom:6px;
-  font-size:.8rem;
-  font-weight:700;
-  background:#eef3f8;
-  color:#223;
-  border-radius:999px;
-  padding:4px 8px;
-}
-
-.segnalazione-item .btn-modifica,
-.segnalazione-item .btn-elimina{
-  margin-top:10px;
-  margin-right:8px;
-  border:none;
-  border-radius:10px;
-  padding:8px 11px;
-  font-size:.85rem;
-  cursor:pointer;
-  font-weight:600;
-}
-
-.segnalazione-item .btn-modifica{
-  background:#e8f1fb;
-  color:var(--brand);
-}
-
-.segnalazione-item .btn-elimina{
-  background:#fdecec;
-  color:#b42318;
-}
-
-.popup-content{
-  max-width:240px;
-  line-height:1.5;
-}
-
-.popup-actions{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  margin-top:8px;
-}
-
-.popup-delete-btn{
-  border:none;
-  border-radius:10px;
-  padding:7px 10px;
-  background:#fdecec;
-  color:#b42318;
-  font-size:.82rem;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.popup-foto-box{
-  margin-top:8px;
-}
-
-.foto-btn{
-  border:none;
-  border-radius:10px;
-  padding:7px 10px;
-  background:#eef3f8;
-  color:var(--brand);
-  font-size:.85rem;
-  font-weight:600;
-  cursor:pointer;
-  transition:background .15s ease, transform .15s ease;
-}
-
-.foto-btn:hover{
-  background:#dfeaf6;
-  transform:translateY(-1px);
-}
-
-.autocomplete-field{
-  position:relative;
-}
-
-.suggestions-box{
-  position:absolute;
-  top:100%;
-  left:0;
-  right:0;
-  margin-top:4px;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:12px;
-  box-shadow:var(--shadow-soft);
-  max-height:180px;
-  overflow-y:auto;
-  z-index:5000;
-}
-
-.suggestions-box.hidden{
-  display:none;
-}
-
-.suggestion-item{
-  padding:10px 12px;
-  cursor:pointer;
-  font-size:.95rem;
-  border-bottom:1px solid #f1f4f8;
-}
-
-.suggestion-item:last-child{
-  border-bottom:none;
-}
-
-.suggestion-item:hover,
-.suggestion-item.active{
-  background:#eef6ff;
-}
-
-.gps-row{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-
-.gps-status{
-  font-size:.92rem;
-  color:var(--muted);
-  background:#f8fbff;
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:8px 10px;
-}
-
-.wf-badge{
-  display:inline-block;
-  margin-top:6px;
-  padding:4px 8px;
-  border-radius:999px;
-  font-size:.78rem;
-  font-weight:700;
-}
-
-.wf-blue{
-  background:#e8f1fb;
-  color:var(--brand);
-}
-
-.wf-orange{
-  background:#fff3e8;
-  color:#b85c00;
-}
-
-.wf-green{
-  background:#e8f7ef;
-  color:#18794e;
-}
-
-.legend-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  padding:8px 0;
-}
-
-.legend-row strong{
-  font-size:1rem;
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  z-index:3000;
-}
-
-.modal.hidden{
-  display:none;
-}
-
-.modal-card{
-  background:#fff;
-  border-radius:20px;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  width:min(760px, 100%);
-  max-height:90vh;
-  display:flex;
-  flex-direction:column;
-}
-
-.small-modal{
-  width:min(520px, 100%);
-}
-
-.form-modal .modal-body{
-  overflow-y:auto;
-}
-
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:16px 18px;
-  border-bottom:1px solid var(--line);
-  flex:0 0 auto;
-}
-
-.modal-header h3{
-  margin:0;
-  font-size:1.15rem;
-  color:var(--brand-dark);
-}
-
-.modal-body{
-  padding:18px;
-  color:var(--text);
-  line-height:1.7;
-}
-
-.form-segnalazione{
-  display:block;
-}
-
-.form-actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:10px;
-  position:sticky;
-  bottom:0;
-  background:var(--white);
-  padding-top:10px;
-}
-
-.help-modal-text{
-  color:#334155;
-  line-height:1.6;
-  font-size:.98rem;
-}
-
-.help-list{
-  padding-left:18px;
-  margin:12px 0;
-}
-
-.help-list li{
-  margin-bottom:8px;
-}
-
-.help-note{
-  margin-top:14px;
-  font-weight:600;
-  color:#475569;
-}
-
-.guide-actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:14px;
-}
-
-.guide-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  border-radius:999px;
-  font-size:.9rem;
-  font-weight:700;
-}
-
-.guide-red{ background:#ffe2e2; color:#b00020; }
-.guide-orange{ background:#ffe7c2; color:#b85c00; }
-.guide-green{ background:#d8f7e6; color:#0f8a4b; }
-
-.map-hint{
-  position:absolute;
-  left:50%;
-  bottom:20px;
-  transform:translateX(-50%);
-  background:rgba(31,75,122,.95);
-  color:#fff;
-  padding:12px 18px;
-  border-radius:999px;
-  box-shadow:var(--shadow);
-  z-index:1200;
-  font-weight:700;
-  font-size:.95rem;
-  max-width:90%;
-  text-align:center;
-}
-
-.map-hint.hidden{
-  display:none;
-}
-
-.tour-box{
-  position:absolute;
-  right:20px;
-  bottom:20px;
-  width:min(380px, calc(100% - 40px));
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:18px;
-  box-shadow:var(--shadow);
-  z-index:1300;
-  overflow:hidden;
-}
-
-.tour-box.hidden{
-  display:none;
-}
-
-.tour-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  padding:14px 16px;
-  background:#f8fbff;
-  border-bottom:1px solid var(--line);
-}
-
-.tour-head h3{
-  margin:0;
-  font-size:1rem;
-  color:var(--brand-dark);
-}
-
-.tour-body{
-  padding:16px;
-  color:#334155;
-  line-height:1.55;
-}
-
-.tour-footer{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  padding:0 16px 16px;
-}
-
-@media (max-width: 960px){
-  body{
-    overflow:hidden;
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mappa dell'Accessibilità</title>
+  <meta name="theme-color" content="#1f4b7a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="site-brand">
+      <img src="logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
+      <div class="site-brand-text">
+        <h1>Mappa dell’Accessibilità</h1>
+        <p>Scopri, segnala e monitora accessibilità e barriere urbane</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="topbar-actions">
+    <a href="admin-mappa.html" class="admin-link-btn">🔐 Area operatori</a>
+    <a href="https://www.nessunostacolo.org" class="site-link-btn" target="_blank" rel="noopener">🌐 Torna al sito</a>
+    <button id="btnHowTo" class="btn btn-secondary" type="button">❓ Come segnalare</button>
+    <button id="btnTour" class="btn btn-secondary" type="button">🧭 Guida</button>
+    <button id="btnLocate" class="btn btn-primary" type="button">📍 Mostra la mia posizione</button>
+    <button id="btnLegend" class="btn btn-secondary" type="button">ℹ️ Legenda</button>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="sidebar">
+
+    <section class="panel">
+      <h2>Ricerca e filtri</h2>
+
+      <label class="field">
+        <span>Ricerca</span>
+        <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo o comune">
+      </label>
+
+      <label class="field">
+        <span>Comune</span>
+        <select id="filterComune">
+          <option value="tutti">Tutti</option>
+          <option value="San Cataldo">San Cataldo</option>
+          <option value="Caltanissetta">Caltanissetta</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Impostazione colori</span>
+        <select id="filterStatus">
+          <option value="tutti">Tutti</option>
+          <option value="rosso">🔴 Rosso — Non accessibile</option>
+          <option value="arancione">🟠 Arancione — Parziale</option>
+          <option value="verde">🟢 Verde — Accessibile</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Stato segnalazione</span>
+        <select id="filterWorkflow">
+          <option value="tutti">Tutti</option>
+          <option value="nuova">Nuova</option>
+          <option value="presa in carico">Presa in carico</option>
+          <option value="chiusa">Chiusa</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="panel">
+      <button id="toggleSegnalazioni" class="toggle-panel" type="button">
+        <span>Segnalazioni</span>
+        <span>▼</span>
+      </button>
+
+      <div id="contenitoreSegnalazioni">
+        <div id="listaSegnalazioni"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <button id="toggleNuovoPunto" class="toggle-panel" type="button">
+        <span>Nuovo punto</span>
+        <span>▼</span>
+      </button>
+
+      <div id="contenitoreNuovoPunto">
+        <p class="small">Clicca su un punto della mappa per aprire la finestra di inserimento.</p>
+
+        <div id="selectedCoords" class="coords-box">Nessun punto selezionato</div>
+
+        <button id="btnApriForm" class="btn btn-light" type="button">Apri finestra segnalazione</button>
+      </div>
+    </section>
+
+  </aside>
+
+  <section class="map-area">
+    <div id="map"></div>
+
+    <!-- TOOLTIP PRIMO ACCESSO -->
+    <div id="mapHint" class="map-hint hidden">
+      👆 Clicca sulla mappa per iniziare una nuova segnalazione
+    </div>
+
+    <!-- TOUR GUIDATO -->
+    <div id="tourBox" class="tour-box hidden" aria-hidden="true">
+      <div class="tour-head">
+        <h3 id="tourTitle">Guida rapida</h3>
+        <button id="btnCloseTour" class="btn btn-close" type="button">✕</button>
+      </div>
+      <div class="tour-body">
+        <p id="tourText">Testo guida</p>
+      </div>
+      <div class="tour-footer">
+        <button id="btnPrevTour" class="btn btn-light" type="button">Indietro</button>
+        <button id="btnNextTour" class="btn btn-primary" type="button">Avanti</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- MODALE LEGENDA -->
+<div id="legendModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card small-modal">
+    <div class="modal-header">
+      <h3>Legenda e conteggi</h3>
+      <button id="btnCloseLegend" class="btn btn-close" type="button">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="legend-row"><span>🔴 Rosso — Non accessibile</span><strong id="countRosso">0</strong></div>
+      <div class="legend-row"><span>🟠 Arancione — Parziale</span><strong id="countArancione">0</strong></div>
+      <div class="legend-row"><span>🟢 Verde — Accessibile</span><strong id="countVerde">0</strong></div>
+      <hr>
+      <div class="legend-row"><span>Totale segnalazioni</span><strong id="countTotale">0</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE COME SEGNALARE -->
+<div id="howToModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card small-modal">
+    <div class="modal-header">
+      <h3>Come segnalare</h3>
+      <button id="btnCloseHowTo" class="btn btn-close" type="button">✕</button>
+    </div>
+    <div class="modal-body help-modal-text">
+      <p>La Mappa dell’Accessibilità serve per segnalare barriere architettoniche, difficoltà di accesso e luoghi accessibili da valorizzare.</p>
+
+      <ol class="help-list">
+        <li>Spostati sulla mappa nella zona interessata</li>
+        <li>Clicca sul punto preciso</li>
+        <li>Apri la finestra di segnalazione</li>
+        <li>Inserisci titolo, descrizione e foto</li>
+        <li>Scegli il colore corretto</li>
+        <li>Premi <strong>Salva</strong></li>
+      </ol>
+
+      <div class="guide-actions">
+        <span class="guide-badge guide-red">🔴 Rosso = non accessibile</span>
+        <span class="guide-badge guide-orange">🟠 Arancione = accessibile con difficoltà</span>
+        <span class="guide-badge guide-green">🟢 Verde = accessibile</span>
+      </div>
+
+      <p class="help-note">Le segnalazioni saranno poi verificate dagli operatori di NessunOstacolo.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE BENVENUTO -->
+<div id="welcomeModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card small-modal">
+    <div class="modal-header">
+      <h3>Benvenuto nella Mappa dell’Accessibilità</h3>
+      <button id="btnCloseWelcome" class="btn btn-close" type="button">✕</button>
+    </div>
+    <div class="modal-body help-modal-text">
+      <p>Con questa mappa puoi segnalare:</p>
+      <ul class="help-list">
+        <li>barriere architettoniche</li>
+        <li>problemi di accesso</li>
+        <li>luoghi accessibili da valorizzare</li>
+      </ul>
+
+      <p>Per iniziare:</p>
+      <ul class="help-list">
+        <li>attiva la posizione se vuoi aiutarti con la geolocalizzazione</li>
+        <li>clicca sul punto della mappa</li>
+        <li>compila il modulo</li>
+        <li>salva la segnalazione</li>
+      </ul>
+
+      <div class="guide-actions">
+        <button id="btnWelcomeOk" class="btn btn-primary" type="button">Ho capito</button>
+        <button id="btnWelcomeTour" class="btn btn-light" type="button">Avvia guida</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE FORM -->
+<div id="formModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card form-modal">
+    <div class="modal-header">
+      <h3 id="formModalTitle">Nuova segnalazione</h3>
+      <button id="btnCloseFormModal" class="btn btn-close" type="button">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="small">Compila i dati del punto selezionato.</p>
+
+      <div id="modalSelectedCoords" class="coords-box">Nessun punto selezionato</div>
+
+      <form id="formSegnalazione" class="form-segnalazione">
+
+        <label class="field">
+          <span>Codice segnalazione</span>
+          <input id="inputCodice" type="text" readonly>
+        </label>
+
+        <label class="field">
+          <span>Titolo</span>
+          <input id="inputTitolo" type="text" placeholder="Es. Gradino ingresso municipio" autocomplete="off" required />
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Comune</span>
+          <input id="inputComune" type="text" placeholder="Es. San Cataldo" autocomplete="off" required />
+          <div id="suggestionsComune" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Categoria</span>
+          <input id="inputCategoria" type="text" placeholder="Es. Parcheggio disabili" autocomplete="off" required />
+          <div id="suggestionsCategoria" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Luogo</span>
+          <input id="inputLuogo" type="text" placeholder="Es. Municipio di San Cataldo" autocomplete="off" required />
+          <div id="suggestionsLuogo" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field">
+          <span>Descrizione</span>
+          <textarea id="inputDescrizione" rows="4" placeholder="Descrivi il problema o il punto accessibile"></textarea>
+        </label>
+
+        <label class="field">
+          <span>Stato accessibilità</span>
+          <select id="inputStatus" required>
+            <option value="">Seleziona</option>
+            <option value="rosso">🔴 Rosso — Non accessibile</option>
+            <option value="arancione">🟠 Arancione — Parziale</option>
+            <option value="verde">🟢 Verde — Accessibile</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Stato segnalazione</span>
+          <select id="inputWorkflow" required>
+            <option value="nuova">Nuova</option>
+            <option value="presa in carico">Presa in carico</option>
+            <option value="chiusa">Chiusa</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Nome segnalante</span>
+          <input id="inputNomeSegnalante" type="text" placeholder="Nome e cognome">
+        </label>
+
+        <label class="field">
+          <span>Contatto segnalante</span>
+          <input id="inputContattoSegnalante" type="text" placeholder="Telefono o email">
+        </label>
+
+        <label class="field">
+          <span>GPS automatico telefono</span>
+          <div class="gps-row">
+            <button id="btnGpsPhone" class="btn btn-light" type="button">Usa GPS del telefono</button>
+            <div id="gpsStatus" class="gps-status">Non acquisito</div>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Foto 1</span>
+          <input id="inputFoto1" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <label class="field">
+          <span>Foto 2</span>
+          <input id="inputFoto2" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <label class="field">
+          <span>Foto 3</span>
+          <input id="inputFoto3" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Salva</button>
+          <button id="btnResetSegnalazione" class="btn btn-light" type="button">Pulisci</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+
+<script>
+  const btnHowTo = document.getElementById("btnHowTo");
+  const howToModal = document.getElementById("howToModal");
+  const btnCloseHowTo = document.getElementById("btnCloseHowTo");
+
+  const welcomeModal = document.getElementById("welcomeModal");
+  const btnCloseWelcome = document.getElementById("btnCloseWelcome");
+  const btnWelcomeOk = document.getElementById("btnWelcomeOk");
+  const btnWelcomeTour = document.getElementById("btnWelcomeTour");
+
+  const btnTour = document.getElementById("btnTour");
+  const tourBox = document.getElementById("tourBox");
+  const tourTitle = document.getElementById("tourTitle");
+  const tourText = document.getElementById("tourText");
+  const btnCloseTour = document.getElementById("btnCloseTour");
+  const btnPrevTour = document.getElementById("btnPrevTour");
+  const btnNextTour = document.getElementById("btnNextTour");
+
+  const mapHint = document.getElementById("mapHint");
+
+  const TOUR_KEY = "mappa_accessibilita_tour_done";
+  const WELCOME_KEY = "mappa_accessibilita_welcome_seen";
+  const HINT_KEY = "mappa_accessibilita_hint_seen";
+
+  const tourSteps = [
+    {
+      title: "Benvenuto",
+      text: "Questa mappa ti aiuta a segnalare barriere architettoniche e luoghi accessibili."
+    },
+    {
+      title: "1. Guarda la mappa",
+      text: "Spostati sulla mappa e individua il punto preciso dove vuoi fare la segnalazione."
+    },
+    {
+      title: "2. Clicca sul punto",
+      text: "Premi sul punto esatto nella mappa. Da lì potrai aprire la finestra di inserimento."
+    },
+    {
+      title: "3. Compila il modulo",
+      text: "Inserisci titolo, comune, categoria, luogo, descrizione e foto."
+    },
+    {
+      title: "4. Scegli il colore giusto",
+      text: "Rosso = non accessibile. Arancione = accessibile con difficoltà. Verde = accessibile."
+    },
+    {
+      title: "5. Salva la segnalazione",
+      text: "Dopo il salvataggio, la segnalazione sarà visibile e potrà essere verificata dagli operatori."
+    }
+  ];
+
+  let currentTourStep = 0;
+
+  function openModal(modal) {
+    if (!modal) return;
+    modal.classList.remove("hidden");
+    modal.setAttribute("aria-hidden", "false");
   }
 
-  .topbar{
-    padding:10px 12px;
-    flex-direction:column;
-    align-items:stretch;
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.setAttribute("aria-hidden", "true");
   }
 
-  .site-brand{
-    align-items:flex-start;
+  function renderTourStep() {
+    const step = tourSteps[currentTourStep];
+    tourTitle.textContent = step.title;
+    tourText.textContent = step.text;
+    btnPrevTour.disabled = currentTourStep === 0;
+    btnNextTour.textContent = currentTourStep === tourSteps.length - 1 ? "Fine" : "Avanti";
   }
 
-  .site-logo{
-    width:56px;
-    height:56px;
-    border-radius:14px;
+  function openTour(startIndex = 0) {
+    currentTourStep = startIndex;
+    renderTourStep();
+    tourBox.classList.remove("hidden");
+    tourBox.setAttribute("aria-hidden", "false");
   }
 
-  .brand h1{
-    font-size:1.2rem;
+  function closeTour() {
+    tourBox.classList.add("hidden");
+    tourBox.setAttribute("aria-hidden", "true");
   }
 
-  .brand p{
-    font-size:.88rem;
-    margin-top:4px;
+  if (btnHowTo) btnHowTo.addEventListener("click", () => openModal(howToModal));
+  if (btnCloseHowTo) btnCloseHowTo.addEventListener("click", () => closeModal(howToModal));
+
+  if (btnTour) {
+    btnTour.addEventListener("click", () => {
+      closeModal(welcomeModal);
+      openTour(0);
+    });
   }
 
-  .topbar-actions{
-    width:100%;
-    display:flex;
-    gap:8px;
-    flex-direction:column;
+  if (btnCloseTour) btnCloseTour.addEventListener("click", closeTour);
+
+  if (btnPrevTour) {
+    btnPrevTour.addEventListener("click", () => {
+      if (currentTourStep > 0) {
+        currentTourStep--;
+        renderTourStep();
+      }
+    });
   }
 
-  .topbar-actions .btn,
-  .topbar-actions .admin-link-btn,
-  .topbar-actions .site-link-btn{
-    width:100%;
-    padding:10px 12px;
-    font-size:.9rem;
+  if (btnNextTour) {
+    btnNextTour.addEventListener("click", () => {
+      if (currentTourStep < tourSteps.length - 1) {
+        currentTourStep++;
+        renderTourStep();
+      } else {
+        localStorage.setItem(TOUR_KEY, "true");
+        closeTour();
+      }
+    });
   }
 
-  .layout{
-    display:block;
-    height:calc(100vh - 170px);
-    min-height:calc(100vh - 170px);
-    padding:0;
-    margin:0;
-    overflow:hidden;
+  if (btnCloseWelcome) {
+    btnCloseWelcome.addEventListener("click", () => {
+      localStorage.setItem(WELCOME_KEY, "true");
+      closeModal(welcomeModal);
+    });
   }
 
-  .sidebar{
-    display:none !important;
+  if (btnWelcomeOk) {
+    btnWelcomeOk.addEventListener("click", () => {
+      localStorage.setItem(WELCOME_KEY, "true");
+      closeModal(welcomeModal);
+    });
   }
 
-  .map-area{
-    width:100%;
-    height:100%;
-    min-height:100%;
-    display:block;
+  if (btnWelcomeTour) {
+    btnWelcomeTour.addEventListener("click", () => {
+      localStorage.setItem(WELCOME_KEY, "true");
+      closeModal(welcomeModal);
+      openTour(0);
+    });
   }
 
-  #map{
-    width:100%;
-    height:100%;
-    min-height:100%;
-    border-radius:0;
-    border:none;
-    box-shadow:none;
-  }
+  [howToModal, welcomeModal].forEach(modal => {
+    if (!modal) return;
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal(modal);
+    });
+  });
 
-  .modal{
-    padding:0;
-    align-items:stretch;
-    justify-content:stretch;
-  }
+  window.addEventListener("load", () => {
+    if (!localStorage.getItem(WELCOME_KEY)) {
+      setTimeout(() => openModal(welcomeModal), 600);
+    }
 
-  .modal-card{
-    width:100%;
-    height:100%;
-    max-height:100%;
-    border-radius:0;
-  }
+    if (!localStorage.getItem(HINT_KEY)) {
+      setTimeout(() => {
+        mapHint.classList.remove("hidden");
+        setTimeout(() => {
+          mapHint.classList.add("hidden");
+          localStorage.setItem(HINT_KEY, "true");
+        }, 5000);
+      }, 1200);
+    }
+  });
 
-  .modal-header{
-    padding:14px 16px;
+  const mapElement = document.getElementById("map");
+  if (mapElement) {
+    mapElement.addEventListener("click", () => {
+      mapHint.classList.add("hidden");
+      localStorage.setItem(HINT_KEY, "true");
+    });
   }
+</script>
 
-  .modal-body{
-    padding:14px 16px 22px;
-    overflow-y:auto;
-  }
-
-  .form-actions{
-    position:sticky;
-    bottom:0;
-    background:#fff;
-    padding-top:12px;
-    flex-direction:column;
-  }
-
-  .form-actions .btn{
-    width:100%;
-  }
-
-  .gps-row{
-    flex-direction:column;
-    align-items:stretch;
-  }
-
-  .guide-actions{
-    flex-direction:column;
-  }
-
-  .guide-actions .btn,
-  .guide-actions .guide-badge{
-    width:100%;
-    justify-content:center;
-  }
-
-  .tour-box{
-    left:12px;
-    right:12px;
-    bottom:12px;
-    width:auto;
-  }
-
-  .tour-footer{
-    flex-direction:column;
-  }
-
-  .tour-footer .btn{
-    width:100%;
-  }
-
-  .map-hint{
-    left:12px;
-    right:12px;
-    bottom:12px;
-    transform:none;
-    max-width:none;
-    border-radius:16px;
-  }
-}
+</body>
+</html>
