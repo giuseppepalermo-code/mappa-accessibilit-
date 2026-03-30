@@ -1,5 +1,6 @@
 // ===============================
 // MAPPA DELL'ACCESSIBILITÀ
+// Codice automatico + legenda conteggi + elimina da popup
 // ===============================
 
 const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
@@ -57,9 +58,6 @@ function workflowBadgeClass(value) {
 }
 
 function dbRowToPoint(row) {
-  const latValue = Number(row.lat ?? row.Lat);
-  const lngValue = Number(row.lng ?? row.Lng ?? row.log ?? row.Log);
-
   return {
     id: row.id,
     codice: row.codice || "",
@@ -77,7 +75,10 @@ function dbRowToPoint(row) {
     foto1: row.foto1 || null,
     foto2: row.foto2 || null,
     foto3: row.foto3 || null,
-    coords: [latValue, lngValue]
+    coords: [
+      Number(row.lat ?? row.Lat),
+      Number(row.log ?? row.Log ?? row.lng ?? row.Lng)
+    ]
   };
 }
 
@@ -147,6 +148,7 @@ let selectedCoordsValue = null;
 let editingId = null;
 let gpsPhoneCoords = null;
 
+// sidebar
 const listaSegnalazioni = document.getElementById("listaSegnalazioni");
 const toggleSegnalazioni = document.getElementById("toggleSegnalazioni");
 const contenitoreSegnalazioni = document.getElementById("contenitoreSegnalazioni");
@@ -154,16 +156,19 @@ const toggleNuovoPunto = document.getElementById("toggleNuovoPunto");
 const contenitoreNuovoPunto = document.getElementById("contenitoreNuovoPunto");
 const btnApriForm = document.getElementById("btnApriForm");
 
+// filters
 const searchText = document.getElementById("searchText");
 const filterComune = document.getElementById("filterComune");
 const filterStatus = document.getElementById("filterStatus");
 const filterWorkflow = document.getElementById("filterWorkflow");
 
+// legend counts
 const countRosso = document.getElementById("countRosso");
 const countArancione = document.getElementById("countArancione");
 const countVerde = document.getElementById("countVerde");
 const countTotale = document.getElementById("countTotale");
 
+// topbar/modal
 const btnLocate = document.getElementById("btnLocate");
 const btnLegend = document.getElementById("btnLegend");
 const btnCloseLegend = document.getElementById("btnCloseLegend");
@@ -176,6 +181,7 @@ const btnCloseFormModal = document.getElementById("btnCloseFormModal");
 const selectedCoords = document.getElementById("selectedCoords");
 const modalSelectedCoords = document.getElementById("modalSelectedCoords");
 
+// form
 const formSegnalazione = document.getElementById("formSegnalazione");
 const inputCodice = document.getElementById("inputCodice");
 const inputTitolo = document.getElementById("inputTitolo");
@@ -194,6 +200,7 @@ const btnResetSegnalazione = document.getElementById("btnResetSegnalazione");
 const btnGpsPhone = document.getElementById("btnGpsPhone");
 const gpsStatus = document.getElementById("gpsStatus");
 
+// autocomplete
 const suggestionsComune = document.getElementById("suggestionsComune");
 const suggestionsCategoria = document.getElementById("suggestionsCategoria");
 const suggestionsLuogo = document.getElementById("suggestionsLuogo");
@@ -406,23 +413,6 @@ function clearForm() {
   closeFormModal();
 }
 
-function resetFormKeepPoint() {
-  formSegnalazione.reset();
-  resetGpsStatus();
-  hideSuggestions(suggestionsComune);
-  hideSuggestions(suggestionsCategoria);
-  hideSuggestions(suggestionsLuogo);
-
-  if (selectedCoordsValue) {
-    setCoordsBoxes(selectedCoordsValue);
-    if (!editingId) {
-      inputCodice.value = generateNextCode(inputComune.value || "", points);
-    }
-  } else {
-    inputCodice.value = "";
-  }
-}
-
 function fillFormFromPoint(point) {
   inputCodice.value = point.codice || "";
   inputTitolo.value = point.title || "";
@@ -582,10 +572,7 @@ async function loadPointsFromSupabase() {
     return;
   }
 
-  points = (data || []).map(dbRowToPoint).filter((point) => {
-    return Array.isArray(point.coords) && point.coords.every((v) => !Number.isNaN(v));
-  });
-
+  points = (data || []).map(dbRowToPoint).filter(Boolean);
   renderPoints();
 }
 
@@ -730,7 +717,12 @@ if (inputComune) {
 
 if (btnResetSegnalazione) {
   btnResetSegnalazione.addEventListener("click", () => {
-    resetFormKeepPoint();
+    formSegnalazione.reset();
+    inputCodice.value = "";
+    resetGpsStatus();
+    hideSuggestions(suggestionsComune);
+    hideSuggestions(suggestionsCategoria);
+    hideSuggestions(suggestionsLuogo);
   });
 }
 
