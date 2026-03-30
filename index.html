@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mappa dell'Accessibilità</title>
   <meta name="theme-color" content="#1f4b7a" />
   <link rel="manifest" href="manifest.json" />
@@ -14,7 +14,7 @@
 <header class="topbar">
   <div class="brand">
     <div class="site-brand">
-      <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
+      <img src="logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
       <div class="site-brand-text">
         <h1>Mappa dell’Accessibilità</h1>
         <p>Scopri, segnala e monitora accessibilità e barriere urbane</p>
@@ -26,7 +26,7 @@
     <a href="admin-mappa.html" class="admin-link-btn">🔐 Area operatori</a>
     <a href="https://www.nessunostacolo.org" class="site-link-btn" target="_blank" rel="noopener">🌐 Torna al sito</a>
     <button id="btnHowTo" class="btn btn-secondary" type="button">❓ Come segnalare</button>
-    <button id="btnTour" class="btn btn-secondary tour-trigger" type="button">🧭 Guida</button>
+    <button id="btnTour" class="btn btn-secondary" type="button">🧭 Guida</button>
     <button id="btnLocate" class="btn btn-primary" type="button">📍 Mostra la mia posizione</button>
     <button id="btnLegend" class="btn btn-secondary" type="button">ℹ️ Legenda</button>
   </div>
@@ -92,7 +92,9 @@
 
       <div id="contenitoreNuovoPunto">
         <p class="small">Clicca su un punto della mappa per aprire la finestra di inserimento.</p>
+
         <div id="selectedCoords" class="coords-box">Nessun punto selezionato</div>
+
         <button id="btnApriForm" class="btn btn-light" type="button">Apri finestra segnalazione</button>
       </div>
     </section>
@@ -102,14 +104,16 @@
   <section class="map-area">
     <div id="map"></div>
 
+    <!-- TOOLTIP PRIMO ACCESSO -->
     <div id="mapHint" class="map-hint hidden">
       👆 Clicca sulla mappa per iniziare una nuova segnalazione
     </div>
 
+    <!-- TOUR GUIDATO -->
     <div id="tourBox" class="tour-box hidden" aria-hidden="true">
       <div class="tour-head">
         <h3 id="tourTitle">Guida rapida</h3>
-        <button id="btnCloseTour" class="btn btn-close" type="button">✕ Esci</button>
+        <button id="btnCloseTour" class="btn btn-close" type="button">✕</button>
       </div>
       <div class="tour-body">
         <p id="tourText">Testo guida</p>
@@ -122,11 +126,12 @@
   </section>
 </main>
 
+<!-- MODALE LEGENDA -->
 <div id="legendModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card small-modal">
     <div class="modal-header">
       <h3>Legenda e conteggi</h3>
-      <button id="btnCloseLegend" class="btn btn-close modal-exit" type="button">✕ Esci</button>
+      <button id="btnCloseLegend" class="btn btn-close" type="button">✕</button>
     </div>
     <div class="modal-body">
       <div class="legend-row"><span>🔴 Rosso — Non accessibile</span><strong id="countRosso">0</strong></div>
@@ -138,11 +143,12 @@
   </div>
 </div>
 
+<!-- MODALE COME SEGNALARE -->
 <div id="howToModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card small-modal">
     <div class="modal-header">
       <h3>Come segnalare</h3>
-      <button id="btnCloseHowTo" class="btn btn-close modal-exit" type="button">✕ Esci</button>
+      <button id="btnCloseHowTo" class="btn btn-close" type="button">✕</button>
     </div>
     <div class="modal-body help-modal-text">
       <p>La Mappa dell’Accessibilità serve per segnalare barriere architettoniche, difficoltà di accesso e luoghi accessibili da valorizzare.</p>
@@ -167,11 +173,12 @@
   </div>
 </div>
 
+<!-- MODALE BENVENUTO -->
 <div id="welcomeModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card small-modal">
     <div class="modal-header">
       <h3>Benvenuto nella Mappa dell’Accessibilità</h3>
-      <button id="btnCloseWelcome" class="btn btn-close modal-exit" type="button">✕ Esci</button>
+      <button id="btnCloseWelcome" class="btn btn-close" type="button">✕</button>
     </div>
     <div class="modal-body help-modal-text">
       <p>Con questa mappa puoi segnalare:</p>
@@ -197,11 +204,12 @@
   </div>
 </div>
 
+<!-- MODALE FORM -->
 <div id="formModal" class="modal hidden" aria-hidden="true">
   <div class="modal-card form-modal">
     <div class="modal-header">
       <h3 id="formModalTitle">Nuova segnalazione</h3>
-      <button id="btnCloseFormModal" class="btn btn-close modal-exit" type="button">✕ Esci</button>
+      <button id="btnCloseFormModal" class="btn btn-close" type="button">✕</button>
     </div>
 
     <div class="modal-body">
@@ -334,12 +342,30 @@
   const HINT_KEY = "mappa_accessibilita_hint_seen";
 
   const tourSteps = [
-    { title: "Benvenuto", text: "Questa mappa ti aiuta a segnalare barriere architettoniche e luoghi accessibili." },
-    { title: "1. Guarda la mappa", text: "Spostati sulla mappa e individua il punto preciso dove vuoi fare la segnalazione." },
-    { title: "2. Clicca sul punto", text: "Premi sul punto esatto nella mappa. Da lì potrai aprire la finestra di inserimento." },
-    { title: "3. Compila il modulo", text: "Inserisci titolo, comune, categoria, luogo, descrizione e foto." },
-    { title: "4. Scegli il colore giusto", text: "Rosso = non accessibile. Arancione = accessibile con difficoltà. Verde = accessibile." },
-    { title: "5. Salva la segnalazione", text: "Dopo il salvataggio, la segnalazione sarà visibile e potrà essere verificata dagli operatori." }
+    {
+      title: "Benvenuto",
+      text: "Questa mappa ti aiuta a segnalare barriere architettoniche e luoghi accessibili."
+    },
+    {
+      title: "1. Guarda la mappa",
+      text: "Spostati sulla mappa e individua il punto preciso dove vuoi fare la segnalazione."
+    },
+    {
+      title: "2. Clicca sul punto",
+      text: "Premi sul punto esatto nella mappa. Da lì potrai aprire la finestra di inserimento."
+    },
+    {
+      title: "3. Compila il modulo",
+      text: "Inserisci titolo, comune, categoria, luogo, descrizione e foto."
+    },
+    {
+      title: "4. Scegli il colore giusto",
+      text: "Rosso = non accessibile. Arancione = accessibile con difficoltà. Verde = accessibile."
+    },
+    {
+      title: "5. Salva la segnalazione",
+      text: "Dopo il salvataggio, la segnalazione sarà visibile e potrà essere verificata dagli operatori."
+    }
   ];
 
   let currentTourStep = 0;
@@ -443,7 +469,7 @@
       setTimeout(() => openModal(welcomeModal), 600);
     }
 
-    if (!localStorage.getItem(HINT_KEY) && mapHint) {
+    if (!localStorage.getItem(HINT_KEY)) {
       setTimeout(() => {
         mapHint.classList.remove("hidden");
         setTimeout(() => {
@@ -455,7 +481,7 @@
   });
 
   const mapElement = document.getElementById("map");
-  if (mapElement && mapHint) {
+  if (mapElement) {
     mapElement.addEventListener("click", () => {
       mapHint.classList.add("hidden");
       localStorage.setItem(HINT_KEY, "true");
