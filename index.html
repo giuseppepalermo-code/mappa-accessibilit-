@@ -1,150 +1,467 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Mappa dell'Accessibilità</title>
-
-  <meta name="theme-color" content="#1f4b7a">
-  <link rel="manifest" href="manifest.json">
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#1f4b7a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <header class="topbar">
+<header class="topbar">
+  <div class="brand">
     <div class="site-brand">
       <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
-
       <div class="site-brand-text">
         <h1>Mappa dell’Accessibilità</h1>
-        <p>Scopri, segnala e monitora barriere e luoghi accessibili</p>
+        <p>Scopri, segnala e monitora accessibilità e barriere urbane</p>
       </div>
     </div>
+  </div>
 
-    <div class="topbar-actions">
-      <a href="#" class="admin-link-btn">🔐 Area operatori</a>
+  <div class="topbar-actions">
+    <a href="admin-mappa.html" class="admin-link-btn">🔐 Area operatori</a>
+    <a href="https://www.nessunostacolo.org" class="site-link-btn" target="_blank" rel="noopener">🌐 Torna al sito</a>
+    <button id="btnHowTo" class="btn btn-secondary" type="button">❓ Come segnalare</button>
+    <button id="btnTour" class="btn btn-secondary tour-trigger" type="button">🧭 Guida</button>
+    <button id="btnLocate" class="btn btn-primary" type="button">📍 Mostra la mia posizione</button>
+    <button id="btnLegend" class="btn btn-secondary" type="button">ℹ️ Legenda</button>
+  </div>
+</header>
 
-      <a href="https://www.nessunostacolo.org" target="_blank" rel="noopener" class="site-link-btn">
-        🌐 Sito NessunOstacolo
-      </a>
+<main class="layout">
+  <aside class="sidebar">
 
-      <button id="btnHowTo" class="btn btn-secondary" type="button">
-        ❓ Come segnalare
-      </button>
+    <section class="panel">
+      <h2>Ricerca e filtri</h2>
 
-      <button id="btnLocate" class="btn btn-primary" type="button">
-        📍 Mostra la mia posizione
-      </button>
+      <label class="field">
+        <span>Ricerca</span>
+        <input id="searchText" type="text" placeholder="Cerca per codice, titolo, luogo o comune">
+      </label>
 
-      <button id="btnLegend" class="btn btn-secondary" type="button">
-        ℹ️ Legenda
-      </button>
-    </div>
-  </header>
+      <label class="field">
+        <span>Comune</span>
+        <select id="filterComune">
+          <option value="tutti">Tutti</option>
+          <option value="San Cataldo">San Cataldo</option>
+          <option value="Caltanissetta">Caltanissetta</option>
+        </select>
+      </label>
 
-  <main class="layout">
-    <aside class="sidebar">
-      <section class="panel">
-        <h2>Filtri</h2>
+      <label class="field">
+        <span>Impostazione colori</span>
+        <select id="filterStatus">
+          <option value="tutti">Tutti</option>
+          <option value="rosso">🔴 Rosso — Non accessibile</option>
+          <option value="arancione">🟠 Arancione — Parziale</option>
+          <option value="verde">🟢 Verde — Accessibile</option>
+        </select>
+      </label>
 
-        <label class="field">
-          <span>Ricerca</span>
-          <input id="searchText" type="text" placeholder="Titolo, luogo o comune">
-        </label>
-
-        <label class="field">
-          <span>Comune</span>
-          <select id="filterComune">
-            <option value="tutti">Tutti</option>
-            <option value="San Cataldo">San Cataldo</option>
-            <option value="Caltanissetta">Caltanissetta</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Accessibilità</span>
-          <select id="filterStatus">
-            <option value="tutti">Tutti</option>
-            <option value="rosso">🔴 Non accessibile</option>
-            <option value="arancione">🟠 Parziale</option>
-            <option value="verde">🟢 Accessibile</option>
-          </select>
-        </label>
-      </section>
-
-      <section class="panel">
-        <button id="toggleSegnalazioni" class="toggle-panel" type="button">
-          Segnalazioni ▼
-        </button>
-
-        <div id="contenitoreSegnalazioni">
-          <div id="listaSegnalazioni"></div>
-        </div>
-      </section>
-    </aside>
-
-    <section class="map-area">
-      <div id="map"></div>
+      <label class="field">
+        <span>Stato segnalazione</span>
+        <select id="filterWorkflow">
+          <option value="tutti">Tutti</option>
+          <option value="nuova">Nuova</option>
+          <option value="presa in carico">Presa in carico</option>
+          <option value="chiusa">Chiusa</option>
+        </select>
+      </label>
     </section>
-  </main>
 
-  <!-- MODALE LEGENDA -->
-  <div id="legendModal" class="modal hidden">
-    <div class="modal-card small-modal">
-      <div class="modal-header">
-        <h3>Legenda</h3>
-        <button id="btnCloseLegend" class="btn-close" type="button">✕ Esci</button>
+    <section class="panel">
+      <button id="toggleSegnalazioni" class="toggle-panel" type="button">
+        <span>Segnalazioni</span>
+        <span>▼</span>
+      </button>
+
+      <div id="contenitoreSegnalazioni">
+        <div id="listaSegnalazioni"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <button id="toggleNuovoPunto" class="toggle-panel" type="button">
+        <span>Nuovo punto</span>
+        <span>▼</span>
+      </button>
+
+      <div id="contenitoreNuovoPunto">
+        <p class="small">Clicca su un punto della mappa per aprire la finestra di inserimento.</p>
+        <div id="selectedCoords" class="coords-box">Nessun punto selezionato</div>
+        <button id="btnApriForm" class="btn btn-light" type="button">Apri finestra segnalazione</button>
+      </div>
+    </section>
+
+  </aside>
+
+  <section class="map-area">
+    <div id="map"></div>
+
+    <div id="mapHint" class="map-hint hidden">
+      👆 Clicca sulla mappa per iniziare una nuova segnalazione
+    </div>
+
+    <div id="tourBox" class="tour-box hidden" aria-hidden="true">
+      <div class="tour-head">
+        <h3 id="tourTitle">Guida rapida</h3>
+        <button id="btnCloseTour" class="btn btn-close" type="button">✕ Esci</button>
+      </div>
+      <div class="tour-body">
+        <p id="tourText">Testo guida</p>
+      </div>
+      <div class="tour-footer">
+        <button id="btnPrevTour" class="btn btn-light" type="button">Indietro</button>
+        <button id="btnNextTour" class="btn btn-primary" type="button">Avanti</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="legendModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card small-modal">
+    <div class="modal-header">
+      <h3>Legenda e conteggi</h3>
+      <button id="btnCloseLegend" class="btn btn-close modal-exit" type="button">✕ Esci</button>
+    </div>
+    <div class="modal-body">
+      <div class="legend-row"><span>🔴 Rosso — Non accessibile</span><strong id="countRosso">0</strong></div>
+      <div class="legend-row"><span>🟠 Arancione — Parziale</span><strong id="countArancione">0</strong></div>
+      <div class="legend-row"><span>🟢 Verde — Accessibile</span><strong id="countVerde">0</strong></div>
+      <hr>
+      <div class="legend-row"><span>Totale segnalazioni</span><strong id="countTotale">0</strong></div>
+    </div>
+  </div>
+</div>
+
+<div id="howToModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card small-modal">
+    <div class="modal-header">
+      <h3>Come segnalare</h3>
+      <button id="btnCloseHowTo" class="btn btn-close modal-exit" type="button">✕ Esci</button>
+    </div>
+    <div class="modal-body help-modal-text">
+      <p>La Mappa dell’Accessibilità serve per segnalare barriere architettoniche, difficoltà di accesso e luoghi accessibili da valorizzare.</p>
+
+      <ol class="help-list">
+        <li>Spostati sulla mappa nella zona interessata</li>
+        <li>Clicca sul punto preciso</li>
+        <li>Apri la finestra di segnalazione</li>
+        <li>Inserisci titolo, descrizione e foto</li>
+        <li>Scegli il colore corretto</li>
+        <li>Premi <strong>Salva</strong></li>
+      </ol>
+
+      <div class="guide-actions">
+        <span class="guide-badge guide-red">🔴 Rosso = non accessibile</span>
+        <span class="guide-badge guide-orange">🟠 Arancione = accessibile con difficoltà</span>
+        <span class="guide-badge guide-green">🟢 Verde = accessibile</span>
       </div>
 
-      <div class="modal-body">
-        <div class="legend-row">
-          <span>🔴 Non accessibile</span>
-          <strong id="countRosso">0</strong>
-        </div>
+      <p class="help-note">Le segnalazioni saranno poi verificate dagli operatori di NessunOstacolo.</p>
+    </div>
+  </div>
+</div>
 
-        <div class="legend-row">
-          <span>🟠 Parziale</span>
-          <strong id="countArancione">0</strong>
-        </div>
+<div id="welcomeModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card small-modal">
+    <div class="modal-header">
+      <h3>Benvenuto nella Mappa dell’Accessibilità</h3>
+      <button id="btnCloseWelcome" class="btn btn-close modal-exit" type="button">✕ Esci</button>
+    </div>
+    <div class="modal-body help-modal-text">
+      <p>Con questa mappa puoi segnalare:</p>
+      <ul class="help-list">
+        <li>barriere architettoniche</li>
+        <li>problemi di accesso</li>
+        <li>luoghi accessibili da valorizzare</li>
+      </ul>
 
-        <div class="legend-row">
-          <span>🟢 Accessibile</span>
-          <strong id="countVerde">0</strong>
-        </div>
+      <p>Per iniziare:</p>
+      <ul class="help-list">
+        <li>attiva la posizione se vuoi aiutarti con la geolocalizzazione</li>
+        <li>clicca sul punto della mappa</li>
+        <li>compila il modulo</li>
+        <li>salva la segnalazione</li>
+      </ul>
 
-        <hr>
-
-        <div class="legend-row">
-          <span>Totale segnalazioni</span>
-          <strong id="countTotale">0</strong>
-        </div>
+      <div class="guide-actions">
+        <button id="btnWelcomeOk" class="btn btn-primary" type="button">Ho capito</button>
+        <button id="btnWelcomeTour" class="btn btn-light" type="button">Avvia guida</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- MODALE GUIDA -->
-  <div id="howToModal" class="modal hidden">
-    <div class="modal-card small-modal">
-      <div class="modal-header">
-        <h3>Come segnalare</h3>
-        <button id="btnCloseHowTo" class="btn-close" type="button">✕ Esci</button>
-      </div>
+<div id="formModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-card form-modal">
+    <div class="modal-header">
+      <h3 id="formModalTitle">Nuova segnalazione</h3>
+      <button id="btnCloseFormModal" class="btn btn-close modal-exit" type="button">✕ Esci</button>
+    </div>
 
-      <div class="modal-body">
-        <ul class="help-list">
-          <li>Apri la mappa nella zona interessata</li>
-          <li>Seleziona il punto desiderato</li>
-          <li>Compila i campi della segnalazione</li>
-          <li>Scegli il livello di accessibilità corretto</li>
-          <li>Salva la segnalazione</li>
-        </ul>
-      </div>
+    <div class="modal-body">
+      <p class="small">Compila i dati del punto selezionato.</p>
+
+      <div id="modalSelectedCoords" class="coords-box">Nessun punto selezionato</div>
+
+      <form id="formSegnalazione" class="form-segnalazione">
+
+        <label class="field">
+          <span>Codice segnalazione</span>
+          <input id="inputCodice" type="text" readonly>
+        </label>
+
+        <label class="field">
+          <span>Titolo</span>
+          <input id="inputTitolo" type="text" placeholder="Es. Gradino ingresso municipio" autocomplete="off" required />
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Comune</span>
+          <input id="inputComune" type="text" placeholder="Es. San Cataldo" autocomplete="off" required />
+          <div id="suggestionsComune" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Categoria</span>
+          <input id="inputCategoria" type="text" placeholder="Es. Parcheggio disabili" autocomplete="off" required />
+          <div id="suggestionsCategoria" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field autocomplete-field">
+          <span>Luogo</span>
+          <input id="inputLuogo" type="text" placeholder="Es. Municipio di San Cataldo" autocomplete="off" required />
+          <div id="suggestionsLuogo" class="suggestions-box hidden"></div>
+        </label>
+
+        <label class="field">
+          <span>Descrizione</span>
+          <textarea id="inputDescrizione" rows="4" placeholder="Descrivi il problema o il punto accessibile"></textarea>
+        </label>
+
+        <label class="field">
+          <span>Stato accessibilità</span>
+          <select id="inputStatus" required>
+            <option value="">Seleziona</option>
+            <option value="rosso">🔴 Rosso — Non accessibile</option>
+            <option value="arancione">🟠 Arancione — Parziale</option>
+            <option value="verde">🟢 Verde — Accessibile</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Stato segnalazione</span>
+          <select id="inputWorkflow" required>
+            <option value="nuova">Nuova</option>
+            <option value="presa in carico">Presa in carico</option>
+            <option value="chiusa">Chiusa</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Nome segnalante</span>
+          <input id="inputNomeSegnalante" type="text" placeholder="Nome e cognome">
+        </label>
+
+        <label class="field">
+          <span>Contatto segnalante</span>
+          <input id="inputContattoSegnalante" type="text" placeholder="Telefono o email">
+        </label>
+
+        <label class="field">
+          <span>GPS automatico telefono</span>
+          <div class="gps-row">
+            <button id="btnGpsPhone" class="btn btn-light" type="button">Usa GPS del telefono</button>
+            <div id="gpsStatus" class="gps-status">Non acquisito</div>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Foto 1</span>
+          <input id="inputFoto1" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <label class="field">
+          <span>Foto 2</span>
+          <input id="inputFoto2" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <label class="field">
+          <span>Foto 3</span>
+          <input id="inputFoto3" type="file" accept="image/*" capture="environment">
+        </label>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Salva</button>
+          <button id="btnResetSegnalazione" class="btn btn-light" type="button">Pulisci</button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+
+<script>
+  const btnHowTo = document.getElementById("btnHowTo");
+  const howToModal = document.getElementById("howToModal");
+  const btnCloseHowTo = document.getElementById("btnCloseHowTo");
+
+  const welcomeModal = document.getElementById("welcomeModal");
+  const btnCloseWelcome = document.getElementById("btnCloseWelcome");
+  const btnWelcomeOk = document.getElementById("btnWelcomeOk");
+  const btnWelcomeTour = document.getElementById("btnWelcomeTour");
+
+  const btnTour = document.getElementById("btnTour");
+  const tourBox = document.getElementById("tourBox");
+  const tourTitle = document.getElementById("tourTitle");
+  const tourText = document.getElementById("tourText");
+  const btnCloseTour = document.getElementById("btnCloseTour");
+  const btnPrevTour = document.getElementById("btnPrevTour");
+  const btnNextTour = document.getElementById("btnNextTour");
+
+  const mapHint = document.getElementById("mapHint");
+
+  const TOUR_KEY = "mappa_accessibilita_tour_done";
+  const WELCOME_KEY = "mappa_accessibilita_welcome_seen";
+  const HINT_KEY = "mappa_accessibilita_hint_seen";
+
+  const tourSteps = [
+    { title: "Benvenuto", text: "Questa mappa ti aiuta a segnalare barriere architettoniche e luoghi accessibili." },
+    { title: "1. Guarda la mappa", text: "Spostati sulla mappa e individua il punto preciso dove vuoi fare la segnalazione." },
+    { title: "2. Clicca sul punto", text: "Premi sul punto esatto nella mappa. Da lì potrai aprire la finestra di inserimento." },
+    { title: "3. Compila il modulo", text: "Inserisci titolo, comune, categoria, luogo, descrizione e foto." },
+    { title: "4. Scegli il colore giusto", text: "Rosso = non accessibile. Arancione = accessibile con difficoltà. Verde = accessibile." },
+    { title: "5. Salva la segnalazione", text: "Dopo il salvataggio, la segnalazione sarà visibile e potrà essere verificata dagli operatori." }
+  ];
+
+  let currentTourStep = 0;
+
+  function openModal(modal) {
+    if (!modal) return;
+    modal.classList.remove("hidden");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function renderTourStep() {
+    const step = tourSteps[currentTourStep];
+    tourTitle.textContent = step.title;
+    tourText.textContent = step.text;
+    btnPrevTour.disabled = currentTourStep === 0;
+    btnNextTour.textContent = currentTourStep === tourSteps.length - 1 ? "Fine" : "Avanti";
+  }
+
+  function openTour(startIndex = 0) {
+    currentTourStep = startIndex;
+    renderTourStep();
+    tourBox.classList.remove("hidden");
+    tourBox.setAttribute("aria-hidden", "false");
+  }
+
+  function closeTour() {
+    tourBox.classList.add("hidden");
+    tourBox.setAttribute("aria-hidden", "true");
+  }
+
+  if (btnHowTo) btnHowTo.addEventListener("click", () => openModal(howToModal));
+  if (btnCloseHowTo) btnCloseHowTo.addEventListener("click", () => closeModal(howToModal));
+
+  if (btnTour) {
+    btnTour.addEventListener("click", () => {
+      closeModal(welcomeModal);
+      openTour(0);
+    });
+  }
+
+  if (btnCloseTour) btnCloseTour.addEventListener("click", closeTour);
+
+  if (btnPrevTour) {
+    btnPrevTour.addEventListener("click", () => {
+      if (currentTourStep > 0) {
+        currentTourStep--;
+        renderTourStep();
+      }
+    });
+  }
+
+  if (btnNextTour) {
+    btnNextTour.addEventListener("click", () => {
+      if (currentTourStep < tourSteps.length - 1) {
+        currentTourStep++;
+        renderTourStep();
+      } else {
+        localStorage.setItem(TOUR_KEY, "true");
+        closeTour();
+      }
+    });
+  }
+
+  if (btnCloseWelcome) {
+    btnCloseWelcome.addEventListener("click", () => {
+      localStorage.setItem(WELCOME_KEY, "true");
+      closeModal(welcomeModal);
+    });
+  }
+
+  if (btnWelcomeOk) {
+    btnWelcomeOk.addEventListener("click", () => {
+      localStorage.setItem(WELCOME_KEY, "true");
+      closeModal(welcomeModal);
+    });
+  }
+
+  if (btnWelcomeTour) {
+    btnWelcomeTour.addEventListener("click", () => {
+      localStorage.setItem(WELCOME_KEY, "true");
+      closeModal(welcomeModal);
+      openTour(0);
+    });
+  }
+
+  [howToModal, welcomeModal].forEach(modal => {
+    if (!modal) return;
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal(modal);
+    });
+  });
+
+  window.addEventListener("load", () => {
+    if (!localStorage.getItem(WELCOME_KEY)) {
+      setTimeout(() => openModal(welcomeModal), 600);
+    }
+
+    if (!localStorage.getItem(HINT_KEY) && mapHint) {
+      setTimeout(() => {
+        mapHint.classList.remove("hidden");
+        setTimeout(() => {
+          mapHint.classList.add("hidden");
+          localStorage.setItem(HINT_KEY, "true");
+        }, 5000);
+      }, 1200);
+    }
+  });
+
+  const mapElement = document.getElementById("map");
+  if (mapElement && mapHint) {
+    mapElement.addEventListener("click", () => {
+      mapHint.classList.add("hidden");
+      localStorage.setItem(HINT_KEY, "true");
+    });
+  }
+</script>
+
 </body>
 </html>
