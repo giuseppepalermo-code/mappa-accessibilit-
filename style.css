@@ -41,22 +41,11 @@ body{
   flex:0 0 auto;
 }
 
-.brand h1{
-  margin:0;
-  font-size:1.55rem;
-  line-height:1.1;
-}
-
-.brand p{
-  margin:8px 0 0 0;
-  opacity:.94;
-  font-size:1rem;
-}
-
 .site-brand{
   display:flex;
   align-items:center;
   gap:14px;
+  min-width:0;
 }
 
 .site-logo{
@@ -71,12 +60,22 @@ body{
   flex-shrink:0;
 }
 
+.site-brand-text{
+  min-width:0;
+}
+
 .site-brand-text h1{
   margin:0;
+  font-size:1.55rem;
+  line-height:1.1;
+  color:#fff;
 }
 
 .site-brand-text p{
   margin:6px 0 0 0;
+  opacity:.94;
+  font-size:1rem;
+  color:#fff;
 }
 
 .topbar-actions{
@@ -84,6 +83,7 @@ body{
   gap:12px;
   flex-wrap:wrap;
   align-items:center;
+  justify-content:flex-end;
 }
 
 .layout{
@@ -286,6 +286,7 @@ body{
   text-decoration:none;
   font-weight:800;
   transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+  white-space:nowrap;
 }
 
 .admin-link-btn{
@@ -707,49 +708,61 @@ body{
   }
 
   .topbar{
-    padding:10px 12px;
+    padding:8px 10px;
+    gap:10px;
     flex-direction:column;
     align-items:stretch;
   }
 
   .site-brand{
-    align-items:flex-start;
+    align-items:center;
+    gap:10px;
   }
 
   .site-logo{
-    width:56px;
-    height:56px;
-    border-radius:14px;
+    width:46px;
+    height:46px;
+    border-radius:12px;
+    padding:4px;
   }
 
-  .brand h1{
-    font-size:1.2rem;
+  .site-brand-text h1{
+    font-size:1.05rem;
+    line-height:1.15;
   }
 
-  .brand p{
-    font-size:.88rem;
-    margin-top:4px;
+  .site-brand-text p{
+    font-size:.78rem;
+    margin-top:3px;
+    line-height:1.25;
   }
 
   .topbar-actions{
     width:100%;
-    display:flex;
+    display:grid;
+    grid-template-columns:1fr 1fr;
     gap:8px;
-    flex-direction:column;
   }
 
   .topbar-actions .btn,
   .topbar-actions .admin-link-btn,
   .topbar-actions .site-link-btn{
     width:100%;
-    padding:10px 12px;
-    font-size:.9rem;
+    min-width:0;
+    padding:9px 10px;
+    font-size:.84rem;
+    border-radius:12px;
+    text-align:center;
+  }
+
+  .tour-trigger{
+    display:none;
   }
 
   .layout{
     display:block;
-    height:calc(100vh - 170px);
-    min-height:calc(100vh - 170px);
+    height:calc(100vh - 148px);
+    min-height:calc(100vh - 148px);
     padding:0;
     margin:0;
     overflow:hidden;
@@ -786,6 +799,10 @@ body{
     height:100%;
     max-height:100%;
     border-radius:0;
+  }
+
+  .small-modal{
+    width:100%;
   }
 
   .modal-header{
@@ -846,5 +863,34 @@ body{
     transform:none;
     max-width:none;
     border-radius:16px;
+    font-size:.88rem;
+    padding:11px 14px;
+  }
+}
+
+@media (max-width: 640px){
+  .topbar-actions{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .site-link-btn{
+    order:2;
+  }
+
+  .admin-link-btn{
+    order:1;
+  }
+
+  #btnHowTo{
+    order:3;
+  }
+
+  #btnLocate{
+    order:4;
+  }
+
+  #btnLegend{
+    order:5;
+    grid-column:1 / -1;
   }
 }
