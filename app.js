@@ -140,6 +140,29 @@ function refreshMapSize() {
   setTimeout(() => map.invalidateSize(), 250);
 }
 
+function findNearestPointWithinTolerance(latlng, maxPixelDistance = 26) {
+  if (!latlng || !points.length) return null;
+
+  const tappedPoint = map.latLngToContainerPoint(latlng);
+  let nearest = null;
+  let minDistance = Infinity;
+
+  points.forEach((point) => {
+    if (!Array.isArray(point.coords) || point.coords.some((v) => Number.isNaN(v))) return;
+
+    const pointLatLng = L.latLng(point.coords[0], point.coords[1]);
+    const pointPixel = map.latLngToContainerPoint(pointLatLng);
+    const distance = tappedPoint.distanceTo(pointPixel);
+
+    if (distance <= maxPixelDistance && distance < minDistance) {
+      minDistance = distance;
+      nearest = point;
+    }
+  });
+
+  return nearest;
+}
+
 const markersLayer = L.layerGroup().addTo(map);
 let userMarker = null;
 let points = [];
@@ -514,7 +537,7 @@ function renderPoints() {
     if (!Array.isArray(point.coords) || point.coords.some((v) => Number.isNaN(v))) return;
 
     const marker = L.circleMarker(point.coords, {
-      radius: 8,
+      radius: 12,
       color: getColor(point.status),
       fillColor: getColor(point.status),
       fillOpacity: 1,
