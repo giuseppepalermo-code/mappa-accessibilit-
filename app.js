@@ -850,7 +850,7 @@ if (btnLocate) {
         }
 
         userMarker = L.circleMarker([lat, lng], {
-          radius: 8,
+          radius: 12,
           color: "#1f4b7a",
           fillColor: "#1f4b7a",
           fillOpacity: 1,
