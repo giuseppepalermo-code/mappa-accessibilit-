@@ -597,6 +597,8 @@ async function loadPointsFromSupabase() {
   const { data, error } = await supabaseClient
     .from("segnalazioni")
     .select("*")
+    .eq("visibilita", "pubblica")
+    .eq("stato_archivio", "attiva")
     .order("id", { ascending: true });
 
   if (error) {
@@ -604,6 +606,13 @@ async function loadPointsFromSupabase() {
     alert("Errore lettura database.");
     return;
   }
+
+  points = (data || []).map(dbRowToPoint).filter((point) => {
+    return Array.isArray(point.coords) && point.coords.every((v) => !Number.isNaN(v));
+  });
+
+  renderPoints();
+}
 
   points = (data || []).map(dbRowToPoint).filter((point) => {
     return Array.isArray(point.coords) && point.coords.every((v) => !Number.isNaN(v));
