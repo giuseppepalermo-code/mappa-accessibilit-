@@ -193,6 +193,7 @@ let selectedCoordsValue = null;
 let editingId = null;
 let gpsPhoneCoords = null;
 
+// filtri reali desktop
 const searchText = document.getElementById("searchText");
 const filterComune = document.getElementById("filterComune");
 const filterStatus = document.getElementById("filterStatus");
@@ -200,24 +201,42 @@ const filterWorkflow = document.getElementById("filterWorkflow");
 const filterVisibilita = document.getElementById("filterVisibilita");
 const filterArchivio = document.getElementById("filterArchivio");
 
-const btnToggleFilters = document.getElementById("btnToggleFilters");
-const filtersContainer = document.getElementById("filtersContainer");
-const btnResetFilters = document.getElementById("btnResetFilters");
+// mirror mobile
+const searchTextMobileMirror = document.getElementById("searchTextMobileMirror");
+const filterComuneMobileMirror = document.getElementById("filterComuneMobileMirror");
+const filterStatusMobileMirror = document.getElementById("filterStatusMobileMirror");
+const filterWorkflowMobileMirror = document.getElementById("filterWorkflowMobileMirror");
+const filterVisibilitaMobileMirror = document.getElementById("filterVisibilitaMobileMirror");
+const filterArchivioMobileMirror = document.getElementById("filterArchivioMobileMirror");
 
+const btnApplyMobileFilters = document.getElementById("btnApplyMobileFilters");
+const btnResetMobileFilters = document.getElementById("btnResetMobileFilters");
+const btnToggleMobileFilters = document.getElementById("btnToggleMobileFilters");
+const btnCloseMobileFilters = document.getElementById("btnCloseMobileFilters");
+const mobileFiltersPanel = document.getElementById("mobileFiltersPanel");
+
+// dropdown desktop
+const filterChips = document.querySelectorAll(".filter-chip[data-target]");
+const desktopDropdowns = document.querySelectorAll(".filter-dropdown");
+
+// pulsanti vari
+const btnResetFilters = document.getElementById("btnResetFilters");
+const btnLegend = document.getElementById("btnLegend");
+const btnLegendMobile = document.getElementById("btnLegendMobile");
+const btnCloseLegend = document.getElementById("btnCloseLegend");
+const legendModal = document.getElementById("legendModal");
+const btnLocate = document.getElementById("btnLocate");
+
+// conteggi
 const countRosso = document.getElementById("countRosso");
 const countArancione = document.getElementById("countArancione");
 const countVerde = document.getElementById("countVerde");
 const countTotale = document.getElementById("countTotale");
 
-const btnLocate = document.getElementById("btnLocate");
-const btnLegend = document.getElementById("btnLegend");
-const btnCloseLegend = document.getElementById("btnCloseLegend");
-const legendModal = document.getElementById("legendModal");
-
+// form
 const formModal = document.getElementById("formModal");
 const formModalTitle = document.getElementById("formModalTitle");
 const btnCloseFormModal = document.getElementById("btnCloseFormModal");
-
 const selectedCoords = document.getElementById("selectedCoords");
 const modalSelectedCoords = document.getElementById("modalSelectedCoords");
 
@@ -239,6 +258,7 @@ const btnResetSegnalazione = document.getElementById("btnResetSegnalazione");
 const btnGpsPhone = document.getElementById("btnGpsPhone");
 const gpsStatus = document.getElementById("gpsStatus");
 
+// autocomplete
 const suggestionsComune = document.getElementById("suggestionsComune");
 const suggestionsCategoria = document.getElementById("suggestionsCategoria");
 const suggestionsLuogo = document.getElementById("suggestionsLuogo");
@@ -329,7 +349,7 @@ function attachAutocomplete(inputEl, boxEl, type) {
       inputEl.value = selectedValue;
       hideSuggestions(boxEl);
 
-      if (inputEl === inputComune && !editingId) {
+      if (inputEl === inputComune && !editingId && inputCodice) {
         inputCodice.value = generateNextCode(selectedValue, points);
       }
 
@@ -339,7 +359,6 @@ function attachAutocomplete(inputEl, boxEl, type) {
 
   inputEl.addEventListener("focus", update);
   inputEl.addEventListener("input", update);
-
   inputEl.addEventListener("blur", () => {
     setTimeout(() => hideSuggestions(boxEl), 180);
   });
@@ -604,6 +623,69 @@ async function uploadSinglePhoto(file) {
   return safeName;
 }
 
+function openDesktopDropdown(targetId) {
+  desktopDropdowns.forEach((dropdown) => {
+    if (dropdown.id === targetId) {
+      dropdown.classList.toggle("hidden");
+    } else {
+      dropdown.classList.add("hidden");
+    }
+  });
+}
+
+function closeAllDesktopDropdowns() {
+  desktopDropdowns.forEach((dropdown) => dropdown.classList.add("hidden"));
+}
+
+function openMobileFilters() {
+  if (!mobileFiltersPanel) return;
+  syncDesktopToMobile();
+  mobileFiltersPanel.classList.remove("hidden");
+  mobileFiltersPanel.setAttribute("aria-hidden", "false");
+}
+
+function closeMobileFilters() {
+  if (!mobileFiltersPanel) return;
+  mobileFiltersPanel.classList.add("hidden");
+  mobileFiltersPanel.setAttribute("aria-hidden", "true");
+}
+
+function syncDesktopToMobile() {
+  if (searchTextMobileMirror && searchText) searchTextMobileMirror.value = searchText.value;
+  if (filterComuneMobileMirror && filterComune) filterComuneMobileMirror.value = filterComune.value;
+  if (filterStatusMobileMirror && filterStatus) filterStatusMobileMirror.value = filterStatus.value;
+  if (filterWorkflowMobileMirror && filterWorkflow) filterWorkflowMobileMirror.value = filterWorkflow.value;
+  if (filterVisibilitaMobileMirror && filterVisibilita) filterVisibilitaMobileMirror.value = filterVisibilita.value;
+  if (filterArchivioMobileMirror && filterArchivio) filterArchivioMobileMirror.value = filterArchivio.value;
+}
+
+function applyMobileToDesktop() {
+  if (searchTextMobileMirror && searchText) searchText.value = searchTextMobileMirror.value;
+  if (filterComuneMobileMirror && filterComune) filterComune.value = filterComuneMobileMirror.value;
+  if (filterStatusMobileMirror && filterStatus) filterStatus.value = filterStatusMobileMirror.value;
+  if (filterWorkflowMobileMirror && filterWorkflow) filterWorkflow.value = filterWorkflowMobileMirror.value;
+  if (filterVisibilitaMobileMirror && filterVisibilita) filterVisibilita.value = filterVisibilitaMobileMirror.value;
+  if (filterArchivioMobileMirror && filterArchivio) filterArchivio.value = filterArchivioMobileMirror.value;
+}
+
+function resetAllFilters() {
+  if (searchText) searchText.value = "";
+  if (filterComune) filterComune.value = "tutti";
+  if (filterStatus) filterStatus.value = "tutti";
+  if (filterWorkflow) filterWorkflow.value = "tutti";
+  if (filterVisibilita) filterVisibilita.value = "tutti";
+  if (filterArchivio) filterArchivio.value = "tutti";
+
+  if (searchTextMobileMirror) searchTextMobileMirror.value = "";
+  if (filterComuneMobileMirror) filterComuneMobileMirror.value = "tutti";
+  if (filterStatusMobileMirror) filterStatusMobileMirror.value = "tutti";
+  if (filterWorkflowMobileMirror) filterWorkflowMobileMirror.value = "tutti";
+  if (filterVisibilitaMobileMirror) filterVisibilitaMobileMirror.value = "tutti";
+  if (filterArchivioMobileMirror) filterArchivioMobileMirror.value = "tutti";
+
+  renderPoints();
+}
+
 map.on("click", (e) => {
   const nearestPoint = findNearestPointWithinTolerance(e.latlng, 26);
 
@@ -802,33 +884,84 @@ if (filterWorkflow) filterWorkflow.addEventListener("change", renderPoints);
 if (filterVisibilita) filterVisibilita.addEventListener("change", renderPoints);
 if (filterArchivio) filterArchivio.addEventListener("change", renderPoints);
 
-if (btnToggleFilters && filtersContainer) {
-  btnToggleFilters.addEventListener("click", () => {
-    filtersContainer.classList.toggle("open");
-    refreshMapSize();
+if (filterChips.length > 0) {
+  filterChips.forEach((chip) => {
+    chip.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const targetId = chip.getAttribute("data-target");
+      if (targetId) openDesktopDropdown(targetId);
+    });
+  });
+}
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".filter-dropdown") && !e.target.closest(".filter-chip[data-target]")) {
+    closeAllDesktopDropdowns();
+  }
+
+  if (!e.target.closest(".autocomplete-field")) {
+    hideSuggestions(suggestionsComune);
+    hideSuggestions(suggestionsCategoria);
+    hideSuggestions(suggestionsLuogo);
+  }
+});
+
+if (btnToggleMobileFilters) {
+  btnToggleMobileFilters.addEventListener("click", () => {
+    openMobileFilters();
+  });
+}
+
+if (btnCloseMobileFilters) {
+  btnCloseMobileFilters.addEventListener("click", () => {
+    closeMobileFilters();
+  });
+}
+
+if (mobileFiltersPanel) {
+  mobileFiltersPanel.addEventListener("click", (e) => {
+    if (e.target === mobileFiltersPanel) {
+      closeMobileFilters();
+    }
+  });
+}
+
+if (btnApplyMobileFilters) {
+  btnApplyMobileFilters.addEventListener("click", () => {
+    applyMobileToDesktop();
+    renderPoints();
+    closeMobileFilters();
+  });
+}
+
+if (btnResetMobileFilters) {
+  btnResetMobileFilters.addEventListener("click", () => {
+    resetAllFilters();
+    closeMobileFilters();
   });
 }
 
 if (btnResetFilters) {
   btnResetFilters.addEventListener("click", () => {
-    if (searchText) searchText.value = "";
-    if (filterComune) filterComune.value = "tutti";
-    if (filterStatus) filterStatus.value = "tutti";
-    if (filterWorkflow) filterWorkflow.value = "tutti";
-    if (filterVisibilita) filterVisibilita.value = "tutti";
-    if (filterArchivio) filterArchivio.value = "tutti";
-    renderPoints();
+    resetAllFilters();
+    closeAllDesktopDropdowns();
   });
 }
 
+function openLegendModal() {
+  updateLegendCounts();
+  if (legendModal) {
+    legendModal.classList.remove("hidden");
+    legendModal.setAttribute("aria-hidden", "false");
+  }
+}
+
 if (btnLegend) {
-  btnLegend.addEventListener("click", () => {
-    updateLegendCounts();
-    if (legendModal) {
-      legendModal.classList.remove("hidden");
-      legendModal.setAttribute("aria-hidden", "false");
-    }
-  });
+  btnLegend.addEventListener("click", openLegendModal);
+}
+
+if (btnLegendMobile) {
+  btnLegendMobile.addEventListener("click", openLegendModal);
 }
 
 if (btnCloseLegend) {
@@ -895,13 +1028,13 @@ if (btnLocate) {
         userMarker.bindPopup("<strong>Sei qui</strong>").openPopup();
 
         btnLocate.disabled = false;
-        btnLocate.textContent = "📍 Mostra la mia posizione";
+        btnLocate.textContent = "📍 Posizione";
         refreshMapSize();
       },
       () => {
         alert("Non sono riuscito a trovare la tua posizione.");
         btnLocate.disabled = false;
-        btnLocate.textContent = "📍 Mostra la mia posizione";
+        btnLocate.textContent = "📍 Posizione";
       },
       {
         enableHighAccuracy: true,
@@ -911,14 +1044,6 @@ if (btnLocate) {
     );
   });
 }
-
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".autocomplete-field")) {
-    hideSuggestions(suggestionsComune);
-    hideSuggestions(suggestionsCategoria);
-    hideSuggestions(suggestionsLuogo);
-  }
-});
 
 attachAutocomplete(inputComune, suggestionsComune, "comuni");
 attachAutocomplete(inputCategoria, suggestionsCategoria, "categorie");
