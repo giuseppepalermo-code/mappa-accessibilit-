@@ -21,42 +21,61 @@
     .hidden{display:none !important}
     .btn{border:none;border-radius:16px;padding:12px 16px;font-size:.96rem;cursor:pointer;font-weight:800;transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
     .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-soft)}
-    .btn-brand{background:var(--brand);color:#fff}.btn-light{background:#edf3f8;color:#223}.btn-danger{background:#ffe6e6;color:#b42318}.btn-accent{background:var(--accent);color:#111827}.btn-purple{background:#6b21a8;color:#fff}.btn-small{padding:10px 12px;border-radius:12px;font-size:.86rem}
+    .btn-brand{background:var(--brand);color:#fff}
+    .btn-light{background:#edf3f8;color:#223}
+    .btn-danger{background:#ffe6e6;color:#b42318}
+    .btn-accent{background:var(--accent);color:#111827}
+    .btn-purple{background:#6b21a8;color:#fff}
+    .btn-small{padding:10px 12px;border-radius:12px;font-size:.86rem}
+    .btn-hide{background:#e5e7eb;color:#374151}
+    .btn-archive{background:#f3e8ff;color:#7e22ce}
+    .btn-restore{background:#dcfce7;color:#166534}
+
     .login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
     .login-card{width:100%;max-width:620px;background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:28px}
     .brand-login{display:flex;align-items:center;gap:16px;margin-bottom:18px}
     .brand-login img{width:74px;height:74px;object-fit:contain;border-radius:18px;background:#fff;border:1px solid var(--line);padding:8px;box-shadow:var(--shadow-soft)}
     .brand-login-text h1{margin:0 0 6px 0;font-size:2rem;color:var(--brand-dark);line-height:1.05}
     .brand-login-text p{margin:0;color:var(--muted);line-height:1.45;font-size:.98rem}
+
     .field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
     .field label{font-size:.95rem;color:var(--muted);font-weight:700}
     .field input,.field select,.field textarea{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:16px;font-size:1rem;outline:none;background:#fff;color:var(--text)}
     .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(31,75,122,.10)}
+
     .msg{margin-top:12px;font-size:.95rem;min-height:22px;font-weight:700}
-    .msg.error{color:var(--red-text)} .msg.ok{color:var(--green-text)}
+    .msg.error{color:var(--red-text)}
+    .msg.ok{color:var(--green-text)}
+
     .app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
     .sidebar{background:linear-gradient(180deg,var(--brand-dark),var(--brand));color:#fff;padding:22px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow);overflow:auto}
     .sidebar-brand{display:flex;gap:14px;align-items:flex-start}
     .sidebar-brand img{width:68px;height:68px;object-fit:contain;border-radius:16px;background:rgba(255,255,255,.92);padding:6px;border:1px solid rgba(255,255,255,.35);flex-shrink:0}
     .sidebar-brand h2{margin:0;font-size:1.45rem;line-height:1.05;letter-spacing:-.02em}
     .sidebar-brand p{margin:8px 0 0 0;opacity:.95;line-height:1.35;font-size:.92rem}
+
     .menu{display:flex;flex-direction:column;gap:10px;margin-top:10px}
     .menu-btn{width:100%;text-align:left;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:14px 14px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s ease}
     .menu-btn:hover,.menu-btn.active{background:#fff;color:var(--brand-dark);transform:translateX(2px)}
+
     .sidebar-footer{margin-top:auto;display:flex;flex-direction:column;gap:10px}
     .sidebar-note{font-size:.88rem;line-height:1.4;opacity:.95;background:rgba(255,255,255,.08);border-radius:16px;padding:12px}
+
     .main{padding:22px}
     .top-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:18px}
     .panel{background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:22px;margin-bottom:20px}
+
     .section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
     .section-head h2{margin:0;font-size:1.45rem;letter-spacing:-.02em}
     .section-head p{margin:6px 0 0 0;color:var(--muted);line-height:1.4;font-size:.96rem}
+
     .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
     .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:14px;align-items:end}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
     .meta-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
     .results-count{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:var(--blue-bg);color:var(--blue-text);font-weight:800}
     .cards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+
     .stat{border-radius:22px;padding:18px;border:2px solid transparent;box-shadow:var(--shadow-soft);min-height:128px;position:relative;overflow:hidden}
     .stat::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0));pointer-events:none}
     .stat-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;position:relative;z-index:1}
@@ -67,41 +86,75 @@
     .stat-red{background:linear-gradient(135deg,#ffd7d7,#ffbdbd);border-color:#ff8f8f;color:#8f1020}
     .stat-orange{background:linear-gradient(135deg,#ffe2b0,#ffd08c);border-color:#ffba5a;color:#92400e}
     .stat-green{background:linear-gradient(135deg,#d1fae5,#b7f3d6);border-color:#6ee7b7;color:#065f46}
+
     .report-card{border:1px solid var(--line);border-radius:24px;background:#fff;box-shadow:var(--shadow-soft);overflow:hidden;display:flex;flex-direction:column}
     .report-head{padding:18px 18px 12px;background:linear-gradient(180deg,#fbfdff,#f8fbff);border-bottom:1px solid #edf2f7}
     .report-code{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:#edf3f8;color:#23364d;font-weight:800;font-size:.82rem;margin-bottom:10px}
     .report-title{font-size:1.15rem;font-weight:800;line-height:1.3;margin:0 0 10px 0;color:#132238}
     .report-badges{display:flex;flex-wrap:wrap;gap:8px}
     .state-badge,.workflow-badge,.visibility-badge,.archive-badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;border-radius:999px;font-size:.83rem;font-weight:800;white-space:nowrap}
-    .state-red{background:var(--red-bg);color:var(--red-text)} .state-orange{background:var(--orange-bg);color:var(--orange-text)} .state-green{background:var(--green-bg);color:var(--green-text)} .state-default{background:var(--gray-bg);color:var(--gray-text)}
-    .wf-new{background:var(--blue-bg);color:var(--blue-text)} .wf-progress{background:var(--orange-bg);color:var(--orange-text)} .wf-closed{background:var(--green-bg);color:var(--green-text)}
+    .state-red{background:var(--red-bg);color:var(--red-text)}
+    .state-orange{background:var(--orange-bg);color:var(--orange-text)}
+    .state-green{background:var(--green-bg);color:var(--green-text)}
+    .state-default{background:var(--gray-bg);color:var(--gray-text)}
+    .wf-new{background:var(--blue-bg);color:var(--blue-text)}
+    .wf-progress{background:var(--orange-bg);color:var(--orange-text)}
+    .wf-closed{background:var(--green-bg);color:var(--green-text)}
     .visibility-public{background:#dbeafe;color:#1d4ed8}
     .visibility-hidden{background:#e5e7eb;color:#374151}
     .archive-active{background:#dcfce7;color:#166534}
     .archive-archived{background:#f3e8ff;color:#7e22ce}
+
     .report-body{padding:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
     .info-box{border:1px solid #edf2f7;border-radius:16px;background:#fcfdff;padding:12px 13px;min-height:82px}
     .info-label{display:block;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#64748b;margin-bottom:7px}
     .info-value{color:#1f2937;line-height:1.45;font-size:.96rem;word-break:break-word}
     .desc-box{grid-column:1 / -1;background:linear-gradient(180deg,#fff,#fbfdff)}
+
     .report-footer{padding:16px 18px 18px;border-top:1px solid #edf2f7;background:#fbfdff;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
     .workflow-editor{display:flex;flex-direction:column;gap:8px;min-width:220px}
     .workflow-editor label{font-size:.8rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
     .workflow-select{min-width:220px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:.95rem;background:#fff;color:var(--text)}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
+
     .charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
     .chart-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow-soft);min-height:360px}
     .chart-card h3{margin:0 0 14px 0;font-size:1rem}
     .chart-box{position:relative;height:280px}
     .report-output{border:1px solid var(--line);border-radius:20px;background:#fff;padding:18px;line-height:1.6;color:#1f2937;white-space:pre-wrap;min-height:220px}
+
     .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
     .setting-box{border:1px solid var(--line);border-radius:18px;background:#fff;padding:18px;box-shadow:var(--shadow-soft)}
     .setting-box h3{margin:0 0 10px 0;font-size:1.1rem}
     .setting-box p{margin:0 0 12px 0;color:var(--muted);line-height:1.45}
+
     .empty-state{border:2px dashed var(--line);border-radius:24px;padding:28px;background:#fff;text-align:center;color:var(--muted);font-weight:700}
-    @media print{body{background:#fff}.sidebar,.top-actions,.toolbar,.no-print{display:none !important}.app{display:block}.main{padding:0}.panel{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}}
-    @media (max-width:1400px){.app{grid-template-columns:250px 1fr}.grid,.filters,.charts-grid,.cards-grid,.settings-grid{grid-template-columns:1fr}}
-    @media (max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.main{padding:12px}.panel{padding:16px;border-radius:20px}.report-body{grid-template-columns:1fr}.report-footer{flex-direction:column;align-items:stretch}.workflow-editor,.workflow-select{min-width:100%}.brand-login{align-items:flex-start}.brand-login img{width:62px;height:62px}.sidebar-brand img{width:56px;height:56px}}
+
+    @media print{
+      body{background:#fff}
+      .sidebar,.top-actions,.toolbar,.no-print{display:none !important}
+      .app{display:block}
+      .main{padding:0}
+      .panel{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid}
+    }
+
+    @media (max-width:1400px){
+      .app{grid-template-columns:250px 1fr}
+      .grid,.filters,.charts-grid,.cards-grid,.settings-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width:900px){
+      .app{grid-template-columns:1fr}
+      .sidebar{position:relative;height:auto}
+      .main{padding:12px}
+      .panel{padding:16px;border-radius:20px}
+      .report-body{grid-template-columns:1fr}
+      .report-footer{flex-direction:column;align-items:stretch}
+      .workflow-editor,.workflow-select{min-width:100%}
+      .brand-login{align-items:flex-start}
+      .brand-login img{width:62px;height:62px}
+      .sidebar-brand img{width:56px;height:56px}
+    }
   </style>
 </head>
 <body>
@@ -195,8 +248,9 @@
             <div id="adminMsg" class="msg"></div>
           </div>
         </div>
+
         <div class="panel">
-          <div class="section-head"><div><h2>Elenco segnalazioni</h2><p>Vista operativa a schede con date di creazione, stato pubblico e archivio.</p></div></div>
+          <div class="section-head"><div><h2>Elenco segnalazioni</h2><p>Vista operativa a schede con gestione archivio e visibilità.</p></div></div>
           <div id="cardsGrid" class="cards-grid"></div>
         </div>
       </section>
@@ -297,14 +351,36 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function normalizeWorkflowValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nuova") return "nuova"; if(v === "presa in carico") return "presa in carico"; if(v === "chiusa") return "chiusa"; return ""; }
     function normalizeVisibilityValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nascosta") return "nascosta"; return "pubblica"; }
     function normalizeArchiveValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "archiviata") return "archiviata"; return "attiva"; }
+
     function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
     function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 2600); } }
     function showApp(){ loginSection.classList.add("hidden"); appSection.classList.remove("hidden"); }
     function hideApp(){ loginSection.classList.remove("hidden"); appSection.classList.add("hidden"); }
-    function getStateBadgeClass(value){ const v = normalizeText(value).toLowerCase(); if(v === "rosso") return "state-badge state-red"; if(v === "arancione") return "state-badge state-orange"; if(v === "verde") return "state-badge state-green"; return "state-badge state-default"; }
-    function getWorkflowBadgeClass(value){ const v = normalizeText(value).toLowerCase(); if(v === "chiusa") return "workflow-badge wf-closed"; if(v === "presa in carico") return "workflow-badge wf-progress"; return "workflow-badge wf-new"; }
-    function getVisibilityBadgeClass(value){ const v = normalizeVisibilityValue(value); return v === "nascosta" ? "visibility-badge visibility-hidden" : "visibility-badge visibility-public"; }
-    function getArchiveBadgeClass(value){ const v = normalizeArchiveValue(value); return v === "archiviata" ? "archive-badge archive-archived" : "archive-badge archive-active"; }
+
+    function getStateBadgeClass(value){
+      const v = normalizeText(value).toLowerCase();
+      if(v === "rosso") return "state-badge state-red";
+      if(v === "arancione") return "state-badge state-orange";
+      if(v === "verde") return "state-badge state-green";
+      return "state-badge state-default";
+    }
+
+    function getWorkflowBadgeClass(value){
+      const v = normalizeText(value).toLowerCase();
+      if(v === "chiusa") return "workflow-badge wf-closed";
+      if(v === "presa in carico") return "workflow-badge wf-progress";
+      return "workflow-badge wf-new";
+    }
+
+    function getVisibilityBadgeClass(value){
+      const v = normalizeVisibilityValue(value);
+      return v === "nascosta" ? "visibility-badge visibility-hidden" : "visibility-badge visibility-public";
+    }
+
+    function getArchiveBadgeClass(value){
+      const v = normalizeArchiveValue(value);
+      return v === "archiviata" ? "archive-badge archive-archived" : "archive-badge archive-active";
+    }
 
     async function isAdminUser(){
       const { data: authData, error: authError } = await client.auth.getUser();
@@ -401,7 +477,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       });
     }
 
-    function formatDate(value){ if(!value) return "—"; try{ return new Date(value).toLocaleString("it-IT"); } catch { return value; } }
+    function formatDate(value){
+      if(!value) return "—";
+      try{ return new Date(value).toLocaleString("it-IT"); }
+      catch { return value; }
+    }
 
     function updateStats(rows){
       const stato = r => normalizeText(getField(r, "Stato", "stato")).toLowerCase();
@@ -474,7 +554,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
             </div>
             <div class="actions no-print">
               <button class="btn btn-light btn-small" data-save-id="${id}" type="button">Salva</button>
-              <button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina</button>
+              <button class="btn btn-hide btn-small" data-hide-id="${id}" type="button">Nascondi</button>
+              <button class="btn btn-archive btn-small" data-archive-id="${id}" type="button">Archivia</button>
+              <button class="btn btn-restore btn-small" data-restore-id="${id}" type="button">Ripristina</button>
+              <button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina definitiva</button>
             </div>
           </div>`;
         cardsGrid.appendChild(card);
@@ -506,6 +589,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         data:{ labels:Object.keys(statusMap), datasets:[{ data:Object.values(statusMap), backgroundColor:["#ef4444","#f59e0b","#10b981"] }] },
         options:{ responsive:true, maintainAspectRatio:false }
       }));
+
       charts.push(new Chart(document.getElementById("chartWorkflow"), {
         type:"bar",
         data:{ labels:Object.keys(workflowMap), datasets:[{ label:"Segnalazioni", data:Object.values(workflowMap), backgroundColor:["#3b82f6","#f59e0b","#10b981"] }] },
@@ -618,28 +702,124 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       window.scrollTo({ top:0, behavior:"smooth" });
     }
 
+    async function updateWorkflow(id, nuovoWorkflow){
+      const { error } = await client.from("segnalazioni").update({ statosegnalazione: nuovoWorkflow }).eq("id", id);
+      if(error){ setAdminMessage("Errore nel salvataggio workflow.", "error"); return false; }
+      setAdminMessage("Workflow aggiornato correttamente.", "ok");
+      return true;
+    }
+
+    async function hideSegnalazione(id){
+      const conferma = confirm("Vuoi nascondere questa segnalazione dalla mappa pubblica?");
+      if(!conferma) return false;
+
+      const { error } = await client
+        .from("segnalazioni")
+        .update({ visibilita: "nascosta" })
+        .eq("id", id);
+
+      if(error){
+        setAdminMessage("Errore durante il nascondimento.", "error");
+        return false;
+      }
+
+      setAdminMessage("Segnalazione nascosta correttamente.", "ok");
+      return true;
+    }
+
+    async function archiveSegnalazione(id){
+      const conferma = confirm("Vuoi archiviare questa segnalazione? Verrà anche nascosta dalla mappa pubblica.");
+      if(!conferma) return false;
+
+      const { error } = await client
+        .from("segnalazioni")
+        .update({
+          stato_archivio: "archiviata",
+          visibilita: "nascosta"
+        })
+        .eq("id", id);
+
+      if(error){
+        setAdminMessage("Errore durante l'archiviazione.", "error");
+        return false;
+      }
+
+      setAdminMessage("Segnalazione archiviata correttamente.", "ok");
+      return true;
+    }
+
+    async function restoreSegnalazione(id){
+      const conferma = confirm("Vuoi ripristinare questa segnalazione? Tornerà attiva e pubblica.");
+      if(!conferma) return false;
+
+      const { error } = await client
+        .from("segnalazioni")
+        .update({
+          stato_archivio: "attiva",
+          visibilita: "pubblica"
+        })
+        .eq("id", id);
+
+      if(error){
+        setAdminMessage("Errore durante il ripristino.", "error");
+        return false;
+      }
+
+      setAdminMessage("Segnalazione ripristinata correttamente.", "ok");
+      return true;
+    }
+
+    async function deleteSegnalazione(id){
+      const conferma = confirm("Vuoi eliminare DEFINITIVAMENTE questa segnalazione? Questa azione non si può annullare.");
+      if(!conferma) return false;
+
+      const { error } = await client.from("segnalazioni").delete().eq("id", id);
+      if(error){
+        setAdminMessage("Errore durante eliminazione definitiva.", "error");
+        return false;
+      }
+
+      setAdminMessage("Segnalazione eliminata definitivamente.", "ok");
+      return true;
+    }
+
     document.addEventListener("click", async (event) => {
       const saveBtn = event.target.closest("[data-save-id]");
+      const hideBtn = event.target.closest("[data-hide-id]");
+      const archiveBtn = event.target.closest("[data-archive-id]");
+      const restoreBtn = event.target.closest("[data-restore-id]");
       const deleteBtn = event.target.closest("[data-delete-id]");
 
       if(saveBtn){
         const id = saveBtn.dataset.saveId;
         const workflowSelect = document.querySelector(`[data-workflow-id="${id}"]`);
         const nuovoWorkflow = workflowSelect.value;
-        const { error } = await client.from("segnalazioni").update({ statosegnalazione: nuovoWorkflow }).eq("id", id);
-        if(error){ setAdminMessage("Errore nel salvataggio workflow.", "error"); return; }
-        setAdminMessage("Workflow aggiornato correttamente.", "ok");
-        await loadData();
+        const ok = await updateWorkflow(id, nuovoWorkflow);
+        if(ok) await loadData();
+      }
+
+      if(hideBtn){
+        const id = hideBtn.dataset.hideId;
+        const ok = await hideSegnalazione(id);
+        if(ok) await loadData();
+      }
+
+      if(archiveBtn){
+        const id = archiveBtn.dataset.archiveId;
+        const ok = await archiveSegnalazione(id);
+        if(ok) await loadData();
+      }
+
+      if(restoreBtn){
+        const id = restoreBtn.dataset.restoreId;
+        const ok = await restoreSegnalazione(id);
+        if(ok) await loadData();
       }
 
       if(deleteBtn){
         const id = deleteBtn.dataset.deleteId;
-        const conferma = confirm("Vuoi eliminare definitivamente questa segnalazione?");
-        if(!conferma) return;
-        const { error } = await client.from("segnalazioni").delete().eq("id", id);
-        if(error){ setAdminMessage("Errore durante eliminazione.", "error"); return; }
-        setAdminMessage("Segnalazione eliminata.", "ok");
-        await loadData();
+        const ok = await deleteSegnalazione(id);
+        if(ok) await loadData();
       }
     });
 
