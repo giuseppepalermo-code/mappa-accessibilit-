@@ -12,39 +12,55 @@
 <body>
 
 <header class="topbar">
-  <div class="brand">
-    <div class="site-brand">
-      <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
-      <div class="site-brand-text">
-        <h1>Mappa dell’Accessibilità</h1>
-        <p>Scopri, segnala e monitora accessibilità e barriere urbane</p>
+  <div class="topbar-main">
+    <div class="brand">
+      <div class="site-brand">
+        <img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità" class="site-logo">
+        <div class="site-brand-text">
+          <h1>Mappa dell’Accessibilità</h1>
+          <p>Scopri, segnala e monitora accessibilità e barriere urbane</p>
+        </div>
       </div>
+    </div>
+
+    <div class="topbar-actions">
+      <a href="admin-mappa.html" class="admin-link-btn">🔐 Area operatori</a>
+      <a href="https://www.nessunostacolo.org" class="site-link-btn" target="_blank" rel="noopener">🌐 Torna al sito</a>
+      <button id="btnHowTo" class="btn btn-secondary" type="button">❓ Come segnalare</button>
+      <button id="btnTour" class="btn btn-secondary tour-trigger" type="button">🧭 Guida</button>
+      <button id="btnLocate" class="btn btn-primary" type="button">📍 Posizione</button>
     </div>
   </div>
 
-  <div class="topbar-actions">
-    <a href="admin-mappa.html" class="admin-link-btn">🔐 Area operatori</a>
-    <a href="https://www.nessunostacolo.org" class="site-link-btn" target="_blank" rel="noopener">🌐 Torna al sito</a>
-    <button id="btnHowTo" class="btn btn-secondary" type="button">❓ Come segnalare</button>
-    <button id="btnTour" class="btn btn-secondary tour-trigger" type="button">🧭 Guida</button>
-    <button id="btnLocate" class="btn btn-primary" type="button">📍 Mostra la mia posizione</button>
-    <button id="btnLegend" class="btn btn-secondary" type="button">ℹ️ Legenda</button>
+  <!-- Barra filtri desktop -->
+  <div class="filterbar desktop-filterbar">
+    <button class="filter-chip" type="button" data-target="dropdownRicerca">Ricerca ▾</button>
+    <button class="filter-chip" type="button" data-target="dropdownComune">Comune ▾</button>
+    <button class="filter-chip" type="button" data-target="dropdownColore">Colore ▾</button>
+    <button class="filter-chip" type="button" data-target="dropdownStato">Stato ▾</button>
+    <button class="filter-chip" type="button" data-target="dropdownVisibilita">Visibilità ▾</button>
+    <button class="filter-chip" type="button" data-target="dropdownArchivio">Archivio ▾</button>
+    <button id="btnResetFilters" class="filter-chip filter-chip-light" type="button">Azzera</button>
+    <button id="btnLegend" class="filter-chip filter-chip-light" type="button">Legenda</button>
+  </div>
+
+  <!-- Barra mobile -->
+  <div class="filterbar mobile-filterbar">
+    <button id="btnToggleMobileFilters" class="filter-chip" type="button">⚙️ Filtri</button>
+    <button id="btnLegendMobile" class="filter-chip filter-chip-light" type="button">Legenda</button>
   </div>
 </header>
 
-<div class="filters-topbar">
-  <div class="filters-topbar-header mobile-only">
-    <button id="btnToggleFilters" class="btn btn-secondary" type="button">
-      ⚙️ Filtri
-    </button>
-  </div>
-
-  <div id="filtersContainer" class="filters-container">
+<!-- Dropdown desktop -->
+<div class="filters-dropdowns desktop-dropdowns">
+  <div id="dropdownRicerca" class="filter-dropdown hidden">
     <label class="field compact-field">
       <span>Ricerca</span>
       <input id="searchText" type="text" placeholder="Codice, titolo, luogo o comune">
     </label>
+  </div>
 
+  <div id="dropdownComune" class="filter-dropdown hidden">
     <label class="field compact-field">
       <span>Comune</span>
       <select id="filterComune">
@@ -53,7 +69,9 @@
         <option value="Caltanissetta">Caltanissetta</option>
       </select>
     </label>
+  </div>
 
+  <div id="dropdownColore" class="filter-dropdown hidden">
     <label class="field compact-field">
       <span>Colore</span>
       <select id="filterStatus">
@@ -63,9 +81,11 @@
         <option value="verde">🟢 Verde</option>
       </select>
     </label>
+  </div>
 
+  <div id="dropdownStato" class="filter-dropdown hidden">
     <label class="field compact-field">
-      <span>Stato</span>
+      <span>Stato segnalazione</span>
       <select id="filterWorkflow">
         <option value="tutti">Tutti</option>
         <option value="nuova">Nuova</option>
@@ -73,7 +93,9 @@
         <option value="chiusa">Chiusa</option>
       </select>
     </label>
+  </div>
 
+  <div id="dropdownVisibilita" class="filter-dropdown hidden">
     <label class="field compact-field">
       <span>Visibilità</span>
       <select id="filterVisibilita">
@@ -82,7 +104,9 @@
         <option value="nascosta">Nascosta</option>
       </select>
     </label>
+  </div>
 
+  <div id="dropdownArchivio" class="filter-dropdown hidden">
     <label class="field compact-field">
       <span>Archivio</span>
       <select id="filterArchivio">
@@ -91,10 +115,75 @@
         <option value="archiviata">Archiviata</option>
       </select>
     </label>
+  </div>
+</div>
 
-    <button id="btnResetFilters" class="btn btn-light filters-reset-btn" type="button">
-      Azzera filtri
-    </button>
+<!-- Pannello filtri mobile -->
+<div id="mobileFiltersPanel" class="mobile-filters-panel hidden" aria-hidden="true">
+  <div class="mobile-filters-card">
+    <div class="mobile-filters-header">
+      <h3>Filtri</h3>
+      <button id="btnCloseMobileFilters" class="btn btn-close" type="button">✕</button>
+    </div>
+
+    <div class="mobile-filters-body">
+      <label class="field">
+        <span>Ricerca</span>
+        <input id="searchTextMobileMirror" type="text" placeholder="Codice, titolo, luogo o comune">
+      </label>
+
+      <label class="field">
+        <span>Comune</span>
+        <select id="filterComuneMobileMirror">
+          <option value="tutti">Tutti</option>
+          <option value="San Cataldo">San Cataldo</option>
+          <option value="Caltanissetta">Caltanissetta</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Colore</span>
+        <select id="filterStatusMobileMirror">
+          <option value="tutti">Tutti</option>
+          <option value="rosso">🔴 Rosso</option>
+          <option value="arancione">🟠 Arancione</option>
+          <option value="verde">🟢 Verde</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Stato segnalazione</span>
+        <select id="filterWorkflowMobileMirror">
+          <option value="tutti">Tutti</option>
+          <option value="nuova">Nuova</option>
+          <option value="presa in carico">Presa in carico</option>
+          <option value="chiusa">Chiusa</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Visibilità</span>
+        <select id="filterVisibilitaMobileMirror">
+          <option value="tutti">Tutti</option>
+          <option value="pubblica">Pubblica</option>
+          <option value="nascosta">Nascosta</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Archivio</span>
+        <select id="filterArchivioMobileMirror">
+          <option value="tutti">Tutti</option>
+          <option value="attiva">Attiva</option>
+          <option value="archiviata">Archiviata</option>
+        </select>
+      </label>
+
+      <div class="mobile-filters-actions">
+        <button id="btnApplyMobileFilters" class="btn btn-primary" type="button">Applica filtri</button>
+        <button id="btnResetMobileFilters" class="btn btn-light" type="button">Azzera filtri</button>
+      </div>
+    </div>
   </div>
 </div>
 
