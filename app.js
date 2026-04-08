@@ -193,19 +193,16 @@ let selectedCoordsValue = null;
 let editingId = null;
 let gpsPhoneCoords = null;
 
-const listaSegnalazioni = document.getElementById("listaSegnalazioni");
-const toggleSegnalazioni = document.getElementById("toggleSegnalazioni");
-const contenitoreSegnalazioni = document.getElementById("contenitoreSegnalazioni");
-const toggleNuovoPunto = document.getElementById("toggleNuovoPunto");
-const contenitoreNuovoPunto = document.getElementById("contenitoreNuovoPunto");
-const btnApriForm = document.getElementById("btnApriForm");
-
 const searchText = document.getElementById("searchText");
 const filterComune = document.getElementById("filterComune");
 const filterStatus = document.getElementById("filterStatus");
 const filterWorkflow = document.getElementById("filterWorkflow");
 const filterVisibilita = document.getElementById("filterVisibilita");
 const filterArchivio = document.getElementById("filterArchivio");
+
+const btnToggleFilters = document.getElementById("btnToggleFilters");
+const filtersContainer = document.getElementById("filtersContainer");
+const btnResetFilters = document.getElementById("btnResetFilters");
 
 const countRosso = document.getElementById("countRosso");
 const countArancione = document.getElementById("countArancione");
@@ -353,10 +350,10 @@ function updateLegendCounts() {
   const arancione = points.filter(p => p.status === "arancione").length;
   const verde = points.filter(p => p.status === "verde").length;
 
-  countRosso.textContent = rosso;
-  countArancione.textContent = arancione;
-  countVerde.textContent = verde;
-  countTotale.textContent = points.length;
+  if (countRosso) countRosso.textContent = rosso;
+  if (countArancione) countArancione.textContent = arancione;
+  if (countVerde) countVerde.textContent = verde;
+  if (countTotale) countTotale.textContent = points.length;
 }
 
 function buildPhotoButtons(point) {
@@ -378,12 +375,6 @@ function buildPopup(point) {
     <br><small>Archivio: ${archivioLabel(point.statoArchivio)}</small>
   ` : "";
 
-  const operatorActions = IS_OPERATOR_VIEW ? `
-    <div class="popup-actions">
-      <button type="button" class="popup-delete-btn" data-delete-id="${point.id}">Elimina</button>
-    </div>
-  ` : "";
-
   return `
     <div class="popup-content" data-point-id="${point.id}">
       <div class="segnalazione-code">${point.codice || "-"}</div>
@@ -396,7 +387,6 @@ function buildPopup(point) {
       ${gpsHtml}
       ${extraAdminInfo}
       ${buttonsHtml ? `<div class="popup-actions">${buttonsHtml}</div>` : ""}
-      ${operatorActions}
       <div class="popup-foto-box"></div>
     </div>
   `;
@@ -442,12 +432,14 @@ function setCoordsBoxes(coords) {
 }
 
 function openFormModal(isEdit = false) {
+  if (!formModal || !formModalTitle) return;
   formModalTitle.textContent = isEdit ? "Modifica segnalazione" : "Nuova segnalazione";
   formModal.classList.remove("hidden");
   formModal.setAttribute("aria-hidden", "false");
 }
 
 function closeFormModal() {
+  if (!formModal) return;
   formModal.classList.add("hidden");
   formModal.setAttribute("aria-hidden", "true");
   hideSuggestions(suggestionsComune);
@@ -461,16 +453,18 @@ function resetGpsStatus() {
 }
 
 function clearForm() {
+  if (!formSegnalazione) return;
   formSegnalazione.reset();
   editingId = null;
   selectedCoordsValue = null;
-  inputCodice.value = "";
+  if (inputCodice) inputCodice.value = "";
   setCoordsBoxes(null);
   resetGpsStatus();
   closeFormModal();
 }
 
 function resetFormKeepPoint() {
+  if (!formSegnalazione) return;
   formSegnalazione.reset();
   resetGpsStatus();
   hideSuggestions(suggestionsComune);
@@ -479,58 +473,35 @@ function resetFormKeepPoint() {
 
   if (selectedCoordsValue) {
     setCoordsBoxes(selectedCoordsValue);
-    if (!editingId) {
-      inputCodice.value = generateNextCode(inputComune.value || "", points);
+    if (!editingId && inputCodice) {
+      inputCodice.value = generateNextCode(inputComune?.value || "", points);
     }
-  } else {
+  } else if (inputCodice) {
     inputCodice.value = "";
   }
 }
 
 function fillFormFromPoint(point) {
+  if (!inputCodice) return;
+
   inputCodice.value = point.codice || "";
-  inputTitolo.value = point.title || "";
-  inputComune.value = point.comune || "";
-  inputCategoria.value = point.categoria || "";
-  inputLuogo.value = point.luogo || "";
-  inputDescrizione.value = point.description || "";
-  inputStatus.value = point.status || "";
-  inputWorkflow.value = point.workflow || "nuova";
-  inputNomeSegnalante.value = point.nomeSegnalante || "";
-  inputContattoSegnalante.value = point.contattoSegnalante || "";
+  if (inputTitolo) inputTitolo.value = point.title || "";
+  if (inputComune) inputComune.value = point.comune || "";
+  if (inputCategoria) inputCategoria.value = point.categoria || "";
+  if (inputLuogo) inputLuogo.value = point.luogo || "";
+  if (inputDescrizione) inputDescrizione.value = point.description || "";
+  if (inputStatus) inputStatus.value = point.status || "";
+  if (inputWorkflow) inputWorkflow.value = point.workflow || "nuova";
+  if (inputNomeSegnalante) inputNomeSegnalante.value = point.nomeSegnalante || "";
+  if (inputContattoSegnalante) inputContattoSegnalante.value = point.contattoSegnalante || "";
+
   selectedCoordsValue = [...point.coords];
   editingId = point.id;
   gpsPhoneCoords = point.gpsLat && point.gpsLng ? [Number(point.gpsLat), Number(point.gpsLng)] : null;
+
   if (gpsStatus) gpsStatus.textContent = gpsPhoneCoords ? "GPS acquisito" : "Non acquisito";
   setCoordsBoxes(point.coords);
   openFormModal(true);
-}
-
-async function deletePointById(pointId) {
-  const point = points.find(p => p.id === pointId);
-  if (!point) return;
-
-  const conferma = confirm(`Vuoi eliminare la segnalazione "${point.title}" (${point.codice})?`);
-  if (!conferma) return;
-
-  const { error } = await supabaseClient
-    .from("segnalazioni")
-    .delete()
-    .eq("id", pointId);
-
-  if (error) {
-    alert("Eliminazione non riuscita.");
-    console.error(error);
-    return;
-  }
-
-  const filesToDelete = [point.foto1, point.foto2, point.foto3].filter(Boolean);
-  if (filesToDelete.length > 0) {
-    await supabaseClient.storage.from("foto").remove(filesToDelete);
-  }
-
-  await loadPointsFromSupabase();
-  if (editingId === pointId) editingId = null;
 }
 
 function wirePopupActions(marker) {
@@ -540,7 +511,6 @@ function wirePopupActions(marker) {
 
     const buttons = popupEl.querySelectorAll(".foto-btn");
     const box = popupEl.querySelector(".popup-foto-box");
-    const deleteBtn = popupEl.querySelector(".popup-delete-btn");
 
     if (box) {
       buttons.forEach((btn) => {
@@ -558,19 +528,11 @@ function wirePopupActions(marker) {
         });
       });
     }
-
-    if (deleteBtn) {
-      deleteBtn.addEventListener("click", async () => {
-        const pointId = Number(deleteBtn.getAttribute("data-delete-id"));
-        await deletePointById(pointId);
-      });
-    }
   });
 }
 
 function renderPoints() {
   markersLayer.clearLayers();
-  if (listaSegnalazioni) listaSegnalazioni.innerHTML = "";
 
   const filtered = getFilteredPoints();
 
@@ -589,58 +551,9 @@ function renderPoints() {
       autoClose: true,
       closeOnClick: true
     });
+
     wirePopupActions(marker);
-
-    if (listaSegnalazioni) {
-      const item = document.createElement("div");
-      item.className = "segnalazione-item";
-
-      item.innerHTML = `
-        <div class="segnalazione-code">${point.codice || "-"}</div>
-        <strong>${point.title}</strong><br>
-        <small>${point.comune} · ${getStatusLabel(point.status)}</small><br>
-        <small><b>${point.categoria}</b></small><br>
-        <small>${point.luogo}</small><br>
-        <small>${point.description || ""}</small><br>
-        <small class="${workflowBadgeClass(point.workflow)}">${workflowLabel(point.workflow)}</small><br>
-        ${IS_OPERATOR_VIEW ? `<small>Visibilità: ${visibilitaLabel(point.visibilita)}</small><br>` : ""}
-        ${IS_OPERATOR_VIEW ? `<small>Archivio: ${archivioLabel(point.statoArchivio)}</small><br>` : ""}
-        ${IS_OPERATOR_VIEW ? `<button class="btn-modifica" data-id="${point.id}" type="button">Modifica</button>` : ""}
-        ${IS_OPERATOR_VIEW ? `<button class="btn-elimina" data-id="${point.id}" type="button">Elimina</button>` : ""}
-      `;
-
-      listaSegnalazioni.appendChild(item);
-
-      item.addEventListener("click", () => {
-        map.setView(point.coords, 18);
-        marker.openPopup();
-      });
-
-      if (IS_OPERATOR_VIEW) {
-        const btnModifica = item.querySelector(".btn-modifica");
-        const btnElimina = item.querySelector(".btn-elimina");
-
-        if (btnModifica) {
-          btnModifica.addEventListener("click", (ev) => {
-            ev.stopPropagation();
-            fillFormFromPoint(point);
-            map.setView(point.coords, 18);
-          });
-        }
-
-        if (btnElimina) {
-          btnElimina.addEventListener("click", async (ev) => {
-            ev.stopPropagation();
-            await deletePointById(point.id);
-          });
-        }
-      }
-    }
   });
-
-  if (listaSegnalazioni && filtered.length === 0) {
-    listaSegnalazioni.innerHTML = "Nessuna segnalazione trovata";
-  }
 
   updateLegendCounts();
   refreshMapSize();
@@ -715,127 +628,133 @@ map.on("click", (e) => {
   editingId = null;
   setCoordsBoxes(selectedCoordsValue);
   resetGpsStatus();
-  inputCodice.value = generateNextCode(inputComune.value || "", points);
+
+  if (inputCodice) {
+    inputCodice.value = generateNextCode(inputComune?.value || "", points);
+  }
+
   openFormModal(false);
 });
 
-formSegnalazione.addEventListener("submit", async (e) => {
-  e.preventDefault();
+if (formSegnalazione) {
+  formSegnalazione.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const title = normalizeText(inputTitolo.value);
-  const comune = normalizeText(inputComune.value);
-  const categoria = normalizeText(inputCategoria.value);
-  const luogo = normalizeText(inputLuogo.value);
-  const description = normalizeText(inputDescrizione.value);
-  const status = normalizeStatus(inputStatus.value);
-  const workflow = normalizeText(inputWorkflow.value).toLowerCase();
-  const nomeSegnalante = normalizeText(inputNomeSegnalante.value);
-  const contattoSegnalante = normalizeText(inputContattoSegnalante.value);
+    const title = normalizeText(inputTitolo?.value);
+    const comune = normalizeText(inputComune?.value);
+    const categoria = normalizeText(inputCategoria?.value);
+    const luogo = normalizeText(inputLuogo?.value);
+    const description = normalizeText(inputDescrizione?.value);
+    const status = normalizeStatus(inputStatus?.value);
+    const workflow = normalizeText(inputWorkflow?.value).toLowerCase();
+    const nomeSegnalante = normalizeText(inputNomeSegnalante?.value);
+    const contattoSegnalante = normalizeText(inputContattoSegnalante?.value);
 
-  if (!selectedCoordsValue) {
-    alert("Prima clicca sulla mappa per scegliere il punto.");
-    return;
-  }
-
-  if (!title || !comune || !categoria || !luogo) {
-    alert("Compila tutti i campi obbligatori.");
-    return;
-  }
-
-  if (!isValidStatus(status)) {
-    alert("Seleziona uno stato valido: rosso, arancione o verde.");
-    return;
-  }
-
-  try {
-    let foto1 = null;
-    let foto2 = null;
-    let foto3 = null;
-
-    if (inputFoto1 && inputFoto1.files.length > 0) foto1 = await uploadSinglePhoto(inputFoto1.files[0]);
-    if (inputFoto2 && inputFoto2.files.length > 0) foto2 = await uploadSinglePhoto(inputFoto2.files[0]);
-    if (inputFoto3 && inputFoto3.files.length > 0) foto3 = await uploadSinglePhoto(inputFoto3.files[0]);
-
-    const point = {
-      codice: editingId
-        ? (points.find(p => p.id === editingId)?.codice || generateNextCode(comune, points, editingId))
-        : generateNextCode(comune, points),
-      title,
-      comune,
-      categoria,
-      status,
-      workflow,
-      visibilita: "pubblica",
-      statoArchivio: "attiva",
-      luogo,
-      description,
-      motivoArchiviazione: null,
-      dataArchiviazione: null,
-      archiviataDa: null,
-      nomeSegnalante,
-      contattoSegnalante,
-      gpsLat: gpsPhoneCoords ? gpsPhoneCoords[0] : null,
-      gpsLng: gpsPhoneCoords ? gpsPhoneCoords[1] : null,
-      foto1,
-      foto2,
-      foto3,
-      coords: [...selectedCoordsValue]
-    };
-
-    if (editingId) {
-      const pointAttuale = points.find((p) => p.id === editingId);
-      if (!pointAttuale) return;
-
-      if (!foto1) point.foto1 = pointAttuale.foto1 || null;
-      if (!foto2) point.foto2 = pointAttuale.foto2 || null;
-      if (!foto3) point.foto3 = pointAttuale.foto3 || null;
-      if (!point.gpsLat) point.gpsLat = pointAttuale.gpsLat || null;
-      if (!point.gpsLng) point.gpsLng = pointAttuale.gpsLng || null;
-      point.visibilita = pointAttuale.visibilita || "pubblica";
-      point.statoArchivio = pointAttuale.statoArchivio || "attiva";
-      point.motivoArchiviazione = pointAttuale.motivoArchiviazione || null;
-      point.dataArchiviazione = pointAttuale.dataArchiviazione || null;
-      point.archiviataDa = pointAttuale.archiviataDa || null;
-
-      const { error } = await supabaseClient
-        .from("segnalazioni")
-        .update(pointToDbRow(point))
-        .eq("id", editingId);
-
-      if (error) {
-        alert("Modifica non riuscita.");
-        console.error(error);
-        return;
-      }
-    } else {
-      const { error } = await supabaseClient
-        .from("segnalazioni")
-        .insert([pointToDbRow(point)]);
-
-      if (error) {
-        alert("Errore salvataggio su database.");
-        console.error(error);
-        return;
-      }
+    if (!selectedCoordsValue) {
+      alert("Prima clicca sulla mappa per scegliere il punto.");
+      return;
     }
 
-    await loadPointsFromSupabase();
-    clearForm();
-  } catch (error) {
-    alert(error.message || "Errore durante il caricamento delle foto.");
-    console.error(error);
-  }
-});
+    if (!title || !comune || !categoria || !luogo) {
+      alert("Compila tutti i campi obbligatori.");
+      return;
+    }
+
+    if (!isValidStatus(status)) {
+      alert("Seleziona uno stato valido: rosso, arancione o verde.");
+      return;
+    }
+
+    try {
+      let foto1 = null;
+      let foto2 = null;
+      let foto3 = null;
+
+      if (inputFoto1 && inputFoto1.files.length > 0) foto1 = await uploadSinglePhoto(inputFoto1.files[0]);
+      if (inputFoto2 && inputFoto2.files.length > 0) foto2 = await uploadSinglePhoto(inputFoto2.files[0]);
+      if (inputFoto3 && inputFoto3.files.length > 0) foto3 = await uploadSinglePhoto(inputFoto3.files[0]);
+
+      const point = {
+        codice: editingId
+          ? (points.find(p => p.id === editingId)?.codice || generateNextCode(comune, points, editingId))
+          : generateNextCode(comune, points),
+        title,
+        comune,
+        categoria,
+        status,
+        workflow,
+        visibilita: "pubblica",
+        statoArchivio: "attiva",
+        luogo,
+        description,
+        motivoArchiviazione: null,
+        dataArchiviazione: null,
+        archiviataDa: null,
+        nomeSegnalante,
+        contattoSegnalante,
+        gpsLat: gpsPhoneCoords ? gpsPhoneCoords[0] : null,
+        gpsLng: gpsPhoneCoords ? gpsPhoneCoords[1] : null,
+        foto1,
+        foto2,
+        foto3,
+        coords: [...selectedCoordsValue]
+      };
+
+      if (editingId) {
+        const pointAttuale = points.find((p) => p.id === editingId);
+        if (!pointAttuale) return;
+
+        if (!foto1) point.foto1 = pointAttuale.foto1 || null;
+        if (!foto2) point.foto2 = pointAttuale.foto2 || null;
+        if (!foto3) point.foto3 = pointAttuale.foto3 || null;
+        if (!point.gpsLat) point.gpsLat = pointAttuale.gpsLat || null;
+        if (!point.gpsLng) point.gpsLng = pointAttuale.gpsLng || null;
+        point.visibilita = pointAttuale.visibilita || "pubblica";
+        point.statoArchivio = pointAttuale.statoArchivio || "attiva";
+        point.motivoArchiviazione = pointAttuale.motivoArchiviazione || null;
+        point.dataArchiviazione = pointAttuale.dataArchiviazione || null;
+        point.archiviataDa = pointAttuale.archiviataDa || null;
+
+        const { error } = await supabaseClient
+          .from("segnalazioni")
+          .update(pointToDbRow(point))
+          .eq("id", editingId);
+
+        if (error) {
+          alert("Modifica non riuscita.");
+          console.error(error);
+          return;
+        }
+      } else {
+        const { error } = await supabaseClient
+          .from("segnalazioni")
+          .insert([pointToDbRow(point)]);
+
+        if (error) {
+          alert("Errore salvataggio su database.");
+          console.error(error);
+          return;
+        }
+      }
+
+      await loadPointsFromSupabase();
+      clearForm();
+    } catch (error) {
+      alert(error.message || "Errore durante il caricamento delle foto.");
+      console.error(error);
+    }
+  });
+}
 
 if (inputComune) {
   inputComune.addEventListener("change", () => {
-    if (!editingId) {
+    if (!editingId && inputCodice) {
       inputCodice.value = generateNextCode(inputComune.value, points);
     }
   });
 
   inputComune.addEventListener("blur", () => {
-    if (!editingId && normalizeText(inputComune.value)) {
+    if (!editingId && normalizeText(inputComune.value) && inputCodice) {
       inputCodice.value = generateNextCode(inputComune.value, points);
     }
   });
@@ -854,15 +773,17 @@ if (btnGpsPhone) {
       return;
     }
 
-    gpsStatus.textContent = "Ricerca GPS...";
+    if (gpsStatus) gpsStatus.textContent = "Ricerca GPS...";
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         gpsPhoneCoords = [position.coords.latitude, position.coords.longitude];
-        gpsStatus.textContent = `GPS acquisito: ${gpsPhoneCoords[0].toFixed(5)}, ${gpsPhoneCoords[1].toFixed(5)}`;
+        if (gpsStatus) {
+          gpsStatus.textContent = `GPS acquisito: ${gpsPhoneCoords[0].toFixed(5)}, ${gpsPhoneCoords[1].toFixed(5)}`;
+        }
       },
       () => {
-        gpsStatus.textContent = "GPS non acquisito";
+        if (gpsStatus) gpsStatus.textContent = "GPS non acquisito";
         alert("Non sono riuscito a leggere il GPS del telefono.");
       },
       {
@@ -874,30 +795,6 @@ if (btnGpsPhone) {
   });
 }
 
-if (toggleSegnalazioni) {
-  toggleSegnalazioni.addEventListener("click", () => {
-    contenitoreSegnalazioni.classList.toggle("collapsed");
-    refreshMapSize();
-  });
-}
-
-if (toggleNuovoPunto) {
-  toggleNuovoPunto.addEventListener("click", () => {
-    contenitoreNuovoPunto.classList.toggle("collapsed");
-    refreshMapSize();
-  });
-}
-
-if (btnApriForm) {
-  btnApriForm.addEventListener("click", () => {
-    if (!selectedCoordsValue) {
-      alert("Prima clicca sulla mappa per scegliere il punto.");
-      return;
-    }
-    openFormModal(false);
-  });
-}
-
 if (searchText) searchText.addEventListener("input", renderPoints);
 if (filterComune) filterComune.addEventListener("change", renderPoints);
 if (filterStatus) filterStatus.addEventListener("change", renderPoints);
@@ -905,18 +802,41 @@ if (filterWorkflow) filterWorkflow.addEventListener("change", renderPoints);
 if (filterVisibilita) filterVisibilita.addEventListener("change", renderPoints);
 if (filterArchivio) filterArchivio.addEventListener("change", renderPoints);
 
+if (btnToggleFilters && filtersContainer) {
+  btnToggleFilters.addEventListener("click", () => {
+    filtersContainer.classList.toggle("open");
+    refreshMapSize();
+  });
+}
+
+if (btnResetFilters) {
+  btnResetFilters.addEventListener("click", () => {
+    if (searchText) searchText.value = "";
+    if (filterComune) filterComune.value = "tutti";
+    if (filterStatus) filterStatus.value = "tutti";
+    if (filterWorkflow) filterWorkflow.value = "tutti";
+    if (filterVisibilita) filterVisibilita.value = "tutti";
+    if (filterArchivio) filterArchivio.value = "tutti";
+    renderPoints();
+  });
+}
+
 if (btnLegend) {
   btnLegend.addEventListener("click", () => {
     updateLegendCounts();
-    legendModal.classList.remove("hidden");
-    legendModal.setAttribute("aria-hidden", "false");
+    if (legendModal) {
+      legendModal.classList.remove("hidden");
+      legendModal.setAttribute("aria-hidden", "false");
+    }
   });
 }
 
 if (btnCloseLegend) {
   btnCloseLegend.addEventListener("click", () => {
-    legendModal.classList.add("hidden");
-    legendModal.setAttribute("aria-hidden", "true");
+    if (legendModal) {
+      legendModal.classList.add("hidden");
+      legendModal.setAttribute("aria-hidden", "true");
+    }
   });
 }
 
