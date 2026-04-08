@@ -614,13 +614,6 @@ async function loadPointsFromSupabase() {
   renderPoints();
 }
 
-  points = (data || []).map(dbRowToPoint).filter((point) => {
-    return Array.isArray(point.coords) && point.coords.every((v) => !Number.isNaN(v));
-  });
-
-  renderPoints();
-}
-
 async function uploadSinglePhoto(file) {
   if (!file) return null;
 
