@@ -62,18 +62,23 @@ function dbRowToPoint(row) {
 
   return {
     id: row.id,
-    codice: row.codice || "",
+    codice: row.codice || row.Codice || "",
     title: row.titolo || row.Titolo || "",
     comune: row.comune || row.Comune || "",
     categoria: row.categoria || row.Categoria || "Altro",
     status: normalizeStatus(row.stato || row.Stato || ""),
     workflow: normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase(),
+    visibilita: normalizeText(row.visibilita || "pubblica").toLowerCase(),
+    statoArchivio: normalizeText(row.stato_archivio || "attiva").toLowerCase(),
     luogo: row.luogo || row.Luogo || "",
     description: row.descrizione || row.Descrizione || "",
+    motivoArchiviazione: row.motivo_archiviazione || "",
+    dataArchiviazione: row.data_archiviazione || null,
+    archiviataDa: row.archiviata_da || "",
     nomeSegnalante: row.nomesegnalante || row.NomeSegnalante || "",
-    contattoSegnalante: row.contattosegnalante || row.ContattoSegnalante || "",
-    gpsLat: row.gpslat ?? row.GpsLat ?? null,
-    gpsLng: row.gpslng ?? row.GpsLng ?? null,
+    contattoSegnalante: row.contattosegnalante || row["contatto segnalatore"] || row.ContattoSegnalante || "",
+    gpsLat: row.gpslat ?? row.GPSlat ?? row.GpsLat ?? null,
+    gpsLng: row.gpslng ?? row.GPSLNG ?? row.GpsLng ?? null,
     foto1: row.foto1 || null,
     foto2: row.foto2 || null,
     foto3: row.foto3 || null,
@@ -83,7 +88,7 @@ function dbRowToPoint(row) {
 
 function pointToDbRow(point) {
   return {
-    codice: point.codice,
+    Codice: point.codice,
     Titolo: point.title,
     Comune: point.comune,
     Categoria: point.categoria,
@@ -91,6 +96,11 @@ function pointToDbRow(point) {
     Descrizione: point.description,
     Stato: point.status,
     statosegnalazione: point.workflow,
+    visibilita: point.visibilita || "pubblica",
+    stato_archivio: point.statoArchivio || "attiva",
+    motivo_archiviazione: point.motivoArchiviazione || null,
+    data_archiviazione: point.dataArchiviazione || null,
+    archiviata_da: point.archiviataDa || null,
     nomesegnalante: point.nomeSegnalante,
     contattosegnalante: point.contattoSegnalante,
     gpslat: point.gpsLat,
@@ -112,7 +122,9 @@ function comunePrefix(comune) {
 
 function generateNextCode(comune, existingPoints, currentId = null) {
   const prefix = comunePrefix(comune);
-  const sameComune = existingPoints.filter(p => p.id !== currentId && comunePrefix(p.comune) === prefix);
+  const sameComune = existingPoints.filter(
+    p => p.id !== currentId && comunePrefix(p.comune) === prefix
+  );
 
   let maxNum = 0;
   sameComune.forEach(p => {
@@ -181,6 +193,8 @@ const searchText = document.getElementById("searchText");
 const filterComune = document.getElementById("filterComune");
 const filterStatus = document.getElementById("filterStatus");
 const filterWorkflow = document.getElementById("filterWorkflow");
+const filterVisibilita = document.getElementById("filterVisibilita");
+const filterArchivio = document.getElementById("filterArchivio");
 
 const countRosso = document.getElementById("countRosso");
 const countArancione = document.getElementById("countArancione");
@@ -359,9 +373,6 @@ function buildPopup(point) {
       ${point.description || ""}
       ${gpsHtml}
       ${buttonsHtml ? `<div class="popup-actions">${buttonsHtml}</div>` : ""}
-      <div class="popup-actions">
-        <button type="button" class="popup-delete-btn" data-delete-id="${point.id}">Elimina</button>
-      </div>
       <div class="popup-foto-box"></div>
     </div>
   `;
@@ -371,15 +382,21 @@ function getFilteredPoints() {
   const comuneValue = filterComune ? filterComune.value : "tutti";
   const statusValue = filterStatus ? filterStatus.value : "tutti";
   const workflowValue = filterWorkflow ? filterWorkflow.value : "tutti";
+  const visibilitaValue = filterVisibilita ? filterVisibilita.value : "tutti";
+  const archivioValue = filterArchivio ? filterArchivio.value : "tutti";
   const q = normalizeText(searchText?.value || "").toLowerCase();
 
   return points.filter((point) => {
     const matchComune = comuneValue === "tutti" || point.comune === comuneValue;
     const matchStatus = statusValue === "tutti" || normalizeText(point.status) === statusValue;
     const matchWorkflow = workflowValue === "tutti" || normalizeText(point.workflow) === workflowValue;
-    const haystack = `${point.codice} ${point.title} ${point.luogo} ${point.comune}`.toLowerCase();
+    const matchVisibilita = visibilitaValue === "tutti" || normalizeText(point.visibilita) === visibilitaValue;
+    const matchArchivio = archivioValue === "tutti" || normalizeText(point.statoArchivio) === archivioValue;
+
+    const haystack = `${point.codice} ${point.title} ${point.luogo} ${point.comune} ${point.categoria}`.toLowerCase();
     const matchSearch = !q || haystack.includes(q);
-    return matchComune && matchStatus && matchWorkflow && matchSearch;
+
+    return matchComune && matchStatus && matchWorkflow && matchVisibilita && matchArchivio && matchSearch;
   });
 }
 
@@ -499,7 +516,6 @@ function wirePopupActions(marker) {
 
     const buttons = popupEl.querySelectorAll(".foto-btn");
     const box = popupEl.querySelector(".popup-foto-box");
-    const deleteBtn = popupEl.querySelector(".popup-delete-btn");
 
     if (box) {
       buttons.forEach((btn) => {
@@ -515,13 +531,6 @@ function wirePopupActions(marker) {
             >
           `;
         });
-      });
-    }
-
-    if (deleteBtn) {
-      deleteBtn.addEventListener("click", async () => {
-        const pointId = Number(deleteBtn.getAttribute("data-delete-id"));
-        await deletePointById(pointId);
       });
     }
   });
@@ -561,8 +570,6 @@ function renderPoints() {
         <small>${point.luogo}</small><br>
         <small>${point.description || ""}</small><br>
         <small class="${workflowBadgeClass(point.workflow)}">${workflowLabel(point.workflow)}</small><br>
-        <button class="btn-modifica" data-id="${point.id}" type="button">Modifica</button>
-        <button class="btn-elimina" data-id="${point.id}" type="button">Elimina</button>
       `;
 
       listaSegnalazioni.appendChild(item);
@@ -570,17 +577,6 @@ function renderPoints() {
       item.addEventListener("click", () => {
         map.setView(point.coords, 18);
         marker.openPopup();
-      });
-
-      item.querySelector(".btn-modifica").addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        fillFormFromPoint(point);
-        map.setView(point.coords, 18);
-      });
-
-      item.querySelector(".btn-elimina").addEventListener("click", async (ev) => {
-        ev.stopPropagation();
-        await deletePointById(point.id);
       });
     }
   });
@@ -633,6 +629,25 @@ async function uploadSinglePhoto(file) {
 }
 
 map.on("click", (e) => {
+  const nearestPoint = findNearestPointWithinTolerance(e.latlng, 26);
+
+  if (nearestPoint) {
+    map.setView(nearestPoint.coords, Math.max(map.getZoom(), 18));
+
+    markersLayer.eachLayer((layer) => {
+      const layerLatLng = layer.getLatLng ? layer.getLatLng() : null;
+      if (!layerLatLng) return;
+
+      const sameLat = Math.abs(layerLatLng.lat - nearestPoint.coords[0]) < 0.000001;
+      const sameLng = Math.abs(layerLatLng.lng - nearestPoint.coords[1]) < 0.000001;
+
+      if (sameLat && sameLng && layer.openPopup) {
+        layer.openPopup();
+      }
+    });
+    return;
+  }
+
   selectedCoordsValue = [e.latlng.lat, e.latlng.lng];
   editingId = null;
   setCoordsBoxes(selectedCoordsValue);
@@ -687,8 +702,13 @@ formSegnalazione.addEventListener("submit", async (e) => {
       categoria,
       status,
       workflow,
+      visibilita: "pubblica",
+      statoArchivio: "attiva",
       luogo,
       description,
+      motivoArchiviazione: null,
+      dataArchiviazione: null,
+      archiviataDa: null,
       nomeSegnalante,
       contattoSegnalante,
       gpsLat: gpsPhoneCoords ? gpsPhoneCoords[0] : null,
@@ -708,6 +728,11 @@ formSegnalazione.addEventListener("submit", async (e) => {
       if (!foto3) point.foto3 = pointAttuale.foto3 || null;
       if (!point.gpsLat) point.gpsLat = pointAttuale.gpsLat || null;
       if (!point.gpsLng) point.gpsLng = pointAttuale.gpsLng || null;
+      point.visibilita = pointAttuale.visibilita || "pubblica";
+      point.statoArchivio = pointAttuale.statoArchivio || "attiva";
+      point.motivoArchiviazione = pointAttuale.motivoArchiviazione || null;
+      point.dataArchiviazione = pointAttuale.dataArchiviazione || null;
+      point.archiviataDa = pointAttuale.archiviataDa || null;
 
       const { error } = await supabaseClient
         .from("segnalazioni")
@@ -814,6 +839,8 @@ if (searchText) searchText.addEventListener("input", renderPoints);
 if (filterComune) filterComune.addEventListener("change", renderPoints);
 if (filterStatus) filterStatus.addEventListener("change", renderPoints);
 if (filterWorkflow) filterWorkflow.addEventListener("change", renderPoints);
+if (filterVisibilita) filterVisibilita.addEventListener("change", renderPoints);
+if (filterArchivio) filterArchivio.addEventListener("change", renderPoints);
 
 if (btnLegend) {
   btnLegend.addEventListener("click", () => {
