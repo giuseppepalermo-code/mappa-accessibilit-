@@ -7,6 +7,9 @@ const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// true se siamo nella pagina operatori/admin
+const IS_OPERATOR_VIEW = window.location.pathname.toLowerCase().includes("admin-mappa.html");
+
 function normalizeText(value) {
   return (value ?? "").toString().trim();
 }
@@ -54,6 +57,14 @@ function workflowBadgeClass(value) {
   if (v === "chiusa") return "wf-badge wf-green";
   if (v === "presa in carico") return "wf-badge wf-orange";
   return "wf-badge wf-blue";
+}
+
+function visibilitaLabel(value) {
+  return normalizeText(value).toLowerCase() === "nascosta" ? "Nascosta" : "Pubblica";
+}
+
+function archivioLabel(value) {
+  return normalizeText(value).toLowerCase() === "archiviata" ? "Archiviata" : "Attiva";
 }
 
 function dbRowToPoint(row) {
@@ -362,6 +373,17 @@ function buildPopup(point) {
     ? `<br><small>GPS telefono: ${Number(point.gpsLat).toFixed(5)}, ${Number(point.gpsLng).toFixed(5)}</small>`
     : "";
 
+  const extraAdminInfo = IS_OPERATOR_VIEW ? `
+    <br><small>Visibilità: ${visibilitaLabel(point.visibilita)}</small>
+    <br><small>Archivio: ${archivioLabel(point.statoArchivio)}</small>
+  ` : "";
+
+  const operatorActions = IS_OPERATOR_VIEW ? `
+    <div class="popup-actions">
+      <button type="button" class="popup-delete-btn" data-delete-id="${point.id}">Elimina</button>
+    </div>
+  ` : "";
+
   return `
     <div class="popup-content" data-point-id="${point.id}">
       <div class="segnalazione-code">${point.codice || "-"}</div>
@@ -372,7 +394,9 @@ function buildPopup(point) {
       ${point.luogo}<br>
       ${point.description || ""}
       ${gpsHtml}
+      ${extraAdminInfo}
       ${buttonsHtml ? `<div class="popup-actions">${buttonsHtml}</div>` : ""}
+      ${operatorActions}
       <div class="popup-foto-box"></div>
     </div>
   `;
@@ -516,6 +540,7 @@ function wirePopupActions(marker) {
 
     const buttons = popupEl.querySelectorAll(".foto-btn");
     const box = popupEl.querySelector(".popup-foto-box");
+    const deleteBtn = popupEl.querySelector(".popup-delete-btn");
 
     if (box) {
       buttons.forEach((btn) => {
@@ -531,6 +556,13 @@ function wirePopupActions(marker) {
             >
           `;
         });
+      });
+    }
+
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", async () => {
+        const pointId = Number(deleteBtn.getAttribute("data-delete-id"));
+        await deletePointById(pointId);
       });
     }
   });
@@ -562,6 +594,7 @@ function renderPoints() {
     if (listaSegnalazioni) {
       const item = document.createElement("div");
       item.className = "segnalazione-item";
+
       item.innerHTML = `
         <div class="segnalazione-code">${point.codice || "-"}</div>
         <strong>${point.title}</strong><br>
@@ -570,6 +603,10 @@ function renderPoints() {
         <small>${point.luogo}</small><br>
         <small>${point.description || ""}</small><br>
         <small class="${workflowBadgeClass(point.workflow)}">${workflowLabel(point.workflow)}</small><br>
+        ${IS_OPERATOR_VIEW ? `<small>Visibilità: ${visibilitaLabel(point.visibilita)}</small><br>` : ""}
+        ${IS_OPERATOR_VIEW ? `<small>Archivio: ${archivioLabel(point.statoArchivio)}</small><br>` : ""}
+        ${IS_OPERATOR_VIEW ? `<button class="btn-modifica" data-id="${point.id}" type="button">Modifica</button>` : ""}
+        ${IS_OPERATOR_VIEW ? `<button class="btn-elimina" data-id="${point.id}" type="button">Elimina</button>` : ""}
       `;
 
       listaSegnalazioni.appendChild(item);
@@ -578,6 +615,26 @@ function renderPoints() {
         map.setView(point.coords, 18);
         marker.openPopup();
       });
+
+      if (IS_OPERATOR_VIEW) {
+        const btnModifica = item.querySelector(".btn-modifica");
+        const btnElimina = item.querySelector(".btn-elimina");
+
+        if (btnModifica) {
+          btnModifica.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            fillFormFromPoint(point);
+            map.setView(point.coords, 18);
+          });
+        }
+
+        if (btnElimina) {
+          btnElimina.addEventListener("click", async (ev) => {
+            ev.stopPropagation();
+            await deletePointById(point.id);
+          });
+        }
+      }
     }
   });
 
@@ -590,12 +647,18 @@ function renderPoints() {
 }
 
 async function loadPointsFromSupabase() {
-  const { data, error } = await supabaseClient
+  let query = supabaseClient
     .from("segnalazioni")
     .select("*")
-    .eq("visibilita", "pubblica")
-    .eq("stato_archivio", "attiva")
     .order("id", { ascending: true });
+
+  if (!IS_OPERATOR_VIEW) {
+    query = query
+      .eq("visibilita", "pubblica")
+      .eq("stato_archivio", "attiva");
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Errore lettura Supabase:", error);
