@@ -960,4 +960,4 @@ window.addEventListener("load", async () => {
       console.error("Errore registrazione Service Worker:", error);
     }
   }
-});  Guarda attentamente grazie
+}); // Guarda attentamente grazie
