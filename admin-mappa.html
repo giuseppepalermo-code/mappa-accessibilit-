@@ -86,6 +86,10 @@
     .stat-red{background:linear-gradient(135deg,#ffd7d7,#ffbdbd);border-color:#ff8f8f;color:#8f1020}
     .stat-orange{background:linear-gradient(135deg,#ffe2b0,#ffd08c);border-color:#ffba5a;color:#92400e}
     .stat-green{background:linear-gradient(135deg,#d1fae5,#b7f3d6);border-color:#6ee7b7;color:#065f46}
+    .stat-public{background:linear-gradient(135deg,#dbeafe,#c7d2fe);border-color:#93c5fd;color:#1d4ed8}
+    .stat-hidden{background:linear-gradient(135deg,#e5e7eb,#d1d5db);border-color:#cbd5e1;color:#374151}
+    .stat-active{background:linear-gradient(135deg,#dcfce7,#bbf7d0);border-color:#86efac;color:#166534}
+    .stat-archived{background:linear-gradient(135deg,#f3e8ff,#e9d5ff);border-color:#d8b4fe;color:#7e22ce}
 
     .report-card{border:1px solid var(--line);border-radius:24px;background:#fff;box-shadow:var(--shadow-soft);overflow:hidden;display:flex;flex-direction:column}
     .report-head{padding:18px 18px 12px;background:linear-gradient(180deg,#fbfdff,#f8fbff);border-bottom:1px solid #edf2f7}
@@ -212,6 +216,7 @@
       <div class="top-actions no-print">
         <button id="btnRefreshTop" class="btn btn-light" type="button">Aggiorna</button>
         <button id="btnPrintPage" class="btn btn-light" type="button">Stampa pagina</button>
+        <button id="btnLogoutTop" class="btn btn-danger" type="button">Logout</button>
       </div>
 
       <section id="dashboardSection" class="app-section">
@@ -222,6 +227,10 @@
             <div class="stat stat-red"><div class="stat-top"><strong id="statRosso">0</strong><div class="stat-icon">!</div></div><div class="stat-label">Rosso = criticità grave</div></div>
             <div class="stat stat-orange"><div class="stat-top"><strong id="statArancione">0</strong><div class="stat-icon">~</div></div><div class="stat-label">Arancione = criticità media</div></div>
             <div class="stat stat-green"><div class="stat-top"><strong id="statVerde">0</strong><div class="stat-icon">✓</div></div><div class="stat-label">Verde = accessibile</div></div>
+            <div class="stat stat-public"><div class="stat-top"><strong id="statPubbliche">0</strong><div class="stat-icon">🌐</div></div><div class="stat-label">Pubbliche</div></div>
+            <div class="stat stat-hidden"><div class="stat-top"><strong id="statNascoste">0</strong><div class="stat-icon">🙈</div></div><div class="stat-label">Nascoste</div></div>
+            <div class="stat stat-active"><div class="stat-top"><strong id="statAttive">0</strong><div class="stat-icon">🟢</div></div><div class="stat-label">Attive</div></div>
+            <div class="stat stat-archived"><div class="stat-top"><strong id="statArchiviate">0</strong><div class="stat-icon">🗂️</div></div><div class="stat-label">Archiviate</div></div>
           </div>
         </div>
       </section>
@@ -237,12 +246,21 @@
             <div class="field"><label for="filterVisibilita">Visibilità</label><select id="filterVisibilita"><option value="tutti">Tutti</option><option value="pubblica">Pubblica</option><option value="nascosta">Nascosta</option></select></div>
             <div class="field"><label for="filterArchivio">Archivio</label><select id="filterArchivio"><option value="tutti">Tutti</option><option value="attiva">Attiva</option><option value="archiviata">Archiviata</option></select></div>
           </div>
+
           <div class="toolbar no-print">
             <button id="btnRefresh" class="btn btn-light" type="button">Aggiorna dati</button>
             <button id="btnExportCsv" class="btn btn-light" type="button">Esporta CSV</button>
             <button id="btnExportXlsx" class="btn btn-accent" type="button">Esporta Excel</button>
             <button id="btnResetFilters" class="btn btn-light" type="button">Reset filtri</button>
           </div>
+
+          <div class="toolbar no-print">
+            <button id="btnHideFiltered" class="btn btn-hide" type="button">Nascondi filtrate</button>
+            <button id="btnArchiveFiltered" class="btn btn-archive" type="button">Archivia filtrate</button>
+            <button id="btnRestoreFiltered" class="btn btn-restore" type="button">Ripristina filtrate</button>
+            <button id="btnDeleteFiltered" class="btn btn-danger" type="button">Elimina filtrate</button>
+          </div>
+
           <div class="meta-row">
             <div id="resultsCount" class="results-count">0 schede mostrate</div>
             <div id="adminMsg" class="msg"></div>
@@ -319,6 +337,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     const btnRefresh = document.getElementById("btnRefresh");
     const btnRefreshTop = document.getElementById("btnRefreshTop");
     const btnLogoutSide = document.getElementById("btnLogoutSide");
+    const btnLogoutTop = document.getElementById("btnLogoutTop");
     const btnExportCsv = document.getElementById("btnExportCsv");
     const btnExportXlsx = document.getElementById("btnExportXlsx");
     const btnBuildChartsFiltered = document.getElementById("btnBuildChartsFiltered");
@@ -330,6 +349,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     const btnExportReportTxt = document.getElementById("btnExportReportTxt");
     const btnPrintPage = document.getElementById("btnPrintPage");
     const btnResetFilters = document.getElementById("btnResetFilters");
+
+    const btnHideFiltered = document.getElementById("btnHideFiltered");
+    const btnArchiveFiltered = document.getElementById("btnArchiveFiltered");
+    const btnRestoreFiltered = document.getElementById("btnRestoreFiltered");
+    const btnDeleteFiltered = document.getElementById("btnDeleteFiltered");
 
     const searchText = document.getElementById("searchText");
     const filterComune = document.getElementById("filterComune");
@@ -477,6 +501,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       });
     }
 
+    function getFilteredIds(){
+      return getFilteredRows().map(r => r.id).filter(Boolean);
+    }
+
     function formatDate(value){
       if(!value) return "—";
       try{ return new Date(value).toLocaleString("it-IT"); }
@@ -485,10 +513,17 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
     function updateStats(rows){
       const stato = r => normalizeText(getField(r, "Stato", "stato")).toLowerCase();
+      const vis = r => normalizeVisibilityValue(getField(r, "visibilita", "Visibilita"));
+      const arc = r => normalizeArchiveValue(getField(r, "stato_archivio", "StatoArchivio"));
+
       document.getElementById("statTotale").textContent = rows.length;
       document.getElementById("statRosso").textContent = rows.filter(r => stato(r) === "rosso").length;
       document.getElementById("statArancione").textContent = rows.filter(r => stato(r) === "arancione").length;
       document.getElementById("statVerde").textContent = rows.filter(r => stato(r) === "verde").length;
+      document.getElementById("statPubbliche").textContent = rows.filter(r => vis(r) === "pubblica").length;
+      document.getElementById("statNascoste").textContent = rows.filter(r => vis(r) === "nascosta").length;
+      document.getElementById("statAttive").textContent = rows.filter(r => arc(r) === "attiva").length;
+      document.getElementById("statArchiviate").textContent = rows.filter(r => arc(r) === "archiviata").length;
     }
 
     function renderCards(){
@@ -710,77 +745,98 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     async function hideSegnalazione(id){
-      const conferma = confirm("Vuoi nascondere questa segnalazione dalla mappa pubblica?");
-      if(!conferma) return false;
-
-      const { error } = await client
-        .from("segnalazioni")
-        .update({ visibilita: "nascosta" })
-        .eq("id", id);
-
-      if(error){
-        setAdminMessage("Errore durante il nascondimento.", "error");
-        return false;
-      }
-
-      setAdminMessage("Segnalazione nascosta correttamente.", "ok");
+      const { error } = await client.from("segnalazioni").update({ visibilita: "nascosta" }).eq("id", id);
+      if(error){ setAdminMessage("Errore durante il nascondimento.", "error"); return false; }
       return true;
     }
 
     async function archiveSegnalazione(id){
-      const conferma = confirm("Vuoi archiviare questa segnalazione? Verrà anche nascosta dalla mappa pubblica.");
-      if(!conferma) return false;
+      const { error } = await client.from("segnalazioni").update({
+        stato_archivio: "archiviata",
+        visibilita: "nascosta"
+      }).eq("id", id);
 
-      const { error } = await client
-        .from("segnalazioni")
-        .update({
-          stato_archivio: "archiviata",
-          visibilita: "nascosta"
-        })
-        .eq("id", id);
-
-      if(error){
-        setAdminMessage("Errore durante l'archiviazione.", "error");
-        return false;
-      }
-
-      setAdminMessage("Segnalazione archiviata correttamente.", "ok");
+      if(error){ setAdminMessage("Errore durante l'archiviazione.", "error"); return false; }
       return true;
     }
 
     async function restoreSegnalazione(id){
-      const conferma = confirm("Vuoi ripristinare questa segnalazione? Tornerà attiva e pubblica.");
-      if(!conferma) return false;
+      const { error } = await client.from("segnalazioni").update({
+        stato_archivio: "attiva",
+        visibilita: "pubblica"
+      }).eq("id", id);
 
-      const { error } = await client
-        .from("segnalazioni")
-        .update({
-          stato_archivio: "attiva",
-          visibilita: "pubblica"
-        })
-        .eq("id", id);
-
-      if(error){
-        setAdminMessage("Errore durante il ripristino.", "error");
-        return false;
-      }
-
-      setAdminMessage("Segnalazione ripristinata correttamente.", "ok");
+      if(error){ setAdminMessage("Errore durante il ripristino.", "error"); return false; }
       return true;
     }
 
     async function deleteSegnalazione(id){
-      const conferma = confirm("Vuoi eliminare DEFINITIVAMENTE questa segnalazione? Questa azione non si può annullare.");
-      if(!conferma) return false;
-
       const { error } = await client.from("segnalazioni").delete().eq("id", id);
-      if(error){
-        setAdminMessage("Errore durante eliminazione definitiva.", "error");
-        return false;
+      if(error){ setAdminMessage("Errore durante eliminazione definitiva.", "error"); return false; }
+      return true;
+    }
+
+    async function bulkHideFiltered(){
+      const ids = getFilteredIds();
+      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da nascondere."); return; }
+      const conferma = confirm(`Vuoi nascondere ${ids.length} segnalazioni filtrate dalla mappa pubblica?`);
+      if(!conferma) return;
+
+      for(const id of ids){
+        const ok = await hideSegnalazione(id);
+        if(!ok) return;
       }
 
-      setAdminMessage("Segnalazione eliminata definitivamente.", "ok");
-      return true;
+      setAdminMessage(`${ids.length} segnalazioni nascoste correttamente.`, "ok");
+      await loadData();
+    }
+
+    async function bulkArchiveFiltered(){
+      const ids = getFilteredIds();
+      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da archiviare."); return; }
+      const conferma = confirm(`Vuoi archiviare ${ids.length} segnalazioni filtrate? Verranno anche nascoste.`);
+      if(!conferma) return;
+
+      for(const id of ids){
+        const ok = await archiveSegnalazione(id);
+        if(!ok) return;
+      }
+
+      setAdminMessage(`${ids.length} segnalazioni archiviate correttamente.`, "ok");
+      await loadData();
+    }
+
+    async function bulkRestoreFiltered(){
+      const ids = getFilteredIds();
+      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da ripristinare."); return; }
+      const conferma = confirm(`Vuoi ripristinare ${ids.length} segnalazioni filtrate? Torneranno attive e pubbliche.`);
+      if(!conferma) return;
+
+      for(const id of ids){
+        const ok = await restoreSegnalazione(id);
+        if(!ok) return;
+      }
+
+      setAdminMessage(`${ids.length} segnalazioni ripristinate correttamente.`, "ok");
+      await loadData();
+    }
+
+    async function bulkDeleteFiltered(){
+      const ids = getFilteredIds();
+      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da eliminare."); return; }
+      const conferma = confirm(`ATTENZIONE: vuoi eliminare DEFINITIVAMENTE ${ids.length} segnalazioni filtrate? Questa azione non si può annullare.`);
+      if(!conferma) return;
+
+      const confermaFinale = confirm("Conferma finale: procedere davvero con l'eliminazione definitiva dei risultati filtrati?");
+      if(!confermaFinale) return;
+
+      for(const id of ids){
+        const ok = await deleteSegnalazione(id);
+        if(!ok) return;
+      }
+
+      setAdminMessage(`${ids.length} segnalazioni eliminate definitivamente.`, "ok");
+      await loadData();
     }
 
     document.addEventListener("click", async (event) => {
@@ -800,26 +856,46 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
       if(hideBtn){
         const id = hideBtn.dataset.hideId;
+        const conferma = confirm("Vuoi nascondere questa segnalazione dalla mappa pubblica?");
+        if(!conferma) return;
         const ok = await hideSegnalazione(id);
-        if(ok) await loadData();
+        if(ok){
+          setAdminMessage("Segnalazione nascosta correttamente.", "ok");
+          await loadData();
+        }
       }
 
       if(archiveBtn){
         const id = archiveBtn.dataset.archiveId;
+        const conferma = confirm("Vuoi archiviare questa segnalazione? Verrà anche nascosta dalla mappa pubblica.");
+        if(!conferma) return;
         const ok = await archiveSegnalazione(id);
-        if(ok) await loadData();
+        if(ok){
+          setAdminMessage("Segnalazione archiviata correttamente.", "ok");
+          await loadData();
+        }
       }
 
       if(restoreBtn){
         const id = restoreBtn.dataset.restoreId;
+        const conferma = confirm("Vuoi ripristinare questa segnalazione? Tornerà attiva e pubblica.");
+        if(!conferma) return;
         const ok = await restoreSegnalazione(id);
-        if(ok) await loadData();
+        if(ok){
+          setAdminMessage("Segnalazione ripristinata correttamente.", "ok");
+          await loadData();
+        }
       }
 
       if(deleteBtn){
         const id = deleteBtn.dataset.deleteId;
+        const conferma = confirm("Vuoi eliminare DEFINITIVAMENTE questa segnalazione? Questa azione non si può annullare.");
+        if(!conferma) return;
         const ok = await deleteSegnalazione(id);
-        if(ok) await loadData();
+        if(ok){
+          setAdminMessage("Segnalazione eliminata definitivamente.", "ok");
+          await loadData();
+        }
       }
     });
 
@@ -827,6 +903,8 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     btnRefresh.onclick = loadData;
     btnRefreshTop.onclick = loadData;
     btnLogoutSide.onclick = logout;
+    btnLogoutTop.onclick = logout;
+
     btnExportCsv.onclick = exportCSV;
     btnExportXlsx.onclick = exportXLSX;
     btnBuildChartsFiltered.onclick = () => buildCharts(getFilteredRows(), "risultati filtrati");
@@ -838,6 +916,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     btnExportReportTxt.onclick = () => { if(!lastReportText) return alert("Genera prima un report."); exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;"); };
     btnPrintPage.onclick = () => window.print();
     btnResetFilters.onclick = resetFilters;
+
+    btnHideFiltered.onclick = bulkHideFiltered;
+    btnArchiveFiltered.onclick = bulkArchiveFiltered;
+    btnRestoreFiltered.onclick = bulkRestoreFiltered;
+    btnDeleteFiltered.onclick = bulkDeleteFiltered;
 
     searchText.addEventListener("input", renderCards);
     filterComune.addEventListener("change", renderCards);
