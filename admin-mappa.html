@@ -53,6 +53,19 @@
     .sidebar-brand img{width:68px;height:68px;object-fit:contain;border-radius:16px;background:rgba(255,255,255,.92);padding:6px;border:1px solid rgba(255,255,255,.35);flex-shrink:0}
     .sidebar-brand h2{margin:0;font-size:1.45rem;line-height:1.05;letter-spacing:-.02em}
     .sidebar-brand p{margin:8px 0 0 0;opacity:.95;line-height:1.35;font-size:.92rem}
+    .role-badge{
+      margin-top:10px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.22);
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:.82rem;
+      font-weight:800;
+    }
 
     .menu{display:flex;flex-direction:column;gap:10px;margin-top:10px}
     .menu-btn{width:100%;text-align:left;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:14px 14px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s ease}
@@ -195,6 +208,7 @@
         <div>
           <h2>Mappa Accessibilità</h2>
           <p>NessunOstacolo<br>Area riservata operatori per gestione, analisi e report.</p>
+          <div id="roleBadge" class="role-badge">Ruolo: operatore</div>
         </div>
       </div>
       <nav class="menu">
@@ -328,11 +342,14 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     let charts = [];
     let lastReportHtml = "";
     let lastReportText = "";
+    let currentUserRole = "operatore";
 
     const loginSection = document.getElementById("loginSection");
     const appSection = document.getElementById("appSection");
     const loginMsg = document.getElementById("loginMsg");
     const adminMsg = document.getElementById("adminMsg");
+    const roleBadge = document.getElementById("roleBadge");
+
     const btnLogin = document.getElementById("btnLogin");
     const btnRefresh = document.getElementById("btnRefresh");
     const btnRefreshTop = document.getElementById("btnRefreshTop");
@@ -375,11 +392,22 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function normalizeWorkflowValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nuova") return "nuova"; if(v === "presa in carico") return "presa in carico"; if(v === "chiusa") return "chiusa"; return ""; }
     function normalizeVisibilityValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nascosta") return "nascosta"; return "pubblica"; }
     function normalizeArchiveValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "archiviata") return "archiviata"; return "attiva"; }
+    function normalizeRole(value){ const v = normalizeText(value).toLowerCase(); return v === "admin" ? "admin" : "operatore"; }
+    function isAdmin(){ return currentUserRole === "admin"; }
 
     function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
     function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 2600); } }
     function showApp(){ loginSection.classList.add("hidden"); appSection.classList.remove("hidden"); }
     function hideApp(){ loginSection.classList.remove("hidden"); appSection.classList.add("hidden"); }
+
+    function refreshRoleUi(){
+      if(roleBadge){
+        roleBadge.textContent = `Ruolo: ${currentUserRole}`;
+      }
+      if(btnDeleteFiltered){
+        btnDeleteFiltered.style.display = isAdmin() ? "inline-flex" : "none";
+      }
+    }
 
     function getStateBadgeClass(value){
       const v = normalizeText(value).toLowerCase();
@@ -406,15 +434,36 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       return v === "archiviata" ? "archive-badge archive-archived" : "archive-badge archive-active";
     }
 
-    async function isAdminUser(){
+    async function getAdminProfile(){
       const { data: authData, error: authError } = await client.auth.getUser();
-      if(authError) return false;
+      if(authError) return null;
       const user = authData?.user;
       const userEmail = normalizeText(user?.email).toLowerCase();
-      if(!userEmail) return false;
-      const { data, error } = await client.from("admin_utenti").select("email, attivo, ruolo").eq("email", userEmail).maybeSingle();
-      if(error || !data || data.attivo === false) return false;
-      return true;
+      if(!userEmail) return null;
+
+      const { data, error } = await client
+        .from("admin_utenti")
+        .select("email, attivo, ruolo")
+        .eq("email", userEmail)
+        .maybeSingle();
+
+      if(error || !data || data.attivo === false) return null;
+
+      return {
+        email: normalizeText(data.email).toLowerCase(),
+        ruolo: normalizeRole(data.ruolo)
+      };
+    }
+
+    async function isAdminUser(){
+      const profile = await getAdminProfile();
+      return !!profile;
+    }
+
+    async function loadCurrentRole(){
+      const profile = await getAdminProfile();
+      currentUserRole = profile ? profile.ruolo : "operatore";
+      refreshRoleUi();
     }
 
     async function login(){
@@ -422,8 +471,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       const password = document.getElementById("password").value;
       if(!email || !password){ setMsg(loginMsg, "Inserisci email e password.", "error"); return; }
       setMsg(loginMsg, "Accesso in corso...");
+
       const { error } = await client.auth.signInWithPassword({ email, password });
       if(error){ setMsg(loginMsg, "Login non riuscito: " + error.message, "error"); return; }
+
       const admin = await isAdminUser();
       if(!admin){
         await client.auth.signOut();
@@ -431,8 +482,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         setMsg(loginMsg, "Utente non autorizzato.", "error");
         return;
       }
+
       sessionStorage.setItem("adminLogged", "true");
       setMsg(loginMsg, "");
+      await loadCurrentRole();
       showApp();
       await loadData();
     }
@@ -443,10 +496,12 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         await client.auth.signOut();
         return;
       }
+
       const { data } = await client.auth.getSession();
       if(data?.session?.user){
         const admin = await isAdminUser();
         if(admin){
+          await loadCurrentRole();
           showApp();
           await loadData();
         }else{
@@ -460,8 +515,12 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       await client.auth.signOut();
       sessionStorage.removeItem("adminLogged");
       rowsCache = [];
+      charts = [];
+      lastReportHtml = "";
+      lastReportText = "";
+      currentUserRole = "operatore";
+      refreshRoleUi();
       cardsGrid.innerHTML = "";
-      destroyCharts();
       hideApp();
       setMsg(loginMsg, "");
       setAdminMessage("");
@@ -553,6 +612,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         const createdAt = getField(row, "created_at", "creato_il");
         const updatedAt = getField(row, "updated_at", "aggiornato_alle");
 
+        const deleteButtonHtml = isAdmin()
+          ? `<button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina definitiva</button>`
+          : "";
+
         const card = document.createElement("article");
         card.className = "report-card";
         card.innerHTML = `
@@ -592,7 +655,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
               <button class="btn btn-hide btn-small" data-hide-id="${id}" type="button">Nascondi</button>
               <button class="btn btn-archive btn-small" data-archive-id="${id}" type="button">Archivia</button>
               <button class="btn btn-restore btn-small" data-restore-id="${id}" type="button">Ripristina</button>
-              <button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina definitiva</button>
+              ${deleteButtonHtml}
             </div>
           </div>`;
         cardsGrid.appendChild(card);
@@ -771,6 +834,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     async function deleteSegnalazione(id){
+      if(!isAdmin()){
+        setAdminMessage("Solo un admin può eliminare definitivamente.", "error");
+        return false;
+      }
+
       const { error } = await client.from("segnalazioni").delete().eq("id", id);
       if(error){ setAdminMessage("Errore durante eliminazione definitiva.", "error"); return false; }
       return true;
@@ -822,6 +890,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     async function bulkDeleteFiltered(){
+      if(!isAdmin()){
+        setAdminMessage("Solo un admin può eliminare i risultati filtrati.", "error");
+        return;
+      }
+
       const ids = getFilteredIds();
       if(!ids.length){ alert("Non ci sono segnalazioni filtrate da eliminare."); return; }
       const conferma = confirm(`ATTENZIONE: vuoi eliminare DEFINITIVAMENTE ${ids.length} segnalazioni filtrate? Questa azione non si può annullare.`);
@@ -888,6 +961,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }
 
       if(deleteBtn){
+        if(!isAdmin()){
+          setAdminMessage("Solo un admin può eliminare definitivamente.", "error");
+          return;
+        }
+
         const id = deleteBtn.dataset.deleteId;
         const conferma = confirm("Vuoi eliminare DEFINITIVAMENTE questa segnalazione? Questa azione non si può annullare.");
         if(!conferma) return;
@@ -933,6 +1011,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       btn.addEventListener("click", () => switchSection(btn.dataset.section));
     });
 
+    refreshRoleUi();
     checkSession();
   </script>
 </body>
