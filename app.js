@@ -62,20 +62,20 @@ function dbRowToPoint(row) {
 
   return {
     id: row.id,
-    codice: row.codice || row.Codice || "",
+    codice: row.codice || "",
     title: row.titolo || row.Titolo || "",
     comune: row.comune || row.Comune || "",
     categoria: row.categoria || row.Categoria || "Altro",
     status: normalizeStatus(row.stato || row.Stato || ""),
-    workflow: normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase(),
-    visibilita: normalizeText(row.visibilita || row.Visibilita || "pubblica").toLowerCase(),
-    statoArchivio: normalizeText(row.stato_archivio || row.StatoArchivio || "attiva").toLowerCase(),
+    workflow: normalizeText(row.statosegnalazione || "nuova").toLowerCase(),
+    visibilita: normalizeText(row.visibilita || "pubblica").toLowerCase(),
+    statoArchivio: normalizeText(row.stato_archivio || "attiva").toLowerCase(),
     luogo: row.luogo || row.Luogo || "",
     description: row.descrizione || row.Descrizione || "",
-    nomeSegnalante: row.nomesegnalante || row.NomeSegnalante || "",
-    contattoSegnalante: row.contattosegnalante || row.ContattoSegnalante || "",
-    gpsLat: row.gpslat ?? row.GpsLat ?? null,
-    gpsLng: row.gpslng ?? row.GpsLng ?? row.gpslng ?? null,
+    nomeSegnalante: row.nomesegnalante || "",
+    contattoSegnalante: row.contattosegnalante || "",
+    gpsLat: row.gpslat ?? null,
+    gpsLng: row.gpslng ?? null,
     foto1: row.foto1 || null,
     foto2: row.foto2 || null,
     foto3: row.foto3 || null,
@@ -86,24 +86,24 @@ function dbRowToPoint(row) {
 function pointToDbRow(point) {
   return {
     codice: point.codice,
-    titolo: point.title,
-    comune: point.comune,
-    categoria: point.categoria,
-    luogo: point.luogo,
-    descrizione: point.description,
-    stato: point.status,
+    Titolo: point.title,
+    Comune: point.comune,
+    Categoria: point.categoria,
+    Luogo: point.luogo,
+    Descrizione: point.description,
+    Stato: point.status,
     statosegnalazione: point.workflow,
-    visibilita: point.visibilita || "pubblica",
-    stato_archivio: point.statoArchivio || "attiva",
     nomesegnalante: point.nomeSegnalante,
     contattosegnalante: point.contattoSegnalante,
     gpslat: point.gpsLat,
     gpslng: point.gpsLng,
-    lat: point.coords[0],
-    lng: point.coords[1],
+    Lat: point.coords[0],
+    Log: point.coords[1],
     foto1: point.foto1 || null,
     foto2: point.foto2 || null,
-    foto3: point.foto3 || null
+    foto3: point.foto3 || null,
+    visibilita: point.visibilita || "pubblica",
+    stato_archivio: point.statoArchivio || "attiva"
   };
 }
 
@@ -960,4 +960,4 @@ window.addEventListener("load", async () => {
       console.error("Errore registrazione Service Worker:", error);
     }
   }
-});
+});  Guarda attentamente grazie
