@@ -343,6 +343,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     let lastReportHtml = "";
     let lastReportText = "";
     let currentUserRole = "operatore";
+    let currentUserEmail = "";
 
     const loginSection = document.getElementById("loginSection");
     const appSection = document.getElementById("appSection");
@@ -409,6 +410,25 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }
     }
 
+    async function writeLog(azione, segnalazioneId = null, dettagli = ""){
+      try{
+        const payload = {
+          segnalazione_id: segnalazioneId,
+          azione: azione,
+          utente_email: currentUserEmail || null,
+          ruolo: currentUserRole || "operatore",
+          dettagli: dettagli || null
+        };
+
+        const { error } = await client.from("segnalazioni_log").insert([payload]);
+        if(error){
+          console.warn("Log non salvato:", error.message);
+        }
+      }catch(err){
+        console.warn("Errore scrittura log:", err);
+      }
+    }
+
     function getStateBadgeClass(value){
       const v = normalizeText(value).toLowerCase();
       if(v === "rosso") return "state-badge state-red";
@@ -463,6 +483,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function loadCurrentRole(){
       const profile = await getAdminProfile();
       currentUserRole = profile ? profile.ruolo : "operatore";
+      currentUserEmail = profile ? profile.email : "";
       refreshRoleUi();
     }
 
@@ -486,6 +507,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       sessionStorage.setItem("adminLogged", "true");
       setMsg(loginMsg, "");
       await loadCurrentRole();
+      await writeLog("login", null, "Accesso al pannello operatori");
       showApp();
       await loadData();
     }
@@ -512,6 +534,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     async function logout(){
+      await writeLog("logout", null, "Uscita dal pannello operatori");
       await client.auth.signOut();
       sessionStorage.removeItem("adminLogged");
       rowsCache = [];
@@ -519,6 +542,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       lastReportHtml = "";
       lastReportText = "";
       currentUserRole = "operatore";
+      currentUserEmail = "";
       refreshRoleUi();
       cardsGrid.innerHTML = "";
       hideApp();
@@ -803,6 +827,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function updateWorkflow(id, nuovoWorkflow){
       const { error } = await client.from("segnalazioni").update({ statosegnalazione: nuovoWorkflow }).eq("id", id);
       if(error){ setAdminMessage("Errore nel salvataggio workflow.", "error"); return false; }
+      await writeLog("workflow_update", id, `Nuovo workflow: ${nuovoWorkflow}`);
       setAdminMessage("Workflow aggiornato correttamente.", "ok");
       return true;
     }
@@ -810,6 +835,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function hideSegnalazione(id){
       const { error } = await client.from("segnalazioni").update({ visibilita: "nascosta" }).eq("id", id);
       if(error){ setAdminMessage("Errore durante il nascondimento.", "error"); return false; }
+      await writeLog("nascondi", id, "Visibilità impostata a nascosta");
       return true;
     }
 
@@ -820,6 +846,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }).eq("id", id);
 
       if(error){ setAdminMessage("Errore durante l'archiviazione.", "error"); return false; }
+      await writeLog("archivia", id, "Archivio=archiviata, visibilità=nascosta");
       return true;
     }
 
@@ -830,6 +857,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }).eq("id", id);
 
       if(error){ setAdminMessage("Errore durante il ripristino.", "error"); return false; }
+      await writeLog("ripristina", id, "Archivio=attiva, visibilità=pubblica");
       return true;
     }
 
@@ -841,6 +869,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
       const { error } = await client.from("segnalazioni").delete().eq("id", id);
       if(error){ setAdminMessage("Errore durante eliminazione definitiva.", "error"); return false; }
+      await writeLog("elimina_definitiva", id, "Segnalazione eliminata definitivamente");
       return true;
     }
 
@@ -855,6 +884,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         if(!ok) return;
       }
 
+      await writeLog("bulk_nascondi", null, `Nascondi filtrate: ${ids.length} segnalazioni`);
       setAdminMessage(`${ids.length} segnalazioni nascoste correttamente.`, "ok");
       await loadData();
     }
@@ -870,6 +900,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         if(!ok) return;
       }
 
+      await writeLog("bulk_archivia", null, `Archivia filtrate: ${ids.length} segnalazioni`);
       setAdminMessage(`${ids.length} segnalazioni archiviate correttamente.`, "ok");
       await loadData();
     }
@@ -885,6 +916,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         if(!ok) return;
       }
 
+      await writeLog("bulk_ripristina", null, `Ripristina filtrate: ${ids.length} segnalazioni`);
       setAdminMessage(`${ids.length} segnalazioni ripristinate correttamente.`, "ok");
       await loadData();
     }
@@ -908,6 +940,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         if(!ok) return;
       }
 
+      await writeLog("bulk_elimina_definitiva", null, `Elimina filtrate: ${ids.length} segnalazioni`);
       setAdminMessage(`${ids.length} segnalazioni eliminate definitivamente.`, "ok");
       await loadData();
     }
