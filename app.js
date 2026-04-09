@@ -7,9 +7,6 @@ const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// true se siamo nella pagina operatori/admin
-const IS_OPERATOR_VIEW = window.location.pathname.toLowerCase().includes("admin-mappa.html");
-
 function normalizeText(value) {
   return (value ?? "").toString().trim();
 }
@@ -59,14 +56,6 @@ function workflowBadgeClass(value) {
   return "wf-badge wf-blue";
 }
 
-function visibilitaLabel(value) {
-  return normalizeText(value).toLowerCase() === "nascosta" ? "Nascosta" : "Pubblica";
-}
-
-function archivioLabel(value) {
-  return normalizeText(value).toLowerCase() === "archiviata" ? "Archiviata" : "Attiva";
-}
-
 function dbRowToPoint(row) {
   const latValue = Number(row.lat ?? row.Lat);
   const lngValue = Number(row.lng ?? row.Lng ?? row.log ?? row.Log);
@@ -79,17 +68,14 @@ function dbRowToPoint(row) {
     categoria: row.categoria || row.Categoria || "Altro",
     status: normalizeStatus(row.stato || row.Stato || ""),
     workflow: normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase(),
-    visibilita: normalizeText(row.visibilita || "pubblica").toLowerCase(),
-    statoArchivio: normalizeText(row.stato_archivio || "attiva").toLowerCase(),
+    visibilita: normalizeText(row.visibilita || row.Visibilita || "pubblica").toLowerCase(),
+    statoArchivio: normalizeText(row.stato_archivio || row.StatoArchivio || "attiva").toLowerCase(),
     luogo: row.luogo || row.Luogo || "",
     description: row.descrizione || row.Descrizione || "",
-    motivoArchiviazione: row.motivo_archiviazione || "",
-    dataArchiviazione: row.data_archiviazione || null,
-    archiviataDa: row.archiviata_da || "",
     nomeSegnalante: row.nomesegnalante || row.NomeSegnalante || "",
-    contattoSegnalante: row.contattosegnalante || row["contatto segnalatore"] || row.ContattoSegnalante || "",
-    gpsLat: row.gpslat ?? row.GPSlat ?? row.GpsLat ?? null,
-    gpsLng: row.gpslng ?? row.GPSLNG ?? row.GpsLng ?? null,
+    contattoSegnalante: row.contattosegnalante || row.ContattoSegnalante || "",
+    gpsLat: row.gpslat ?? row.GpsLat ?? null,
+    gpsLng: row.gpslng ?? row.GpsLng ?? row.gpslng ?? null,
     foto1: row.foto1 || null,
     foto2: row.foto2 || null,
     foto3: row.foto3 || null,
@@ -99,25 +85,22 @@ function dbRowToPoint(row) {
 
 function pointToDbRow(point) {
   return {
-    Codice: point.codice,
-    Titolo: point.title,
-    Comune: point.comune,
-    Categoria: point.categoria,
-    Luogo: point.luogo,
-    Descrizione: point.description,
-    Stato: point.status,
+    codice: point.codice,
+    titolo: point.title,
+    comune: point.comune,
+    categoria: point.categoria,
+    luogo: point.luogo,
+    descrizione: point.description,
+    stato: point.status,
     statosegnalazione: point.workflow,
     visibilita: point.visibilita || "pubblica",
     stato_archivio: point.statoArchivio || "attiva",
-    motivo_archiviazione: point.motivoArchiviazione || null,
-    data_archiviazione: point.dataArchiviazione || null,
-    archiviata_da: point.archiviataDa || null,
     nomesegnalante: point.nomeSegnalante,
     contattosegnalante: point.contattoSegnalante,
     gpslat: point.gpsLat,
     gpslng: point.gpsLng,
-    Lat: point.coords[0],
-    Log: point.coords[1],
+    lat: point.coords[0],
+    lng: point.coords[1],
     foto1: point.foto1 || null,
     foto2: point.foto2 || null,
     foto3: point.foto3 || null
@@ -133,9 +116,7 @@ function comunePrefix(comune) {
 
 function generateNextCode(comune, existingPoints, currentId = null) {
   const prefix = comunePrefix(comune);
-  const sameComune = existingPoints.filter(
-    p => p.id !== currentId && comunePrefix(p.comune) === prefix
-  );
+  const sameComune = existingPoints.filter(p => p.id !== currentId && comunePrefix(p.comune) === prefix);
 
   let maxNum = 0;
   sameComune.forEach(p => {
@@ -193,7 +174,13 @@ let selectedCoordsValue = null;
 let editingId = null;
 let gpsPhoneCoords = null;
 
-// filtri reali desktop
+const listaSegnalazioni = document.getElementById("listaSegnalazioni");
+const toggleSegnalazioni = document.getElementById("toggleSegnalazioni");
+const contenitoreSegnalazioni = document.getElementById("contenitoreSegnalazioni");
+const toggleNuovoPunto = document.getElementById("toggleNuovoPunto");
+const contenitoreNuovoPunto = document.getElementById("contenitoreNuovoPunto");
+const btnApriForm = document.getElementById("btnApriForm");
+
 const searchText = document.getElementById("searchText");
 const filterComune = document.getElementById("filterComune");
 const filterStatus = document.getElementById("filterStatus");
@@ -201,42 +188,20 @@ const filterWorkflow = document.getElementById("filterWorkflow");
 const filterVisibilita = document.getElementById("filterVisibilita");
 const filterArchivio = document.getElementById("filterArchivio");
 
-// mirror mobile
-const searchTextMobileMirror = document.getElementById("searchTextMobileMirror");
-const filterComuneMobileMirror = document.getElementById("filterComuneMobileMirror");
-const filterStatusMobileMirror = document.getElementById("filterStatusMobileMirror");
-const filterWorkflowMobileMirror = document.getElementById("filterWorkflowMobileMirror");
-const filterVisibilitaMobileMirror = document.getElementById("filterVisibilitaMobileMirror");
-const filterArchivioMobileMirror = document.getElementById("filterArchivioMobileMirror");
-
-const btnApplyMobileFilters = document.getElementById("btnApplyMobileFilters");
-const btnResetMobileFilters = document.getElementById("btnResetMobileFilters");
-const btnToggleMobileFilters = document.getElementById("btnToggleMobileFilters");
-const btnCloseMobileFilters = document.getElementById("btnCloseMobileFilters");
-const mobileFiltersPanel = document.getElementById("mobileFiltersPanel");
-
-// dropdown desktop
-const filterChips = document.querySelectorAll(".filter-chip[data-target]");
-const desktopDropdowns = document.querySelectorAll(".filter-dropdown");
-
-// pulsanti vari
-const btnResetFilters = document.getElementById("btnResetFilters");
-const btnLegend = document.getElementById("btnLegend");
-const btnLegendMobile = document.getElementById("btnLegendMobile");
-const btnCloseLegend = document.getElementById("btnCloseLegend");
-const legendModal = document.getElementById("legendModal");
-const btnLocate = document.getElementById("btnLocate");
-
-// conteggi
 const countRosso = document.getElementById("countRosso");
 const countArancione = document.getElementById("countArancione");
 const countVerde = document.getElementById("countVerde");
 const countTotale = document.getElementById("countTotale");
 
-// form
+const btnLocate = document.getElementById("btnLocate");
+const btnLegend = document.getElementById("btnLegend");
+const btnCloseLegend = document.getElementById("btnCloseLegend");
+const legendModal = document.getElementById("legendModal");
+
 const formModal = document.getElementById("formModal");
 const formModalTitle = document.getElementById("formModalTitle");
 const btnCloseFormModal = document.getElementById("btnCloseFormModal");
+
 const selectedCoords = document.getElementById("selectedCoords");
 const modalSelectedCoords = document.getElementById("modalSelectedCoords");
 
@@ -258,7 +223,6 @@ const btnResetSegnalazione = document.getElementById("btnResetSegnalazione");
 const btnGpsPhone = document.getElementById("btnGpsPhone");
 const gpsStatus = document.getElementById("gpsStatus");
 
-// autocomplete
 const suggestionsComune = document.getElementById("suggestionsComune");
 const suggestionsCategoria = document.getElementById("suggestionsCategoria");
 const suggestionsLuogo = document.getElementById("suggestionsLuogo");
@@ -349,7 +313,7 @@ function attachAutocomplete(inputEl, boxEl, type) {
       inputEl.value = selectedValue;
       hideSuggestions(boxEl);
 
-      if (inputEl === inputComune && !editingId && inputCodice) {
+      if (inputEl === inputComune && !editingId) {
         inputCodice.value = generateNextCode(selectedValue, points);
       }
 
@@ -359,6 +323,7 @@ function attachAutocomplete(inputEl, boxEl, type) {
 
   inputEl.addEventListener("focus", update);
   inputEl.addEventListener("input", update);
+
   inputEl.addEventListener("blur", () => {
     setTimeout(() => hideSuggestions(boxEl), 180);
   });
@@ -369,10 +334,10 @@ function updateLegendCounts() {
   const arancione = points.filter(p => p.status === "arancione").length;
   const verde = points.filter(p => p.status === "verde").length;
 
-  if (countRosso) countRosso.textContent = rosso;
-  if (countArancione) countArancione.textContent = arancione;
-  if (countVerde) countVerde.textContent = verde;
-  if (countTotale) countTotale.textContent = points.length;
+  countRosso.textContent = rosso;
+  countArancione.textContent = arancione;
+  countVerde.textContent = verde;
+  countTotale.textContent = points.length;
 }
 
 function buildPhotoButtons(point) {
@@ -389,11 +354,6 @@ function buildPopup(point) {
     ? `<br><small>GPS telefono: ${Number(point.gpsLat).toFixed(5)}, ${Number(point.gpsLng).toFixed(5)}</small>`
     : "";
 
-  const extraAdminInfo = IS_OPERATOR_VIEW ? `
-    <br><small>Visibilità: ${visibilitaLabel(point.visibilita)}</small>
-    <br><small>Archivio: ${archivioLabel(point.statoArchivio)}</small>
-  ` : "";
-
   return `
     <div class="popup-content" data-point-id="${point.id}">
       <div class="segnalazione-code">${point.codice || "-"}</div>
@@ -404,8 +364,10 @@ function buildPopup(point) {
       ${point.luogo}<br>
       ${point.description || ""}
       ${gpsHtml}
-      ${extraAdminInfo}
       ${buttonsHtml ? `<div class="popup-actions">${buttonsHtml}</div>` : ""}
+      <div class="popup-actions">
+        <button type="button" class="popup-delete-btn" data-delete-id="${point.id}">Elimina</button>
+      </div>
       <div class="popup-foto-box"></div>
     </div>
   `;
@@ -425,8 +387,7 @@ function getFilteredPoints() {
     const matchWorkflow = workflowValue === "tutti" || normalizeText(point.workflow) === workflowValue;
     const matchVisibilita = visibilitaValue === "tutti" || normalizeText(point.visibilita) === visibilitaValue;
     const matchArchivio = archivioValue === "tutti" || normalizeText(point.statoArchivio) === archivioValue;
-
-    const haystack = `${point.codice} ${point.title} ${point.luogo} ${point.comune} ${point.categoria}`.toLowerCase();
+    const haystack = `${point.codice} ${point.title} ${point.luogo} ${point.comune}`.toLowerCase();
     const matchSearch = !q || haystack.includes(q);
 
     return matchComune && matchStatus && matchWorkflow && matchVisibilita && matchArchivio && matchSearch;
@@ -451,14 +412,12 @@ function setCoordsBoxes(coords) {
 }
 
 function openFormModal(isEdit = false) {
-  if (!formModal || !formModalTitle) return;
   formModalTitle.textContent = isEdit ? "Modifica segnalazione" : "Nuova segnalazione";
   formModal.classList.remove("hidden");
   formModal.setAttribute("aria-hidden", "false");
 }
 
 function closeFormModal() {
-  if (!formModal) return;
   formModal.classList.add("hidden");
   formModal.setAttribute("aria-hidden", "true");
   hideSuggestions(suggestionsComune);
@@ -472,18 +431,16 @@ function resetGpsStatus() {
 }
 
 function clearForm() {
-  if (!formSegnalazione) return;
   formSegnalazione.reset();
   editingId = null;
   selectedCoordsValue = null;
-  if (inputCodice) inputCodice.value = "";
+  inputCodice.value = "";
   setCoordsBoxes(null);
   resetGpsStatus();
   closeFormModal();
 }
 
 function resetFormKeepPoint() {
-  if (!formSegnalazione) return;
   formSegnalazione.reset();
   resetGpsStatus();
   hideSuggestions(suggestionsComune);
@@ -492,35 +449,58 @@ function resetFormKeepPoint() {
 
   if (selectedCoordsValue) {
     setCoordsBoxes(selectedCoordsValue);
-    if (!editingId && inputCodice) {
-      inputCodice.value = generateNextCode(inputComune?.value || "", points);
+    if (!editingId) {
+      inputCodice.value = generateNextCode(inputComune.value || "", points);
     }
-  } else if (inputCodice) {
+  } else {
     inputCodice.value = "";
   }
 }
 
 function fillFormFromPoint(point) {
-  if (!inputCodice) return;
-
   inputCodice.value = point.codice || "";
-  if (inputTitolo) inputTitolo.value = point.title || "";
-  if (inputComune) inputComune.value = point.comune || "";
-  if (inputCategoria) inputCategoria.value = point.categoria || "";
-  if (inputLuogo) inputLuogo.value = point.luogo || "";
-  if (inputDescrizione) inputDescrizione.value = point.description || "";
-  if (inputStatus) inputStatus.value = point.status || "";
-  if (inputWorkflow) inputWorkflow.value = point.workflow || "nuova";
-  if (inputNomeSegnalante) inputNomeSegnalante.value = point.nomeSegnalante || "";
-  if (inputContattoSegnalante) inputContattoSegnalante.value = point.contattoSegnalante || "";
-
+  inputTitolo.value = point.title || "";
+  inputComune.value = point.comune || "";
+  inputCategoria.value = point.categoria || "";
+  inputLuogo.value = point.luogo || "";
+  inputDescrizione.value = point.description || "";
+  inputStatus.value = point.status || "";
+  inputWorkflow.value = point.workflow || "nuova";
+  inputNomeSegnalante.value = point.nomeSegnalante || "";
+  inputContattoSegnalante.value = point.contattoSegnalante || "";
   selectedCoordsValue = [...point.coords];
   editingId = point.id;
   gpsPhoneCoords = point.gpsLat && point.gpsLng ? [Number(point.gpsLat), Number(point.gpsLng)] : null;
-
   if (gpsStatus) gpsStatus.textContent = gpsPhoneCoords ? "GPS acquisito" : "Non acquisito";
   setCoordsBoxes(point.coords);
   openFormModal(true);
+}
+
+async function deletePointById(pointId) {
+  const point = points.find(p => p.id === pointId);
+  if (!point) return;
+
+  const conferma = confirm(`Vuoi eliminare la segnalazione "${point.title}" (${point.codice})?`);
+  if (!conferma) return;
+
+  const { error } = await supabaseClient
+    .from("segnalazioni")
+    .delete()
+    .eq("id", pointId);
+
+  if (error) {
+    alert("Eliminazione non riuscita.");
+    console.error(error);
+    return;
+  }
+
+  const filesToDelete = [point.foto1, point.foto2, point.foto3].filter(Boolean);
+  if (filesToDelete.length > 0) {
+    await supabaseClient.storage.from("foto").remove(filesToDelete);
+  }
+
+  await loadPointsFromSupabase();
+  if (editingId === pointId) editingId = null;
 }
 
 function wirePopupActions(marker) {
@@ -530,6 +510,7 @@ function wirePopupActions(marker) {
 
     const buttons = popupEl.querySelectorAll(".foto-btn");
     const box = popupEl.querySelector(".popup-foto-box");
+    const deleteBtn = popupEl.querySelector(".popup-delete-btn");
 
     if (box) {
       buttons.forEach((btn) => {
@@ -547,11 +528,19 @@ function wirePopupActions(marker) {
         });
       });
     }
+
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", async () => {
+        const pointId = Number(deleteBtn.getAttribute("data-delete-id"));
+        await deletePointById(pointId);
+      });
+    }
   });
 }
 
 function renderPoints() {
   markersLayer.clearLayers();
+  if (listaSegnalazioni) listaSegnalazioni.innerHTML = "";
 
   const filtered = getFilteredPoints();
 
@@ -570,27 +559,58 @@ function renderPoints() {
       autoClose: true,
       closeOnClick: true
     });
-
     wirePopupActions(marker);
+
+    if (listaSegnalazioni) {
+      const item = document.createElement("div");
+      item.className = "segnalazione-item";
+      item.innerHTML = `
+        <div class="segnalazione-code">${point.codice || "-"}</div>
+        <strong>${point.title}</strong><br>
+        <small>${point.comune} · ${getStatusLabel(point.status)}</small><br>
+        <small><b>${point.categoria}</b></small><br>
+        <small>${point.luogo}</small><br>
+        <small>${point.description || ""}</small><br>
+        <small class="${workflowBadgeClass(point.workflow)}">${workflowLabel(point.workflow)}</small><br>
+        <button class="btn-modifica" data-id="${point.id}" type="button">Modifica</button>
+        <button class="btn-elimina" data-id="${point.id}" type="button">Elimina</button>
+      `;
+
+      listaSegnalazioni.appendChild(item);
+
+      item.addEventListener("click", () => {
+        map.setView(point.coords, 18);
+        marker.openPopup();
+      });
+
+      item.querySelector(".btn-modifica").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        fillFormFromPoint(point);
+        map.setView(point.coords, 18);
+      });
+
+      item.querySelector(".btn-elimina").addEventListener("click", async (ev) => {
+        ev.stopPropagation();
+        await deletePointById(point.id);
+      });
+    }
   });
+
+  if (listaSegnalazioni && filtered.length === 0) {
+    listaSegnalazioni.innerHTML = "Nessuna segnalazione trovata";
+  }
 
   updateLegendCounts();
   refreshMapSize();
 }
 
 async function loadPointsFromSupabase() {
-  let query = supabaseClient
+  const { data, error } = await supabaseClient
     .from("segnalazioni")
     .select("*")
+    .eq("visibilita", "pubblica")
+    .eq("stato_archivio", "attiva")
     .order("id", { ascending: true });
-
-  if (!IS_OPERATOR_VIEW) {
-    query = query
-      .eq("visibilita", "pubblica")
-      .eq("stato_archivio", "attiva");
-  }
-
-  const { data, error } = await query;
 
   if (error) {
     console.error("Errore lettura Supabase:", error);
@@ -623,220 +643,143 @@ async function uploadSinglePhoto(file) {
   return safeName;
 }
 
-function openDesktopDropdown(targetId) {
-  desktopDropdowns.forEach((dropdown) => {
-    if (dropdown.id === targetId) {
-      dropdown.classList.toggle("hidden");
-    } else {
-      dropdown.classList.add("hidden");
-    }
-  });
-}
-
-function closeAllDesktopDropdowns() {
-  desktopDropdowns.forEach((dropdown) => dropdown.classList.add("hidden"));
-}
-
-function openMobileFilters() {
-  if (!mobileFiltersPanel) return;
-  syncDesktopToMobile();
-  mobileFiltersPanel.classList.remove("hidden");
-  mobileFiltersPanel.setAttribute("aria-hidden", "false");
-}
-
-function closeMobileFilters() {
-  if (!mobileFiltersPanel) return;
-  mobileFiltersPanel.classList.add("hidden");
-  mobileFiltersPanel.setAttribute("aria-hidden", "true");
-}
-
-function syncDesktopToMobile() {
-  if (searchTextMobileMirror && searchText) searchTextMobileMirror.value = searchText.value;
-  if (filterComuneMobileMirror && filterComune) filterComuneMobileMirror.value = filterComune.value;
-  if (filterStatusMobileMirror && filterStatus) filterStatusMobileMirror.value = filterStatus.value;
-  if (filterWorkflowMobileMirror && filterWorkflow) filterWorkflowMobileMirror.value = filterWorkflow.value;
-  if (filterVisibilitaMobileMirror && filterVisibilita) filterVisibilitaMobileMirror.value = filterVisibilita.value;
-  if (filterArchivioMobileMirror && filterArchivio) filterArchivioMobileMirror.value = filterArchivio.value;
-}
-
-function applyMobileToDesktop() {
-  if (searchTextMobileMirror && searchText) searchText.value = searchTextMobileMirror.value;
-  if (filterComuneMobileMirror && filterComune) filterComune.value = filterComuneMobileMirror.value;
-  if (filterStatusMobileMirror && filterStatus) filterStatus.value = filterStatusMobileMirror.value;
-  if (filterWorkflowMobileMirror && filterWorkflow) filterWorkflow.value = filterWorkflowMobileMirror.value;
-  if (filterVisibilitaMobileMirror && filterVisibilita) filterVisibilita.value = filterVisibilitaMobileMirror.value;
-  if (filterArchivioMobileMirror && filterArchivio) filterArchivio.value = filterArchivioMobileMirror.value;
-}
-
-function resetAllFilters() {
-  if (searchText) searchText.value = "";
-  if (filterComune) filterComune.value = "tutti";
-  if (filterStatus) filterStatus.value = "tutti";
-  if (filterWorkflow) filterWorkflow.value = "tutti";
-  if (filterVisibilita) filterVisibilita.value = "tutti";
-  if (filterArchivio) filterArchivio.value = "tutti";
-
-  if (searchTextMobileMirror) searchTextMobileMirror.value = "";
-  if (filterComuneMobileMirror) filterComuneMobileMirror.value = "tutti";
-  if (filterStatusMobileMirror) filterStatusMobileMirror.value = "tutti";
-  if (filterWorkflowMobileMirror) filterWorkflowMobileMirror.value = "tutti";
-  if (filterVisibilitaMobileMirror) filterVisibilitaMobileMirror.value = "tutti";
-  if (filterArchivioMobileMirror) filterArchivioMobileMirror.value = "tutti";
-
-  renderPoints();
-}
-
 map.on("click", (e) => {
-  const nearestPoint = findNearestPointWithinTolerance(e.latlng, 26);
+  const nearestPoint = findNearestPointWithinTolerance(e.latlng);
 
   if (nearestPoint) {
     map.setView(nearestPoint.coords, Math.max(map.getZoom(), 18));
-
-    markersLayer.eachLayer((layer) => {
-      const layerLatLng = layer.getLatLng ? layer.getLatLng() : null;
-      if (!layerLatLng) return;
-
-      const sameLat = Math.abs(layerLatLng.lat - nearestPoint.coords[0]) < 0.000001;
-      const sameLng = Math.abs(layerLatLng.lng - nearestPoint.coords[1]) < 0.000001;
-
-      if (sameLat && sameLng && layer.openPopup) {
-        layer.openPopup();
-      }
+    const targetLayer = markersLayer.getLayers().find(layer => {
+      if (!layer.getLatLng) return false;
+      const ll = layer.getLatLng();
+      return Math.abs(ll.lat - nearestPoint.coords[0]) < 0.000001 &&
+             Math.abs(ll.lng - nearestPoint.coords[1]) < 0.000001;
     });
-    return;
+
+    if (targetLayer) {
+      targetLayer.openPopup();
+      return;
+    }
   }
 
   selectedCoordsValue = [e.latlng.lat, e.latlng.lng];
   editingId = null;
   setCoordsBoxes(selectedCoordsValue);
   resetGpsStatus();
-
-  if (inputCodice) {
-    inputCodice.value = generateNextCode(inputComune?.value || "", points);
-  }
-
+  inputCodice.value = generateNextCode(inputComune.value || "", points);
   openFormModal(false);
 });
 
-if (formSegnalazione) {
-  formSegnalazione.addEventListener("submit", async (e) => {
-    e.preventDefault();
+formSegnalazione.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const title = normalizeText(inputTitolo?.value);
-    const comune = normalizeText(inputComune?.value);
-    const categoria = normalizeText(inputCategoria?.value);
-    const luogo = normalizeText(inputLuogo?.value);
-    const description = normalizeText(inputDescrizione?.value);
-    const status = normalizeStatus(inputStatus?.value);
-    const workflow = normalizeText(inputWorkflow?.value).toLowerCase();
-    const nomeSegnalante = normalizeText(inputNomeSegnalante?.value);
-    const contattoSegnalante = normalizeText(inputContattoSegnalante?.value);
+  const title = normalizeText(inputTitolo.value);
+  const comune = normalizeText(inputComune.value);
+  const categoria = normalizeText(inputCategoria.value);
+  const luogo = normalizeText(inputLuogo.value);
+  const description = normalizeText(inputDescrizione.value);
+  const status = normalizeStatus(inputStatus.value);
+  const workflow = normalizeText(inputWorkflow.value).toLowerCase();
+  const nomeSegnalante = normalizeText(inputNomeSegnalante.value);
+  const contattoSegnalante = normalizeText(inputContattoSegnalante.value);
 
-    if (!selectedCoordsValue) {
-      alert("Prima clicca sulla mappa per scegliere il punto.");
-      return;
-    }
+  if (!selectedCoordsValue) {
+    alert("Prima clicca sulla mappa per scegliere il punto.");
+    return;
+  }
 
-    if (!title || !comune || !categoria || !luogo) {
-      alert("Compila tutti i campi obbligatori.");
-      return;
-    }
+  if (!title || !comune || !categoria || !luogo) {
+    alert("Compila tutti i campi obbligatori.");
+    return;
+  }
 
-    if (!isValidStatus(status)) {
-      alert("Seleziona uno stato valido: rosso, arancione o verde.");
-      return;
-    }
+  if (!isValidStatus(status)) {
+    alert("Seleziona uno stato valido: rosso, arancione o verde.");
+    return;
+  }
 
-    try {
-      let foto1 = null;
-      let foto2 = null;
-      let foto3 = null;
+  try {
+    let foto1 = null;
+    let foto2 = null;
+    let foto3 = null;
 
-      if (inputFoto1 && inputFoto1.files.length > 0) foto1 = await uploadSinglePhoto(inputFoto1.files[0]);
-      if (inputFoto2 && inputFoto2.files.length > 0) foto2 = await uploadSinglePhoto(inputFoto2.files[0]);
-      if (inputFoto3 && inputFoto3.files.length > 0) foto3 = await uploadSinglePhoto(inputFoto3.files[0]);
+    if (inputFoto1 && inputFoto1.files.length > 0) foto1 = await uploadSinglePhoto(inputFoto1.files[0]);
+    if (inputFoto2 && inputFoto2.files.length > 0) foto2 = await uploadSinglePhoto(inputFoto2.files[0]);
+    if (inputFoto3 && inputFoto3.files.length > 0) foto3 = await uploadSinglePhoto(inputFoto3.files[0]);
 
-      const point = {
-        codice: editingId
-          ? (points.find(p => p.id === editingId)?.codice || generateNextCode(comune, points, editingId))
-          : generateNextCode(comune, points),
-        title,
-        comune,
-        categoria,
-        status,
-        workflow,
-        visibilita: "pubblica",
-        statoArchivio: "attiva",
-        luogo,
-        description,
-        motivoArchiviazione: null,
-        dataArchiviazione: null,
-        archiviataDa: null,
-        nomeSegnalante,
-        contattoSegnalante,
-        gpsLat: gpsPhoneCoords ? gpsPhoneCoords[0] : null,
-        gpsLng: gpsPhoneCoords ? gpsPhoneCoords[1] : null,
-        foto1,
-        foto2,
-        foto3,
-        coords: [...selectedCoordsValue]
-      };
+    const point = {
+      codice: editingId
+        ? (points.find(p => p.id === editingId)?.codice || generateNextCode(comune, points, editingId))
+        : generateNextCode(comune, points),
+      title,
+      comune,
+      categoria,
+      status,
+      workflow,
+      visibilita: "pubblica",
+      statoArchivio: "attiva",
+      luogo,
+      description,
+      nomeSegnalante,
+      contattoSegnalante,
+      gpsLat: gpsPhoneCoords ? gpsPhoneCoords[0] : null,
+      gpsLng: gpsPhoneCoords ? gpsPhoneCoords[1] : null,
+      foto1,
+      foto2,
+      foto3,
+      coords: [...selectedCoordsValue]
+    };
 
-      if (editingId) {
-        const pointAttuale = points.find((p) => p.id === editingId);
-        if (!pointAttuale) return;
+    if (editingId) {
+      const pointAttuale = points.find((p) => p.id === editingId);
+      if (!pointAttuale) return;
 
-        if (!foto1) point.foto1 = pointAttuale.foto1 || null;
-        if (!foto2) point.foto2 = pointAttuale.foto2 || null;
-        if (!foto3) point.foto3 = pointAttuale.foto3 || null;
-        if (!point.gpsLat) point.gpsLat = pointAttuale.gpsLat || null;
-        if (!point.gpsLng) point.gpsLng = pointAttuale.gpsLng || null;
-        point.visibilita = pointAttuale.visibilita || "pubblica";
-        point.statoArchivio = pointAttuale.statoArchivio || "attiva";
-        point.motivoArchiviazione = pointAttuale.motivoArchiviazione || null;
-        point.dataArchiviazione = pointAttuale.dataArchiviazione || null;
-        point.archiviataDa = pointAttuale.archiviataDa || null;
+      if (!foto1) point.foto1 = pointAttuale.foto1 || null;
+      if (!foto2) point.foto2 = pointAttuale.foto2 || null;
+      if (!foto3) point.foto3 = pointAttuale.foto3 || null;
+      if (!point.gpsLat) point.gpsLat = pointAttuale.gpsLat || null;
+      if (!point.gpsLng) point.gpsLng = pointAttuale.gpsLng || null;
+      if (!point.visibilita) point.visibilita = pointAttuale.visibilita || "pubblica";
+      if (!point.statoArchivio) point.statoArchivio = pointAttuale.statoArchivio || "attiva";
 
-        const { error } = await supabaseClient
-          .from("segnalazioni")
-          .update(pointToDbRow(point))
-          .eq("id", editingId);
+      const { error } = await supabaseClient
+        .from("segnalazioni")
+        .update(pointToDbRow(point))
+        .eq("id", editingId);
 
-        if (error) {
-          alert("Modifica non riuscita.");
-          console.error(error);
-          return;
-        }
-      } else {
-        const { error } = await supabaseClient
-          .from("segnalazioni")
-          .insert([pointToDbRow(point)]);
-
-        if (error) {
-          alert("Errore salvataggio su database.");
-          console.error(error);
-          return;
-        }
+      if (error) {
+        alert("Modifica non riuscita: " + (error.message || "errore sconosciuto"));
+        console.error(error);
+        return;
       }
+    } else {
+      const { error } = await supabaseClient
+        .from("segnalazioni")
+        .insert([pointToDbRow(point)]);
 
-      await loadPointsFromSupabase();
-      clearForm();
-    } catch (error) {
-      alert(error.message || "Errore durante il caricamento delle foto.");
-      console.error(error);
+      if (error) {
+        alert("Errore salvataggio su database: " + (error.message || "errore sconosciuto"));
+        console.error(error);
+        return;
+      }
     }
-  });
-}
+
+    await loadPointsFromSupabase();
+    clearForm();
+  } catch (error) {
+    alert(error.message || "Errore durante il caricamento delle foto.");
+    console.error(error);
+  }
+});
 
 if (inputComune) {
   inputComune.addEventListener("change", () => {
-    if (!editingId && inputCodice) {
+    if (!editingId) {
       inputCodice.value = generateNextCode(inputComune.value, points);
     }
   });
 
   inputComune.addEventListener("blur", () => {
-    if (!editingId && normalizeText(inputComune.value) && inputCodice) {
+    if (!editingId && normalizeText(inputComune.value)) {
       inputCodice.value = generateNextCode(inputComune.value, points);
     }
   });
@@ -855,17 +798,15 @@ if (btnGpsPhone) {
       return;
     }
 
-    if (gpsStatus) gpsStatus.textContent = "Ricerca GPS...";
+    gpsStatus.textContent = "Ricerca GPS...";
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         gpsPhoneCoords = [position.coords.latitude, position.coords.longitude];
-        if (gpsStatus) {
-          gpsStatus.textContent = `GPS acquisito: ${gpsPhoneCoords[0].toFixed(5)}, ${gpsPhoneCoords[1].toFixed(5)}`;
-        }
+        gpsStatus.textContent = `GPS acquisito: ${gpsPhoneCoords[0].toFixed(5)}, ${gpsPhoneCoords[1].toFixed(5)}`;
       },
       () => {
-        if (gpsStatus) gpsStatus.textContent = "GPS non acquisito";
+        gpsStatus.textContent = "GPS non acquisito";
         alert("Non sono riuscito a leggere il GPS del telefono.");
       },
       {
@@ -877,6 +818,30 @@ if (btnGpsPhone) {
   });
 }
 
+if (toggleSegnalazioni) {
+  toggleSegnalazioni.addEventListener("click", () => {
+    contenitoreSegnalazioni.classList.toggle("collapsed");
+    refreshMapSize();
+  });
+}
+
+if (toggleNuovoPunto) {
+  toggleNuovoPunto.addEventListener("click", () => {
+    contenitoreNuovoPunto.classList.toggle("collapsed");
+    refreshMapSize();
+  });
+}
+
+if (btnApriForm) {
+  btnApriForm.addEventListener("click", () => {
+    if (!selectedCoordsValue) {
+      alert("Prima clicca sulla mappa per scegliere il punto.");
+      return;
+    }
+    openFormModal(false);
+  });
+}
+
 if (searchText) searchText.addEventListener("input", renderPoints);
 if (filterComune) filterComune.addEventListener("change", renderPoints);
 if (filterStatus) filterStatus.addEventListener("change", renderPoints);
@@ -884,92 +849,18 @@ if (filterWorkflow) filterWorkflow.addEventListener("change", renderPoints);
 if (filterVisibilita) filterVisibilita.addEventListener("change", renderPoints);
 if (filterArchivio) filterArchivio.addEventListener("change", renderPoints);
 
-if (filterChips.length > 0) {
-  filterChips.forEach((chip) => {
-    chip.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const targetId = chip.getAttribute("data-target");
-      if (targetId) openDesktopDropdown(targetId);
-    });
-  });
-}
-
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".filter-dropdown") && !e.target.closest(".filter-chip[data-target]")) {
-    closeAllDesktopDropdowns();
-  }
-
-  if (!e.target.closest(".autocomplete-field")) {
-    hideSuggestions(suggestionsComune);
-    hideSuggestions(suggestionsCategoria);
-    hideSuggestions(suggestionsLuogo);
-  }
-});
-
-if (btnToggleMobileFilters) {
-  btnToggleMobileFilters.addEventListener("click", () => {
-    openMobileFilters();
-  });
-}
-
-if (btnCloseMobileFilters) {
-  btnCloseMobileFilters.addEventListener("click", () => {
-    closeMobileFilters();
-  });
-}
-
-if (mobileFiltersPanel) {
-  mobileFiltersPanel.addEventListener("click", (e) => {
-    if (e.target === mobileFiltersPanel) {
-      closeMobileFilters();
-    }
-  });
-}
-
-if (btnApplyMobileFilters) {
-  btnApplyMobileFilters.addEventListener("click", () => {
-    applyMobileToDesktop();
-    renderPoints();
-    closeMobileFilters();
-  });
-}
-
-if (btnResetMobileFilters) {
-  btnResetMobileFilters.addEventListener("click", () => {
-    resetAllFilters();
-    closeMobileFilters();
-  });
-}
-
-if (btnResetFilters) {
-  btnResetFilters.addEventListener("click", () => {
-    resetAllFilters();
-    closeAllDesktopDropdowns();
-  });
-}
-
-function openLegendModal() {
-  updateLegendCounts();
-  if (legendModal) {
+if (btnLegend) {
+  btnLegend.addEventListener("click", () => {
+    updateLegendCounts();
     legendModal.classList.remove("hidden");
     legendModal.setAttribute("aria-hidden", "false");
-  }
-}
-
-if (btnLegend) {
-  btnLegend.addEventListener("click", openLegendModal);
-}
-
-if (btnLegendMobile) {
-  btnLegendMobile.addEventListener("click", openLegendModal);
+  });
 }
 
 if (btnCloseLegend) {
   btnCloseLegend.addEventListener("click", () => {
-    if (legendModal) {
-      legendModal.classList.add("hidden");
-      legendModal.setAttribute("aria-hidden", "true");
-    }
+    legendModal.classList.add("hidden");
+    legendModal.setAttribute("aria-hidden", "true");
   });
 }
 
@@ -1028,13 +919,13 @@ if (btnLocate) {
         userMarker.bindPopup("<strong>Sei qui</strong>").openPopup();
 
         btnLocate.disabled = false;
-        btnLocate.textContent = "📍 Posizione";
+        btnLocate.textContent = "📍 Mostra la mia posizione";
         refreshMapSize();
       },
       () => {
         alert("Non sono riuscito a trovare la tua posizione.");
         btnLocate.disabled = false;
-        btnLocate.textContent = "📍 Posizione";
+        btnLocate.textContent = "📍 Mostra la mia posizione";
       },
       {
         enableHighAccuracy: true,
@@ -1044,6 +935,14 @@ if (btnLocate) {
     );
   });
 }
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".autocomplete-field")) {
+    hideSuggestions(suggestionsComune);
+    hideSuggestions(suggestionsCategoria);
+    hideSuggestions(suggestionsLuogo);
+  }
+});
 
 attachAutocomplete(inputComune, suggestionsComune, "comuni");
 attachAutocomplete(inputCategoria, suggestionsCategoria, "categorie");
