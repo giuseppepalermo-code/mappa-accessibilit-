@@ -396,10 +396,30 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function normalizeRole(value){ const v = normalizeText(value).toLowerCase(); return v === "admin" ? "admin" : "operatore"; }
     function isAdmin(){ return currentUserRole === "admin"; }
 
-    function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
-    function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 3500); } }
-    function showApp(){ loginSection.classList.add("hidden"); appSection.classList.remove("hidden"); }
-    function hideApp(){ loginSection.classList.remove("hidden"); appSection.classList.add("hidden"); }
+    function setMsg(el, text, type = ""){
+      el.textContent = text || "";
+      el.className = "msg";
+      if(type) el.classList.add(type);
+    }
+
+    function setAdminMessage(text, type = ""){
+      setMsg(adminMsg, text, type);
+      if(text){
+        setTimeout(() => {
+          if(adminMsg.textContent === text) setMsg(adminMsg, "");
+        }, 2600);
+      }
+    }
+
+    function showApp(){
+      loginSection.classList.add("hidden");
+      appSection.classList.remove("hidden");
+    }
+
+    function hideApp(){
+      loginSection.classList.remove("hidden");
+      appSection.classList.add("hidden");
+    }
 
     function refreshRoleUi(){
       if(roleBadge){
@@ -573,12 +593,12 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       const archivio = filterArchivio.value;
 
       return rowsCache.filter(row => {
-        const titolo = getField(row, "Titolo", "titolo");
-        const luogo = getField(row, "Luogo", "luogo");
-        const descrizione = getField(row, "Descrizione", "descrizione");
-        const comuneRow = getField(row, "Comune", "comune");
+        const titolo = getField(row, "titolo", "Titolo");
+        const luogo = getField(row, "luogo", "Luogo");
+        const descrizione = getField(row, "descrizione", "Descrizione");
+        const comuneRow = getField(row, "comune", "Comune");
         const codice = getField(row, "codice", "Codice");
-        const stato = normalizeText(getField(row, "Stato", "stato")).toLowerCase();
+        const stato = normalizeText(getField(row, "stato", "Stato")).toLowerCase();
         const wf = normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione"));
         const vis = normalizeVisibilityValue(getField(row, "visibilita", "Visibilita"));
         const arc = normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio"));
@@ -594,17 +614,20 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     function getFilteredIds(){
-      return getFilteredRows().map(r => Number(r.id)).filter(Boolean);
+      return getFilteredRows().map(r => r.id).filter(Boolean);
     }
 
     function formatDate(value){
       if(!value) return "—";
-      try{ return new Date(value).toLocaleString("it-IT"); }
-      catch { return value; }
+      try{
+        return new Date(value).toLocaleString("it-IT");
+      }catch{
+        return value;
+      }
     }
 
     function updateStats(rows){
-      const stato = r => normalizeText(getField(r, "Stato", "stato")).toLowerCase();
+      const stato = r => normalizeText(getField(r, "stato", "Stato")).toLowerCase();
       const vis = r => normalizeVisibilityValue(getField(r, "visibilita", "Visibilita"));
       const arc = r => normalizeArchiveValue(getField(r, "stato_archivio", "StatoArchivio"));
 
@@ -629,17 +652,17 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }
 
       rows.forEach(row => {
-        const id = Number(row.id);
+        const id = row.id;
         const codice = getField(row, "codice", "Codice");
-        const titolo = getField(row, "Titolo", "titolo");
-        const comune = getField(row, "Comune", "comune");
-        const categoria = getField(row, "Categoria", "categoria");
-        const stato = getField(row, "Stato", "stato");
+        const titolo = getField(row, "titolo", "Titolo");
+        const comune = getField(row, "comune", "Comune");
+        const categoria = getField(row, "categoria", "Categoria");
+        const stato = getField(row, "stato", "Stato");
         const workflow = normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "nuova";
         const visibilita = normalizeVisibilityValue(getField(row, "visibilita", "Visibilita"));
         const archivio = normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio"));
-        const luogo = getField(row, "Luogo", "luogo");
-        const descrizione = getField(row, "Descrizione", "descrizione");
+        const luogo = getField(row, "luogo", "Luogo");
+        const descrizione = getField(row, "descrizione", "Descrizione");
         const nomeSegnalante = getField(row, "nomesegnalante", "NomeSegnalante");
         const contattoSegnalante = getField(row, "contattosegnalante", "ContattoSegnalante");
         const createdAt = getField(row, "created_at", "creato_il");
@@ -712,9 +735,9 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       chartBaseInfo.textContent = `Base analisi: ${rows.length} segnalazioni (${label})`;
 
       const statusMap = {
-        Rosso: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "rosso").length,
-        Arancione: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length,
-        Verde: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "verde").length
+        Rosso: rows.filter(r => normalizeText(getField(r, "stato", "Stato")).toLowerCase() === "rosso").length,
+        Arancione: rows.filter(r => normalizeText(getField(r, "stato", "Stato")).toLowerCase() === "arancione").length,
+        Verde: rows.filter(r => normalizeText(getField(r, "stato", "Stato")).toLowerCase() === "verde").length
       };
 
       const workflowMap = {
@@ -755,17 +778,17 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       rows.forEach((row, index) => {
         lines.push(`Scheda ${index + 1}`);
         lines.push(`ID: ${row.id}`);
-        lines.push(`Titolo: ${getField(row, "Titolo", "titolo") || "—"}`);
-        lines.push(`Comune: ${getField(row, "Comune", "comune") || "—"}`);
-        lines.push(`Categoria: ${getField(row, "Categoria", "categoria") || "—"}`);
-        lines.push(`Luogo: ${getField(row, "Luogo", "luogo") || "—"}`);
-        lines.push(`Stato: ${getField(row, "Stato", "stato") || "—"}`);
+        lines.push(`Titolo: ${getField(row, "titolo", "Titolo") || "—"}`);
+        lines.push(`Comune: ${getField(row, "comune", "Comune") || "—"}`);
+        lines.push(`Categoria: ${getField(row, "categoria", "Categoria") || "—"}`);
+        lines.push(`Luogo: ${getField(row, "luogo", "Luogo") || "—"}`);
+        lines.push(`Stato: ${getField(row, "stato", "Stato") || "—"}`);
         lines.push(`Workflow: ${normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "—"}`);
         lines.push(`Visibilità: ${normalizeVisibilityValue(getField(row, "visibilita", "Visibilita"))}`);
         lines.push(`Archivio: ${normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio"))}`);
         lines.push(`Creato il: ${formatDate(getField(row, "created_at", "creato_il"))}`);
         lines.push(`Aggiornato il: ${formatDate(getField(row, "updated_at", "aggiornato_alle"))}`);
-        lines.push(`Descrizione: ${getField(row, "Descrizione", "descrizione") || "—"}`);
+        lines.push(`Descrizione: ${getField(row, "descrizione", "Descrizione") || "—"}`);
         lines.push("");
       });
 
@@ -874,13 +897,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function updateWorkflow(id, nuovoWorkflow){
       const numericId = Number(id);
 
-      const { data, error } = await client
+      const { error } = await client
         .from("segnalazioni")
         .update({ statosegnalazione: nuovoWorkflow })
-        .eq("id", numericId)
-        .select();
-
-      console.log("updateWorkflow", { numericId, data, error });
+        .eq("id", numericId);
 
       if(error){
         setAdminMessage("Errore nel salvataggio workflow: " + error.message, "error");
@@ -895,13 +915,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function hideSegnalazione(id){
       const numericId = Number(id);
 
-      const { data, error } = await client
+      const { error } = await client
         .from("segnalazioni")
         .update({ visibilita: "nascosta" })
-        .eq("id", numericId)
-        .select();
-
-      console.log("hideSegnalazione", { numericId, data, error });
+        .eq("id", numericId);
 
       if(error){
         setAdminMessage("Errore durante il nascondimento: " + error.message, "error");
@@ -915,16 +932,13 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function archiveSegnalazione(id){
       const numericId = Number(id);
 
-      const { data, error } = await client
+      const { error } = await client
         .from("segnalazioni")
         .update({
           stato_archivio: "archiviata",
           visibilita: "nascosta"
         })
-        .eq("id", numericId)
-        .select();
-
-      console.log("archiveSegnalazione", { numericId, data, error });
+        .eq("id", numericId);
 
       if(error){
         setAdminMessage("Errore durante l'archiviazione: " + error.message, "error");
@@ -938,16 +952,13 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function restoreSegnalazione(id){
       const numericId = Number(id);
 
-      const { data, error } = await client
+      const { error } = await client
         .from("segnalazioni")
         .update({
           stato_archivio: "attiva",
           visibilita: "pubblica"
         })
-        .eq("id", numericId)
-        .select();
-
-      console.log("restoreSegnalazione", { numericId, data, error });
+        .eq("id", numericId);
 
       if(error){
         setAdminMessage("Errore durante il ripristino: " + error.message, "error");
@@ -966,13 +977,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
       const numericId = Number(id);
 
-      const { data, error } = await client
+      const { error } = await client
         .from("segnalazioni")
         .delete()
-        .eq("id", numericId)
-        .select();
-
-      console.log("deleteSegnalazione", { numericId, data, error });
+        .eq("id", numericId);
 
       if(error){
         setAdminMessage("Errore durante eliminazione definitiva: " + error.message, "error");
