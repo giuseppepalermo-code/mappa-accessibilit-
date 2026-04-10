@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
@@ -397,7 +397,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function isAdmin(){ return currentUserRole === "admin"; }
 
     function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
-    function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 2600); } }
+    function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 3500); } }
     function showApp(){ loginSection.classList.add("hidden"); appSection.classList.remove("hidden"); }
     function hideApp(){ loginSection.classList.remove("hidden"); appSection.classList.add("hidden"); }
 
@@ -457,6 +457,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function getAdminProfile(){
       const { data: authData, error: authError } = await client.auth.getUser();
       if(authError) return null;
+
       const user = authData?.user;
       const userEmail = normalizeText(user?.email).toLowerCase();
       if(!userEmail) return null;
@@ -490,11 +491,19 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function login(){
       const email = normalizeText(document.getElementById("email").value).toLowerCase();
       const password = document.getElementById("password").value;
-      if(!email || !password){ setMsg(loginMsg, "Inserisci email e password.", "error"); return; }
+
+      if(!email || !password){
+        setMsg(loginMsg, "Inserisci email e password.", "error");
+        return;
+      }
+
       setMsg(loginMsg, "Accesso in corso...");
 
       const { error } = await client.auth.signInWithPassword({ email, password });
-      if(error){ setMsg(loginMsg, "Login non riuscito: " + error.message, "error"); return; }
+      if(error){
+        setMsg(loginMsg, "Login non riuscito: " + error.message, "error");
+        return;
+      }
 
       const admin = await isAdminUser();
       if(!admin){
@@ -585,7 +594,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     function getFilteredIds(){
-      return getFilteredRows().map(r => r.id).filter(Boolean);
+      return getFilteredRows().map(r => Number(r.id)).filter(Boolean);
     }
 
     function formatDate(value){
@@ -620,7 +629,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }
 
       rows.forEach(row => {
-        const id = row.id;
+        const id = Number(row.id);
         const codice = getField(row, "codice", "Codice");
         const titolo = getField(row, "Titolo", "titolo");
         const comune = getField(row, "Comune", "comune");
@@ -686,10 +695,17 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       });
     }
 
-    function destroyCharts(){ charts.forEach(chart => chart.destroy()); charts = []; }
+    function destroyCharts(){
+      charts.forEach(chart => chart.destroy());
+      charts = [];
+    }
 
     function buildCharts(rows, label){
-      if(!rows.length){ alert("Nessun dato disponibile per generare i grafici."); return; }
+      if(!rows.length){
+        alert("Nessun dato disponibile per generare i grafici.");
+        return;
+      }
+
       destroyCharts();
       chartsEmpty.classList.add("hidden");
       chartsWrap.classList.remove("hidden");
@@ -700,6 +716,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         Arancione: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length,
         Verde: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "verde").length
       };
+
       const workflowMap = {
         Nuova: rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "nuova").length,
         "Presa in carico": rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "presa in carico").length,
@@ -717,11 +734,16 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         data:{ labels:Object.keys(workflowMap), datasets:[{ label:"Segnalazioni", data:Object.values(workflowMap), backgroundColor:["#3b82f6","#f59e0b","#10b981"] }] },
         options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
       }));
+
       setAdminMessage("Grafici generati correttamente.", "ok");
     }
 
     function buildReport(rows, label){
-      if(!rows.length){ alert("Nessun dato disponibile per generare il report."); return; }
+      if(!rows.length){
+        alert("Nessun dato disponibile per generare il report.");
+        return;
+      }
+
       const lines = [];
       lines.push("REPORT OPERATORI - MAPPA ACCESSIBILITÀ");
       lines.push("NessunOstacolo");
@@ -749,6 +771,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
       const text = lines.join("\n");
       const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Report operatori - Mappa Accessibilità</title><style>body{font-family:Arial,Helvetica,sans-serif;margin:40px;color:#111;line-height:1.6}header{display:flex;align-items:center;gap:16px;margin-bottom:24px}header img{width:72px;height:72px;object-fit:contain}h1{color:#1f4b7a;margin:0}p{margin:0}pre{white-space:pre-wrap}</style></head><body><header><img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità"><div><h1>Mappa Accessibilità - NessunOstacolo</h1><p>Area riservata operatori</p></div></header><pre>${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></body></html>`;
+
       lastReportText = text;
       lastReportHtml = html;
       reportOutput.textContent = text;
@@ -767,8 +790,16 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     async function loadData(){
-      const { data, error } = await client.from("segnalazioni").select("*").order("id", { ascending:true });
-      if(error){ alert("Errore caricamento dati: " + error.message); return; }
+      const { data, error } = await client
+        .from("segnalazioni")
+        .select("*")
+        .order("id", { ascending:true });
+
+      if(error){
+        alert("Errore caricamento dati: " + error.message);
+        return;
+      }
+
       rowsCache = data || [];
       updateStats(rowsCache);
       renderCards();
@@ -791,15 +822,27 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
     function exportCSV(){
       const rows = getFilteredRows();
-      if(!rows.length){ alert("Nessun dato da esportare"); return; }
+      if(!rows.length){
+        alert("Nessun dato da esportare");
+        return;
+      }
+
       const headers = Object.keys(rows[0]);
-      const csv = [headers.join(","), ...rows.map(row => headers.map(h => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
+      const csv = [
+        headers.join(","),
+        ...rows.map(row => headers.map(h => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","))
+      ].join("\n");
+
       exportFile("segnalazioni-mappa.csv", csv, "text/csv;charset=utf-8;");
     }
 
     function exportXLSX(){
       const rows = getFilteredRows();
-      if(!rows.length){ alert("Nessun dato da esportare"); return; }
+      if(!rows.length){
+        alert("Nessun dato da esportare");
+        return;
+      }
+
       const worksheet = XLSX.utils.json_to_sheet(rows);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Segnalazioni");
@@ -807,7 +850,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     function printReport(){
-      if(!lastReportHtml){ alert("Genera prima un report."); return; }
+      if(!lastReportHtml){
+        alert("Genera prima un report.");
+        return;
+      }
+
       const w = window.open("", "_blank");
       w.document.open();
       w.document.write(lastReportHtml);
@@ -825,39 +872,89 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     async function updateWorkflow(id, nuovoWorkflow){
-      const { error } = await client.from("segnalazioni").update({ statosegnalazione: nuovoWorkflow }).eq("id", id);
-      if(error){ setAdminMessage("Errore nel salvataggio workflow.", "error"); return false; }
-      await writeLog("workflow_update", id, `Nuovo workflow: ${nuovoWorkflow}`);
+      const numericId = Number(id);
+
+      const { data, error } = await client
+        .from("segnalazioni")
+        .update({ statosegnalazione: nuovoWorkflow })
+        .eq("id", numericId)
+        .select();
+
+      console.log("updateWorkflow", { numericId, data, error });
+
+      if(error){
+        setAdminMessage("Errore nel salvataggio workflow: " + error.message, "error");
+        return false;
+      }
+
+      await writeLog("workflow_update", numericId, `Nuovo workflow: ${nuovoWorkflow}`);
       setAdminMessage("Workflow aggiornato correttamente.", "ok");
       return true;
     }
 
     async function hideSegnalazione(id){
-      const { error } = await client.from("segnalazioni").update({ visibilita: "nascosta" }).eq("id", id);
-      if(error){ setAdminMessage("Errore durante il nascondimento.", "error"); return false; }
-      await writeLog("nascondi", id, "Visibilità impostata a nascosta");
+      const numericId = Number(id);
+
+      const { data, error } = await client
+        .from("segnalazioni")
+        .update({ visibilita: "nascosta" })
+        .eq("id", numericId)
+        .select();
+
+      console.log("hideSegnalazione", { numericId, data, error });
+
+      if(error){
+        setAdminMessage("Errore durante il nascondimento: " + error.message, "error");
+        return false;
+      }
+
+      await writeLog("nascondi", numericId, "Visibilità impostata a nascosta");
       return true;
     }
 
     async function archiveSegnalazione(id){
-      const { error } = await client.from("segnalazioni").update({
-        stato_archivio: "archiviata",
-        visibilita: "nascosta"
-      }).eq("id", id);
+      const numericId = Number(id);
 
-      if(error){ setAdminMessage("Errore durante l'archiviazione.", "error"); return false; }
-      await writeLog("archivia", id, "Archivio=archiviata, visibilità=nascosta");
+      const { data, error } = await client
+        .from("segnalazioni")
+        .update({
+          stato_archivio: "archiviata",
+          visibilita: "nascosta"
+        })
+        .eq("id", numericId)
+        .select();
+
+      console.log("archiveSegnalazione", { numericId, data, error });
+
+      if(error){
+        setAdminMessage("Errore durante l'archiviazione: " + error.message, "error");
+        return false;
+      }
+
+      await writeLog("archivia", numericId, "Archivio=archiviata, visibilità=nascosta");
       return true;
     }
 
     async function restoreSegnalazione(id){
-      const { error } = await client.from("segnalazioni").update({
-        stato_archivio: "attiva",
-        visibilita: "pubblica"
-      }).eq("id", id);
+      const numericId = Number(id);
 
-      if(error){ setAdminMessage("Errore durante il ripristino.", "error"); return false; }
-      await writeLog("ripristina", id, "Archivio=attiva, visibilità=pubblica");
+      const { data, error } = await client
+        .from("segnalazioni")
+        .update({
+          stato_archivio: "attiva",
+          visibilita: "pubblica"
+        })
+        .eq("id", numericId)
+        .select();
+
+      console.log("restoreSegnalazione", { numericId, data, error });
+
+      if(error){
+        setAdminMessage("Errore durante il ripristino: " + error.message, "error");
+        return false;
+      }
+
+      await writeLog("ripristina", numericId, "Archivio=attiva, visibilità=pubblica");
       return true;
     }
 
@@ -867,15 +964,32 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         return false;
       }
 
-      const { error } = await client.from("segnalazioni").delete().eq("id", id);
-      if(error){ setAdminMessage("Errore durante eliminazione definitiva.", "error"); return false; }
-      await writeLog("elimina_definitiva", id, "Segnalazione eliminata definitivamente");
+      const numericId = Number(id);
+
+      const { data, error } = await client
+        .from("segnalazioni")
+        .delete()
+        .eq("id", numericId)
+        .select();
+
+      console.log("deleteSegnalazione", { numericId, data, error });
+
+      if(error){
+        setAdminMessage("Errore durante eliminazione definitiva: " + error.message, "error");
+        return false;
+      }
+
+      await writeLog("elimina_definitiva", numericId, "Segnalazione eliminata definitivamente");
       return true;
     }
 
     async function bulkHideFiltered(){
       const ids = getFilteredIds();
-      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da nascondere."); return; }
+      if(!ids.length){
+        alert("Non ci sono segnalazioni filtrate da nascondere.");
+        return;
+      }
+
       const conferma = confirm(`Vuoi nascondere ${ids.length} segnalazioni filtrate dalla mappa pubblica?`);
       if(!conferma) return;
 
@@ -891,7 +1005,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
     async function bulkArchiveFiltered(){
       const ids = getFilteredIds();
-      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da archiviare."); return; }
+      if(!ids.length){
+        alert("Non ci sono segnalazioni filtrate da archiviare.");
+        return;
+      }
+
       const conferma = confirm(`Vuoi archiviare ${ids.length} segnalazioni filtrate? Verranno anche nascoste.`);
       if(!conferma) return;
 
@@ -907,7 +1025,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
     async function bulkRestoreFiltered(){
       const ids = getFilteredIds();
-      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da ripristinare."); return; }
+      if(!ids.length){
+        alert("Non ci sono segnalazioni filtrate da ripristinare.");
+        return;
+      }
+
       const conferma = confirm(`Vuoi ripristinare ${ids.length} segnalazioni filtrate? Torneranno attive e pubbliche.`);
       if(!conferma) return;
 
@@ -928,7 +1050,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }
 
       const ids = getFilteredIds();
-      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da eliminare."); return; }
+      if(!ids.length){
+        alert("Non ci sono segnalazioni filtrate da eliminare.");
+        return;
+      }
+
       const conferma = confirm(`ATTENZIONE: vuoi eliminare DEFINITIVAMENTE ${ids.length} segnalazioni filtrate? Questa azione non si può annullare.`);
       if(!conferma) return;
 
@@ -1023,8 +1149,14 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     btnBuildReportFiltered.onclick = () => buildReport(getFilteredRows(), "risultati filtrati");
     btnBuildReportAll.onclick = () => buildReport(rowsCache, "database completo");
     btnPrintReport.onclick = printReport;
-    btnExportReportHtml.onclick = () => { if(!lastReportHtml) return alert("Genera prima un report."); exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;"); };
-    btnExportReportTxt.onclick = () => { if(!lastReportText) return alert("Genera prima un report."); exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;"); };
+    btnExportReportHtml.onclick = () => {
+      if(!lastReportHtml) return alert("Genera prima un report.");
+      exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;");
+    };
+    btnExportReportTxt.onclick = () => {
+      if(!lastReportText) return alert("Genera prima un report.");
+      exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;");
+    };
     btnPrintPage.onclick = () => window.print();
     btnResetFilters.onclick = resetFilters;
 
