@@ -7,12 +7,75 @@ const SUPABASE_KEY = "sb_publishable_-BATje0RS7UM8GMtRiQjkQ_vujpg8ho";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// -------------------------------
+// UTILITÀ TESTO E NORMALIZZAZIONE
+// -------------------------------
+
 function normalizeText(value) {
   return (value ?? "").toString().trim();
 }
 
 function normalizeStatus(value) {
   return normalizeText(value).toLowerCase();
+}
+
+function normalizeDisplayText(value) {
+  const cleaned = normalizeText(value)
+    .replace(/\s+/g, " ")
+    .replace(/\.+$/, "")
+    .trim();
+
+  if (!cleaned) return "";
+
+  return cleaned
+    .toLowerCase()
+    .split(" ")
+    .map((word) => {
+      if (!word) return "";
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+}
+
+function cleanComuneValue(value) {
+  const v = normalizeDisplayText(value).toLowerCase();
+
+  if (!v) return "";
+  if (v.includes("san cataldo")) return "San Cataldo";
+  if (v.includes("caltanissetta")) return "Caltanissetta";
+
+  return "";
+}
+
+function cleanCategoriaValue(value) {
+  const v = normalizeDisplayText(value).toLowerCase();
+
+  if (!v) return "";
+
+  if (v.includes("parcheggio")) return "Parcheggio disabili";
+  if (v.includes("rampa")) return "Rampa";
+  if (v.includes("farmacia")) return "Farmacia";
+  if (v.includes("scuola")) return "Scuola";
+  if (v.includes("comune")) return "Comune";
+  if (v.includes("barriera")) return "Barriera architettonica";
+  if (v.includes("percorso")) return "Percorso pedonale";
+  if (v.includes("ingresso")) return "Ingresso edificio";
+  if (v.includes("spazio")) return "Spazio pubblico";
+  if (v.includes("altro")) return "Altro";
+
+  return normalizeDisplayText(value);
+}
+
+function cleanLuogoValue(value) {
+  const cleaned = normalizeDisplayText(value);
+
+  if (!cleaned) return "";
+  if (cleaned.length < 4) return "";
+  if (/^[0-9\s\-]+$/.test(cleaned)) return "";
+  if (cleaned.toLowerCase().includes("undefined")) return "";
+  if (cleaned.toLowerCase().includes("null")) return "";
+
+  return cleaned;
 }
 
 function isValidStatus(status) {
@@ -35,12 +98,6 @@ function getColor(status) {
   return "#6b7280";
 }
 
-function fotoPublicUrl(nomeFile) {
-  if (!nomeFile) return "";
-  const { data } = supabaseClient.storage.from("foto").getPublicUrl(nomeFile);
-  return data.publicUrl;
-}
-
 function workflowLabel(value) {
   const v = normalizeText(value).toLowerCase();
   if (v === "nuova") return "Nuova";
@@ -56,6 +113,16 @@ function workflowBadgeClass(value) {
   return "wf-badge wf-blue";
 }
 
+function fotoPublicUrl(nomeFile) {
+  if (!nomeFile) return "";
+  const { data } = supabaseClient.storage.from("foto").getPublicUrl(nomeFile);
+  return data.publicUrl;
+}
+
+// -------------------------------
+// MAPPING DB <-> APP
+// -------------------------------
+
 function dbRowToPoint(row) {
   const latValue = Number(row.lat ?? row.Lat);
   const lngValue = Number(row.lng ?? row.Lng ?? row.log ?? row.Log);
@@ -64,16 +131,16 @@ function dbRowToPoint(row) {
     id: row.id,
     codice: row.codice || row.Codice || "",
     title: row.titolo || row.Titolo || "",
-    comune: row.comune || row.Comune || "",
-    categoria: row.categoria || row.Categoria || "Altro",
+    comune: cleanComuneValue(row.comune || row.Comune || ""),
+    categoria: cleanCategoriaValue(row.categoria || row.Categoria || "Altro"),
     status: normalizeStatus(row.stato || row.Stato || ""),
     workflow: normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase(),
     visibilita: normalizeText(row.visibilita || row.Visibilita || "pubblica").toLowerCase(),
     statoArchivio: normalizeText(row.stato_archivio || row.StatoArchivio || "attiva").toLowerCase(),
-    luogo: row.luogo || row.Luogo || "",
-    description: row.descrizione || row.Descrizione || "",
-    nomeSegnalante: row.nomesegnalante || row.NomeSegnalante || "",
-    contattoSegnalante: row.contattosegnalante || row.ContattoSegnalante || "",
+    luogo: cleanLuogoValue(row.luogo || row.Luogo || ""),
+    description: normalizeText(row.descrizione || row.Descrizione || ""),
+    nomeSegnalante: normalizeDisplayText(row.nomesegnalante || row.NomeSegnalante || ""),
+    contattoSegnalante: normalizeText(row.contattosegnalante || row.ContattoSegnalante || ""),
     gpsLat: row.gpslat ?? row.GpsLat ?? null,
     gpsLng: row.gpslng ?? row.GpsLng ?? null,
     foto1: row.foto1 || null,
@@ -86,26 +153,30 @@ function dbRowToPoint(row) {
 function pointToDbRow(point) {
   return {
     codice: point.codice,
-    titolo: point.title,
-    comune: point.comune,
-    categoria: point.categoria,
-    luogo: point.luogo,
-    descrizione: point.description,
-    stato: point.status,
+    Titolo: point.title,
+    Comune: point.comune,
+    Categoria: point.categoria,
+    Luogo: point.luogo,
+    Descrizione: point.description,
+    Stato: point.status,
     statosegnalazione: point.workflow,
-    visibilita: point.visibilita || "pubblica",
-    stato_archivio: point.statoArchivio || "attiva",
     nomesegnalante: point.nomeSegnalante,
     contattosegnalante: point.contattoSegnalante,
     gpslat: point.gpsLat,
     gpslng: point.gpsLng,
-    lat: point.coords[0],
-    lng: point.coords[1],
+    Lat: point.coords[0],
+    Log: point.coords[1],
     foto1: point.foto1 || null,
     foto2: point.foto2 || null,
-    foto3: point.foto3 || null
+    foto3: point.foto3 || null,
+    visibilita: point.visibilita || "pubblica",
+    stato_archivio: point.statoArchivio || "attiva"
   };
 }
+
+// -------------------------------
+// CODICI
+// -------------------------------
 
 function comunePrefix(comune) {
   const c = normalizeText(comune).toLowerCase();
@@ -116,10 +187,12 @@ function comunePrefix(comune) {
 
 function generateNextCode(comune, existingPoints, currentId = null) {
   const prefix = comunePrefix(comune);
-  const sameComune = existingPoints.filter(p => p.id !== currentId && comunePrefix(p.comune) === prefix);
+  const sameComune = existingPoints.filter(
+    (p) => p.id !== currentId && comunePrefix(p.comune) === prefix
+  );
 
   let maxNum = 0;
-  sameComune.forEach(p => {
+  sameComune.forEach((p) => {
     const match = String(p.codice || "").match(/-(\d+)$/);
     if (match) {
       const n = Number(match[1]);
@@ -130,6 +203,10 @@ function generateNextCode(comune, existingPoints, currentId = null) {
   const nextNum = String(maxNum + 1).padStart(3, "0");
   return `${prefix}-${nextNum}`;
 }
+
+// -------------------------------
+// MAPPA
+// -------------------------------
 
 const map = L.map("map", {
   closePopupOnClick: true
@@ -167,12 +244,20 @@ function findNearestPointWithinTolerance(latlng, maxPixelDistance = 26) {
   return nearest;
 }
 
+// -------------------------------
+// STATO APP
+// -------------------------------
+
 const markersLayer = L.layerGroup().addTo(map);
 let userMarker = null;
 let points = [];
 let selectedCoordsValue = null;
 let editingId = null;
 let gpsPhoneCoords = null;
+
+// -------------------------------
+// ELEMENTI DOM
+// -------------------------------
 
 const listaSegnalazioni = document.getElementById("listaSegnalazioni");
 const toggleSegnalazioni = document.getElementById("toggleSegnalazioni");
@@ -228,6 +313,7 @@ const suggestionsComune = document.getElementById("suggestionsComune");
 const suggestionsCategoria = document.getElementById("suggestionsCategoria");
 const suggestionsLuogo = document.getElementById("suggestionsLuogo");
 
+// menu filtri desktop/mobile
 const btnResetFilters = document.getElementById("btnResetFilters");
 const filterChips = document.querySelectorAll(".filter-chip[data-target]");
 const filterDropdowns = document.querySelectorAll(".filter-dropdown");
@@ -245,36 +331,53 @@ const filterWorkflowMobileMirror = document.getElementById("filterWorkflowMobile
 const filterVisibilitaMobileMirror = document.getElementById("filterVisibilitaMobileMirror");
 const filterArchivioMobileMirror = document.getElementById("filterArchivioMobileMirror");
 
+// -------------------------------
+// AUTOCOMPLETE E SUGGERIMENTI
+// -------------------------------
+
 function uniqueSorted(values) {
-  return [...new Set(values.filter(Boolean).map(normalizeText).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, "it")
-  );
+  return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, "it"));
 }
 
 function getSuggestionValues(type) {
   if (type === "comuni") {
-    return uniqueSorted(points.map((p) => p.comune).concat(["San Cataldo", "Caltanissetta"]));
+    const comuniPuliti = points
+      .map((p) => cleanComuneValue(p.comune))
+      .filter(Boolean);
+
+    return uniqueSorted([
+      "San Cataldo",
+      "Caltanissetta",
+      ...comuniPuliti
+    ]);
   }
 
   if (type === "categorie") {
-    return uniqueSorted(
-      points.map((p) => p.categoria).concat([
-        "Percorso pedonale",
-        "Parcheggio disabili",
-        "Rampa",
-        "Ingresso edificio",
-        "Farmacia",
-        "Spazio pubblico",
-        "Scuola",
-        "Comune",
-        "Barriera architettonica",
-        "Altro"
-      ])
-    );
+    const categoriePulite = points
+      .map((p) => cleanCategoriaValue(p.categoria))
+      .filter(Boolean);
+
+    return uniqueSorted([
+      "Barriera architettonica",
+      "Parcheggio disabili",
+      "Rampa",
+      "Ingresso edificio",
+      "Percorso pedonale",
+      "Farmacia",
+      "Scuola",
+      "Comune",
+      "Spazio pubblico",
+      "Altro",
+      ...categoriePulite
+    ]);
   }
 
   if (type === "luoghi") {
-    return uniqueSorted(points.map((p) => p.luogo));
+    const luoghiPuliti = points
+      .map((p) => cleanLuogoValue(p.luogo))
+      .filter(Boolean);
+
+    return uniqueSorted(luoghiPuliti);
   }
 
   return [];
@@ -285,7 +388,10 @@ function filterSuggestionValues(values, text) {
   if (!t) return values.slice(0, 20);
 
   const starts = values.filter((v) => v.toLowerCase().startsWith(t));
-  const includes = values.filter((v) => !v.toLowerCase().startsWith(t) && v.toLowerCase().includes(t));
+  const includes = values.filter(
+    (v) => !v.toLowerCase().startsWith(t) && v.toLowerCase().includes(t)
+  );
+
   return [...starts, ...includes].slice(0, 20);
 }
 
@@ -341,21 +447,124 @@ function attachAutocomplete(inputEl, boxEl, type) {
 
   inputEl.addEventListener("focus", update);
   inputEl.addEventListener("input", update);
-
   inputEl.addEventListener("blur", () => {
     setTimeout(() => hideSuggestions(boxEl), 180);
   });
 }
 
+// -------------------------------
+// FILTRI E MENU
+// -------------------------------
+
+function closeAllDesktopDropdowns() {
+  filterDropdowns.forEach((drop) => drop.classList.add("hidden"));
+}
+
+function toggleDesktopDropdown(targetId) {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+
+  const isHidden = target.classList.contains("hidden");
+  closeAllDesktopDropdowns();
+  if (isHidden) target.classList.remove("hidden");
+}
+
+function syncDesktopToMobileMirrors() {
+  if (searchTextMobileMirror) searchTextMobileMirror.value = searchText?.value || "";
+  if (filterComuneMobileMirror) filterComuneMobileMirror.value = filterComune?.value || "tutti";
+  if (filterStatusMobileMirror) filterStatusMobileMirror.value = filterStatus?.value || "tutti";
+  if (filterWorkflowMobileMirror) filterWorkflowMobileMirror.value = filterWorkflow?.value || "tutti";
+  if (filterVisibilitaMobileMirror) filterVisibilitaMobileMirror.value = filterVisibilita?.value || "tutti";
+  if (filterArchivioMobileMirror) filterArchivioMobileMirror.value = filterArchivio?.value || "tutti";
+}
+
+function syncMobileMirrorsToDesktop() {
+  if (searchText && searchTextMobileMirror) searchText.value = searchTextMobileMirror.value;
+  if (filterComune && filterComuneMobileMirror) filterComune.value = filterComuneMobileMirror.value;
+  if (filterStatus && filterStatusMobileMirror) filterStatus.value = filterStatusMobileMirror.value;
+  if (filterWorkflow && filterWorkflowMobileMirror) filterWorkflow.value = filterWorkflowMobileMirror.value;
+  if (filterVisibilita && filterVisibilitaMobileMirror) filterVisibilita.value = filterVisibilitaMobileMirror.value;
+  if (filterArchivio && filterArchivioMobileMirror) filterArchivio.value = filterArchivioMobileMirror.value;
+}
+
+function openMobileFilters() {
+  syncDesktopToMobileMirrors();
+  if (mobileFiltersPanel) {
+    mobileFiltersPanel.classList.remove("hidden");
+    mobileFiltersPanel.setAttribute("aria-hidden", "false");
+  }
+}
+
+function closeMobileFilters() {
+  if (mobileFiltersPanel) {
+    mobileFiltersPanel.classList.add("hidden");
+    mobileFiltersPanel.setAttribute("aria-hidden", "true");
+  }
+}
+
+function resetAllFilters() {
+  if (searchText) searchText.value = "";
+  if (filterComune) filterComune.value = "tutti";
+  if (filterStatus) filterStatus.value = "tutti";
+  if (filterWorkflow) filterWorkflow.value = "tutti";
+  if (filterVisibilita) filterVisibilita.value = "tutti";
+  if (filterArchivio) filterArchivio.value = "tutti";
+
+  syncDesktopToMobileMirrors();
+  renderPoints();
+  closeAllDesktopDropdowns();
+  closeMobileFilters();
+}
+
+function getFilteredPoints() {
+  const comuneValue = filterComune ? filterComune.value : "tutti";
+  const statusValue = filterStatus ? filterStatus.value : "tutti";
+  const workflowValue = filterWorkflow ? filterWorkflow.value : "tutti";
+  const visibilitaValue = filterVisibilita ? filterVisibilita.value : "tutti";
+  const archivioValue = filterArchivio ? filterArchivio.value : "tutti";
+  const q = normalizeText(searchText?.value || "").toLowerCase();
+
+  return points.filter((point) => {
+    const matchComune = comuneValue === "tutti" || point.comune === comuneValue;
+    const matchStatus = statusValue === "tutti" || normalizeText(point.status) === statusValue;
+    const matchWorkflow = workflowValue === "tutti" || normalizeText(point.workflow) === workflowValue;
+    const matchVisibilita = visibilitaValue === "tutti" || normalizeText(point.visibilita) === visibilitaValue;
+    const matchArchivio = archivioValue === "tutti" || normalizeText(point.statoArchivio) === archivioValue;
+    const haystack = `${point.codice} ${point.title} ${point.luogo} ${point.comune}`.toLowerCase();
+    const matchSearch = !q || haystack.includes(q);
+
+    return matchComune && matchStatus && matchWorkflow && matchVisibilita && matchArchivio && matchSearch;
+  });
+}
+
+// -------------------------------
+// UI VARIE
+// -------------------------------
+
 function updateLegendCounts() {
-  const rosso = points.filter(p => p.status === "rosso").length;
-  const arancione = points.filter(p => p.status === "arancione").length;
-  const verde = points.filter(p => p.status === "verde").length;
+  const rosso = points.filter((p) => p.status === "rosso").length;
+  const arancione = points.filter((p) => p.status === "arancione").length;
+  const verde = points.filter((p) => p.status === "verde").length;
 
   if (countRosso) countRosso.textContent = rosso;
   if (countArancione) countArancione.textContent = arancione;
   if (countVerde) countVerde.textContent = verde;
   if (countTotale) countTotale.textContent = points.length;
+}
+
+function openLegend() {
+  updateLegendCounts();
+  if (legendModal) {
+    legendModal.classList.remove("hidden");
+    legendModal.setAttribute("aria-hidden", "false");
+  }
+}
+
+function closeLegend() {
+  if (legendModal) {
+    legendModal.classList.add("hidden");
+    legendModal.setAttribute("aria-hidden", "true");
+  }
 }
 
 function buildPhotoButtons(point) {
@@ -386,27 +595,6 @@ function buildPopup(point) {
       <div class="popup-foto-box"></div>
     </div>
   `;
-}
-
-function getFilteredPoints() {
-  const comuneValue = filterComune ? filterComune.value : "tutti";
-  const statusValue = filterStatus ? filterStatus.value : "tutti";
-  const workflowValue = filterWorkflow ? filterWorkflow.value : "tutti";
-  const visibilitaValue = filterVisibilita ? filterVisibilita.value : "tutti";
-  const archivioValue = filterArchivio ? filterArchivio.value : "tutti";
-  const q = normalizeText(searchText?.value || "").toLowerCase();
-
-  return points.filter((point) => {
-    const matchComune = comuneValue === "tutti" || point.comune === comuneValue;
-    const matchStatus = statusValue === "tutti" || normalizeText(point.status) === statusValue;
-    const matchWorkflow = workflowValue === "tutti" || normalizeText(point.workflow) === workflowValue;
-    const matchVisibilita = visibilitaValue === "tutti" || normalizeText(point.visibilita) === visibilitaValue;
-    const matchArchivio = archivioValue === "tutti" || normalizeText(point.statoArchivio) === archivioValue;
-    const haystack = `${point.codice} ${point.title} ${point.luogo} ${point.comune}`.toLowerCase();
-    const matchSearch = !q || haystack.includes(q);
-
-    return matchComune && matchStatus && matchWorkflow && matchVisibilita && matchArchivio && matchSearch;
-  });
 }
 
 function setCoordsBoxes(coords) {
@@ -539,6 +727,7 @@ function renderPoints() {
       autoClose: true,
       closeOnClick: true
     });
+
     wirePopupActions(marker);
 
     if (listaSegnalazioni) {
@@ -571,6 +760,10 @@ function renderPoints() {
   refreshMapSize();
 }
 
+// -------------------------------
+// DB
+// -------------------------------
+
 async function loadPointsFromSupabase() {
   const { data, error } = await supabaseClient
     .from("segnalazioni")
@@ -585,9 +778,9 @@ async function loadPointsFromSupabase() {
     return;
   }
 
-  points = (data || []).map(dbRowToPoint).filter((point) => {
-    return Array.isArray(point.coords) && point.coords.every((v) => !Number.isNaN(v));
-  });
+  points = (data || [])
+    .map(dbRowToPoint)
+    .filter((point) => Array.isArray(point.coords) && point.coords.every((v) => !Number.isNaN(v)));
 
   renderPoints();
 }
@@ -610,91 +803,23 @@ async function uploadSinglePhoto(file) {
   return safeName;
 }
 
-function closeAllDesktopDropdowns() {
-  filterDropdowns.forEach(drop => drop.classList.add("hidden"));
-}
-
-function toggleDesktopDropdown(targetId) {
-  const target = document.getElementById(targetId);
-  if (!target) return;
-
-  const isHidden = target.classList.contains("hidden");
-  closeAllDesktopDropdowns();
-  if (isHidden) target.classList.remove("hidden");
-}
-
-function syncDesktopToMobileMirrors() {
-  if (searchTextMobileMirror) searchTextMobileMirror.value = searchText?.value || "";
-  if (filterComuneMobileMirror) filterComuneMobileMirror.value = filterComune?.value || "tutti";
-  if (filterStatusMobileMirror) filterStatusMobileMirror.value = filterStatus?.value || "tutti";
-  if (filterWorkflowMobileMirror) filterWorkflowMobileMirror.value = filterWorkflow?.value || "tutti";
-  if (filterVisibilitaMobileMirror) filterVisibilitaMobileMirror.value = filterVisibilita?.value || "tutti";
-  if (filterArchivioMobileMirror) filterArchivioMobileMirror.value = filterArchivio?.value || "tutti";
-}
-
-function syncMobileMirrorsToDesktop() {
-  if (searchText && searchTextMobileMirror) searchText.value = searchTextMobileMirror.value;
-  if (filterComune && filterComuneMobileMirror) filterComune.value = filterComuneMobileMirror.value;
-  if (filterStatus && filterStatusMobileMirror) filterStatus.value = filterStatusMobileMirror.value;
-  if (filterWorkflow && filterWorkflowMobileMirror) filterWorkflow.value = filterWorkflowMobileMirror.value;
-  if (filterVisibilita && filterVisibilitaMobileMirror) filterVisibilita.value = filterVisibilitaMobileMirror.value;
-  if (filterArchivio && filterArchivioMobileMirror) filterArchivio.value = filterArchivioMobileMirror.value;
-}
-
-function openMobileFilters() {
-  syncDesktopToMobileMirrors();
-  if (mobileFiltersPanel) {
-    mobileFiltersPanel.classList.remove("hidden");
-    mobileFiltersPanel.setAttribute("aria-hidden", "false");
-  }
-}
-
-function closeMobileFilters() {
-  if (mobileFiltersPanel) {
-    mobileFiltersPanel.classList.add("hidden");
-    mobileFiltersPanel.setAttribute("aria-hidden", "true");
-  }
-}
-
-function resetAllFilters() {
-  if (searchText) searchText.value = "";
-  if (filterComune) filterComune.value = "tutti";
-  if (filterStatus) filterStatus.value = "tutti";
-  if (filterWorkflow) filterWorkflow.value = "tutti";
-  if (filterVisibilita) filterVisibilita.value = "tutti";
-  if (filterArchivio) filterArchivio.value = "tutti";
-
-  syncDesktopToMobileMirrors();
-  renderPoints();
-  closeAllDesktopDropdowns();
-  closeMobileFilters();
-}
-
-function openLegend() {
-  updateLegendCounts();
-  if (legendModal) {
-    legendModal.classList.remove("hidden");
-    legendModal.setAttribute("aria-hidden", "false");
-  }
-}
-
-function closeLegend() {
-  if (legendModal) {
-    legendModal.classList.add("hidden");
-    legendModal.setAttribute("aria-hidden", "true");
-  }
-}
+// -------------------------------
+// EVENTI MAPPA
+// -------------------------------
 
 map.on("click", (e) => {
   const nearestPoint = findNearestPointWithinTolerance(e.latlng);
 
   if (nearestPoint) {
     map.setView(nearestPoint.coords, Math.max(map.getZoom(), 18));
-    const targetLayer = markersLayer.getLayers().find(layer => {
+
+    const targetLayer = markersLayer.getLayers().find((layer) => {
       if (!layer.getLatLng) return false;
       const ll = layer.getLatLng();
-      return Math.abs(ll.lat - nearestPoint.coords[0]) < 0.000001 &&
-             Math.abs(ll.lng - nearestPoint.coords[1]) < 0.000001;
+      return (
+        Math.abs(ll.lat - nearestPoint.coords[0]) < 0.000001 &&
+        Math.abs(ll.lng - nearestPoint.coords[1]) < 0.000001
+      );
     });
 
     if (targetLayer) {
@@ -711,17 +836,21 @@ map.on("click", (e) => {
   openFormModal(false);
 });
 
+// -------------------------------
+// SUBMIT FORM
+// -------------------------------
+
 formSegnalazione.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const title = normalizeText(inputTitolo.value);
-  const comune = normalizeText(inputComune.value);
-  const categoria = normalizeText(inputCategoria.value);
-  const luogo = normalizeText(inputLuogo.value);
+  const title = normalizeDisplayText(inputTitolo.value);
+  const comune = cleanComuneValue(inputComune.value);
+  const categoria = cleanCategoriaValue(inputCategoria.value);
+  const luogo = cleanLuogoValue(inputLuogo.value);
   const description = normalizeText(inputDescrizione.value);
   const status = normalizeStatus(inputStatus.value);
   const workflow = normalizeText(inputWorkflow.value).toLowerCase();
-  const nomeSegnalante = normalizeText(inputNomeSegnalante.value);
+  const nomeSegnalante = normalizeDisplayText(inputNomeSegnalante.value);
   const contattoSegnalante = normalizeText(inputContattoSegnalante.value);
 
   if (!selectedCoordsValue) {
@@ -729,8 +858,23 @@ formSegnalazione.addEventListener("submit", async (e) => {
     return;
   }
 
-  if (!title || !comune || !categoria || !luogo) {
-    alert("Compila tutti i campi obbligatori.");
+  if (!title) {
+    alert("Inserisci un titolo valido.");
+    return;
+  }
+
+  if (!comune) {
+    alert("Seleziona un comune valido.");
+    return;
+  }
+
+  if (!categoria) {
+    alert("Seleziona una categoria valida.");
+    return;
+  }
+
+  if (!luogo) {
+    alert("Inserisci un luogo valido.");
     return;
   }
 
@@ -750,7 +894,7 @@ formSegnalazione.addEventListener("submit", async (e) => {
 
     const point = {
       codice: editingId
-        ? (points.find(p => p.id === editingId)?.codice || generateNextCode(comune, points, editingId))
+        ? (points.find((p) => p.id === editingId)?.codice || generateNextCode(comune, points, editingId))
         : generateNextCode(comune, points),
       title,
       comune,
@@ -813,17 +957,43 @@ formSegnalazione.addEventListener("submit", async (e) => {
   }
 });
 
+// -------------------------------
+// EVENTI CAMPI
+// -------------------------------
+
 if (inputComune) {
   inputComune.addEventListener("change", () => {
     if (!editingId) {
-      inputCodice.value = generateNextCode(inputComune.value, points);
+      const comunePulito = cleanComuneValue(inputComune.value);
+      if (comunePulito) {
+        inputComune.value = comunePulito;
+        inputCodice.value = generateNextCode(comunePulito, points);
+      }
     }
   });
 
   inputComune.addEventListener("blur", () => {
-    if (!editingId && normalizeText(inputComune.value)) {
-      inputCodice.value = generateNextCode(inputComune.value, points);
+    if (!editingId) {
+      const comunePulito = cleanComuneValue(inputComune.value);
+      if (comunePulito) {
+        inputComune.value = comunePulito;
+        inputCodice.value = generateNextCode(comunePulito, points);
+      }
     }
+  });
+}
+
+if (inputCategoria) {
+  inputCategoria.addEventListener("blur", () => {
+    const categoriaPulita = cleanCategoriaValue(inputCategoria.value);
+    if (categoriaPulita) inputCategoria.value = categoriaPulita;
+  });
+}
+
+if (inputLuogo) {
+  inputLuogo.addEventListener("blur", () => {
+    const luogoPulito = cleanLuogoValue(inputLuogo.value);
+    if (luogoPulito) inputLuogo.value = luogoPulito;
   });
 }
 
@@ -891,6 +1061,10 @@ if (filterWorkflow) filterWorkflow.addEventListener("change", renderPoints);
 if (filterVisibilita) filterVisibilita.addEventListener("change", renderPoints);
 if (filterArchivio) filterArchivio.addEventListener("change", renderPoints);
 
+// -------------------------------
+// MENU FILTRI DESKTOP/MOBILE
+// -------------------------------
+
 if (btnResetFilters) {
   btnResetFilters.addEventListener("click", resetAllFilters);
 }
@@ -922,6 +1096,10 @@ if (btnResetMobileFilters) {
   btnResetMobileFilters.addEventListener("click", resetAllFilters);
 }
 
+// -------------------------------
+// LEGENDA
+// -------------------------------
+
 if (btnLegend) {
   btnLegend.addEventListener("click", openLegend);
 }
@@ -942,10 +1120,12 @@ if (legendModal) {
   });
 }
 
+// -------------------------------
+// MODAL FORM
+// -------------------------------
+
 if (btnCloseFormModal) {
-  btnCloseFormModal.addEventListener("click", () => {
-    closeFormModal();
-  });
+  btnCloseFormModal.addEventListener("click", closeFormModal);
 }
 
 if (formModal) {
@@ -963,6 +1143,10 @@ if (mobileFiltersPanel) {
     }
   });
 }
+
+// -------------------------------
+// GEOLOCALIZZAZIONE UTENTE
+// -------------------------------
 
 if (btnLocate) {
   btnLocate.addEventListener("click", () => {
@@ -1013,6 +1197,10 @@ if (btnLocate) {
   });
 }
 
+// -------------------------------
+// CLICK GENERALI
+// -------------------------------
+
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".autocomplete-field")) {
     hideSuggestions(suggestionsComune);
@@ -1024,6 +1212,10 @@ document.addEventListener("click", (e) => {
     closeAllDesktopDropdowns();
   }
 });
+
+// -------------------------------
+// AVVIO
+// -------------------------------
 
 attachAutocomplete(inputComune, suggestionsComune, "comuni");
 attachAutocomplete(inputCategoria, suggestionsCategoria, "categorie");
