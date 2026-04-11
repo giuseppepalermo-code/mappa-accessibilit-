@@ -62,20 +62,20 @@ function dbRowToPoint(row) {
 
   return {
     id: row.id,
-    codice: row.codice || "",
+    codice: row.codice || row.Codice || "",
     title: row.titolo || row.Titolo || "",
     comune: row.comune || row.Comune || "",
     categoria: row.categoria || row.Categoria || "Altro",
     status: normalizeStatus(row.stato || row.Stato || ""),
-    workflow: normalizeText(row.statosegnalazione || "nuova").toLowerCase(),
-    visibilita: normalizeText(row.visibilita || "pubblica").toLowerCase(),
-    statoArchivio: normalizeText(row.stato_archivio || "attiva").toLowerCase(),
+    workflow: normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase(),
+    visibilita: normalizeText(row.visibilita || row.Visibilita || "pubblica").toLowerCase(),
+    statoArchivio: normalizeText(row.stato_archivio || row.StatoArchivio || "attiva").toLowerCase(),
     luogo: row.luogo || row.Luogo || "",
     description: row.descrizione || row.Descrizione || "",
-    nomeSegnalante: row.nomesegnalante || "",
-    contattoSegnalante: row.contattosegnalante || "",
-    gpsLat: row.gpslat ?? null,
-    gpsLng: row.gpslng ?? null,
+    nomeSegnalante: row.nomesegnalante || row.NomeSegnalante || "",
+    contattoSegnalante: row.contattosegnalante || row.ContattoSegnalante || "",
+    gpsLat: row.gpslat ?? row.GpsLat ?? null,
+    gpsLng: row.gpslng ?? row.GpsLng ?? null,
     foto1: row.foto1 || null,
     foto2: row.foto2 || null,
     foto3: row.foto3 || null,
@@ -86,24 +86,24 @@ function dbRowToPoint(row) {
 function pointToDbRow(point) {
   return {
     codice: point.codice,
-    Titolo: point.title,
-    Comune: point.comune,
-    Categoria: point.categoria,
-    Luogo: point.luogo,
-    Descrizione: point.description,
-    Stato: point.status,
+    titolo: point.title,
+    comune: point.comune,
+    categoria: point.categoria,
+    luogo: point.luogo,
+    descrizione: point.description,
+    stato: point.status,
     statosegnalazione: point.workflow,
+    visibilita: point.visibilita || "pubblica",
+    stato_archivio: point.statoArchivio || "attiva",
     nomesegnalante: point.nomeSegnalante,
     contattosegnalante: point.contattoSegnalante,
     gpslat: point.gpsLat,
     gpslng: point.gpsLng,
-    Lat: point.coords[0],
-    Log: point.coords[1],
+    lat: point.coords[0],
+    lng: point.coords[1],
     foto1: point.foto1 || null,
     foto2: point.foto2 || null,
-    foto3: point.foto3 || null,
-    visibilita: point.visibilita || "pubblica",
-    stato_archivio: point.statoArchivio || "attiva"
+    foto3: point.foto3 || null
   };
 }
 
@@ -195,6 +195,7 @@ const countTotale = document.getElementById("countTotale");
 
 const btnLocate = document.getElementById("btnLocate");
 const btnLegend = document.getElementById("btnLegend");
+const btnLegendMobile = document.getElementById("btnLegendMobile");
 const btnCloseLegend = document.getElementById("btnCloseLegend");
 const legendModal = document.getElementById("legendModal");
 
@@ -226,6 +227,23 @@ const gpsStatus = document.getElementById("gpsStatus");
 const suggestionsComune = document.getElementById("suggestionsComune");
 const suggestionsCategoria = document.getElementById("suggestionsCategoria");
 const suggestionsLuogo = document.getElementById("suggestionsLuogo");
+
+const btnResetFilters = document.getElementById("btnResetFilters");
+const filterChips = document.querySelectorAll(".filter-chip[data-target]");
+const filterDropdowns = document.querySelectorAll(".filter-dropdown");
+
+const btnToggleMobileFilters = document.getElementById("btnToggleMobileFilters");
+const btnCloseMobileFilters = document.getElementById("btnCloseMobileFilters");
+const mobileFiltersPanel = document.getElementById("mobileFiltersPanel");
+const btnApplyMobileFilters = document.getElementById("btnApplyMobileFilters");
+const btnResetMobileFilters = document.getElementById("btnResetMobileFilters");
+
+const searchTextMobileMirror = document.getElementById("searchTextMobileMirror");
+const filterComuneMobileMirror = document.getElementById("filterComuneMobileMirror");
+const filterStatusMobileMirror = document.getElementById("filterStatusMobileMirror");
+const filterWorkflowMobileMirror = document.getElementById("filterWorkflowMobileMirror");
+const filterVisibilitaMobileMirror = document.getElementById("filterVisibilitaMobileMirror");
+const filterArchivioMobileMirror = document.getElementById("filterArchivioMobileMirror");
 
 function uniqueSorted(values) {
   return [...new Set(values.filter(Boolean).map(normalizeText).filter(Boolean))].sort((a, b) =>
@@ -334,10 +352,10 @@ function updateLegendCounts() {
   const arancione = points.filter(p => p.status === "arancione").length;
   const verde = points.filter(p => p.status === "verde").length;
 
-  countRosso.textContent = rosso;
-  countArancione.textContent = arancione;
-  countVerde.textContent = verde;
-  countTotale.textContent = points.length;
+  if (countRosso) countRosso.textContent = rosso;
+  if (countArancione) countArancione.textContent = arancione;
+  if (countVerde) countVerde.textContent = verde;
+  if (countTotale) countTotale.textContent = points.length;
 }
 
 function buildPhotoButtons(point) {
@@ -365,9 +383,6 @@ function buildPopup(point) {
       ${point.description || ""}
       ${gpsHtml}
       ${buttonsHtml ? `<div class="popup-actions">${buttonsHtml}</div>` : ""}
-      <div class="popup-actions">
-        <button type="button" class="popup-delete-btn" data-delete-id="${point.id}">Elimina</button>
-      </div>
       <div class="popup-foto-box"></div>
     </div>
   `;
@@ -476,33 +491,6 @@ function fillFormFromPoint(point) {
   openFormModal(true);
 }
 
-async function deletePointById(pointId) {
-  const point = points.find(p => p.id === pointId);
-  if (!point) return;
-
-  const conferma = confirm(`Vuoi eliminare la segnalazione "${point.title}" (${point.codice})?`);
-  if (!conferma) return;
-
-  const { error } = await supabaseClient
-    .from("segnalazioni")
-    .delete()
-    .eq("id", pointId);
-
-  if (error) {
-    alert("Eliminazione non riuscita.");
-    console.error(error);
-    return;
-  }
-
-  const filesToDelete = [point.foto1, point.foto2, point.foto3].filter(Boolean);
-  if (filesToDelete.length > 0) {
-    await supabaseClient.storage.from("foto").remove(filesToDelete);
-  }
-
-  await loadPointsFromSupabase();
-  if (editingId === pointId) editingId = null;
-}
-
 function wirePopupActions(marker) {
   marker.on("popupopen", (e) => {
     const popupEl = e.popup.getElement();
@@ -510,7 +498,6 @@ function wirePopupActions(marker) {
 
     const buttons = popupEl.querySelectorAll(".foto-btn");
     const box = popupEl.querySelector(".popup-foto-box");
-    const deleteBtn = popupEl.querySelector(".popup-delete-btn");
 
     if (box) {
       buttons.forEach((btn) => {
@@ -526,13 +513,6 @@ function wirePopupActions(marker) {
             >
           `;
         });
-      });
-    }
-
-    if (deleteBtn) {
-      deleteBtn.addEventListener("click", async () => {
-        const pointId = Number(deleteBtn.getAttribute("data-delete-id"));
-        await deletePointById(pointId);
       });
     }
   });
@@ -571,9 +551,7 @@ function renderPoints() {
         <small><b>${point.categoria}</b></small><br>
         <small>${point.luogo}</small><br>
         <small>${point.description || ""}</small><br>
-        <small class="${workflowBadgeClass(point.workflow)}">${workflowLabel(point.workflow)}</small><br>
-        <button class="btn-modifica" data-id="${point.id}" type="button">Modifica</button>
-        <button class="btn-elimina" data-id="${point.id}" type="button">Elimina</button>
+        <small class="${workflowBadgeClass(point.workflow)}">${workflowLabel(point.workflow)}</small>
       `;
 
       listaSegnalazioni.appendChild(item);
@@ -581,17 +559,6 @@ function renderPoints() {
       item.addEventListener("click", () => {
         map.setView(point.coords, 18);
         marker.openPopup();
-      });
-
-      item.querySelector(".btn-modifica").addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        fillFormFromPoint(point);
-        map.setView(point.coords, 18);
-      });
-
-      item.querySelector(".btn-elimina").addEventListener("click", async (ev) => {
-        ev.stopPropagation();
-        await deletePointById(point.id);
       });
     }
   });
@@ -641,6 +608,81 @@ async function uploadSinglePhoto(file) {
   }
 
   return safeName;
+}
+
+function closeAllDesktopDropdowns() {
+  filterDropdowns.forEach(drop => drop.classList.add("hidden"));
+}
+
+function toggleDesktopDropdown(targetId) {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+
+  const isHidden = target.classList.contains("hidden");
+  closeAllDesktopDropdowns();
+  if (isHidden) target.classList.remove("hidden");
+}
+
+function syncDesktopToMobileMirrors() {
+  if (searchTextMobileMirror) searchTextMobileMirror.value = searchText?.value || "";
+  if (filterComuneMobileMirror) filterComuneMobileMirror.value = filterComune?.value || "tutti";
+  if (filterStatusMobileMirror) filterStatusMobileMirror.value = filterStatus?.value || "tutti";
+  if (filterWorkflowMobileMirror) filterWorkflowMobileMirror.value = filterWorkflow?.value || "tutti";
+  if (filterVisibilitaMobileMirror) filterVisibilitaMobileMirror.value = filterVisibilita?.value || "tutti";
+  if (filterArchivioMobileMirror) filterArchivioMobileMirror.value = filterArchivio?.value || "tutti";
+}
+
+function syncMobileMirrorsToDesktop() {
+  if (searchText && searchTextMobileMirror) searchText.value = searchTextMobileMirror.value;
+  if (filterComune && filterComuneMobileMirror) filterComune.value = filterComuneMobileMirror.value;
+  if (filterStatus && filterStatusMobileMirror) filterStatus.value = filterStatusMobileMirror.value;
+  if (filterWorkflow && filterWorkflowMobileMirror) filterWorkflow.value = filterWorkflowMobileMirror.value;
+  if (filterVisibilita && filterVisibilitaMobileMirror) filterVisibilita.value = filterVisibilitaMobileMirror.value;
+  if (filterArchivio && filterArchivioMobileMirror) filterArchivio.value = filterArchivioMobileMirror.value;
+}
+
+function openMobileFilters() {
+  syncDesktopToMobileMirrors();
+  if (mobileFiltersPanel) {
+    mobileFiltersPanel.classList.remove("hidden");
+    mobileFiltersPanel.setAttribute("aria-hidden", "false");
+  }
+}
+
+function closeMobileFilters() {
+  if (mobileFiltersPanel) {
+    mobileFiltersPanel.classList.add("hidden");
+    mobileFiltersPanel.setAttribute("aria-hidden", "true");
+  }
+}
+
+function resetAllFilters() {
+  if (searchText) searchText.value = "";
+  if (filterComune) filterComune.value = "tutti";
+  if (filterStatus) filterStatus.value = "tutti";
+  if (filterWorkflow) filterWorkflow.value = "tutti";
+  if (filterVisibilita) filterVisibilita.value = "tutti";
+  if (filterArchivio) filterArchivio.value = "tutti";
+
+  syncDesktopToMobileMirrors();
+  renderPoints();
+  closeAllDesktopDropdowns();
+  closeMobileFilters();
+}
+
+function openLegend() {
+  updateLegendCounts();
+  if (legendModal) {
+    legendModal.classList.remove("hidden");
+    legendModal.setAttribute("aria-hidden", "false");
+  }
+}
+
+function closeLegend() {
+  if (legendModal) {
+    legendModal.classList.add("hidden");
+    legendModal.setAttribute("aria-hidden", "true");
+  }
 }
 
 map.on("click", (e) => {
@@ -849,26 +891,53 @@ if (filterWorkflow) filterWorkflow.addEventListener("change", renderPoints);
 if (filterVisibilita) filterVisibilita.addEventListener("change", renderPoints);
 if (filterArchivio) filterArchivio.addEventListener("change", renderPoints);
 
-if (btnLegend) {
-  btnLegend.addEventListener("click", () => {
-    updateLegendCounts();
-    legendModal.classList.remove("hidden");
-    legendModal.setAttribute("aria-hidden", "false");
+if (btnResetFilters) {
+  btnResetFilters.addEventListener("click", resetAllFilters);
+}
+
+filterChips.forEach((chip) => {
+  chip.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleDesktopDropdown(chip.dataset.target);
+  });
+});
+
+if (btnToggleMobileFilters) {
+  btnToggleMobileFilters.addEventListener("click", openMobileFilters);
+}
+
+if (btnCloseMobileFilters) {
+  btnCloseMobileFilters.addEventListener("click", closeMobileFilters);
+}
+
+if (btnApplyMobileFilters) {
+  btnApplyMobileFilters.addEventListener("click", () => {
+    syncMobileMirrorsToDesktop();
+    renderPoints();
+    closeMobileFilters();
   });
 }
 
+if (btnResetMobileFilters) {
+  btnResetMobileFilters.addEventListener("click", resetAllFilters);
+}
+
+if (btnLegend) {
+  btnLegend.addEventListener("click", openLegend);
+}
+
+if (btnLegendMobile) {
+  btnLegendMobile.addEventListener("click", openLegend);
+}
+
 if (btnCloseLegend) {
-  btnCloseLegend.addEventListener("click", () => {
-    legendModal.classList.add("hidden");
-    legendModal.setAttribute("aria-hidden", "true");
-  });
+  btnCloseLegend.addEventListener("click", closeLegend);
 }
 
 if (legendModal) {
   legendModal.addEventListener("click", (e) => {
     if (e.target === legendModal) {
-      legendModal.classList.add("hidden");
-      legendModal.setAttribute("aria-hidden", "true");
+      closeLegend();
     }
   });
 }
@@ -883,6 +952,14 @@ if (formModal) {
   formModal.addEventListener("click", (e) => {
     if (e.target === formModal) {
       closeFormModal();
+    }
+  });
+}
+
+if (mobileFiltersPanel) {
+  mobileFiltersPanel.addEventListener("click", (e) => {
+    if (e.target === mobileFiltersPanel) {
+      closeMobileFilters();
     }
   });
 }
@@ -919,13 +996,13 @@ if (btnLocate) {
         userMarker.bindPopup("<strong>Sei qui</strong>").openPopup();
 
         btnLocate.disabled = false;
-        btnLocate.textContent = "📍 Mostra la mia posizione";
+        btnLocate.textContent = "📍 Posizione";
         refreshMapSize();
       },
       () => {
         alert("Non sono riuscito a trovare la tua posizione.");
         btnLocate.disabled = false;
-        btnLocate.textContent = "📍 Mostra la mia posizione";
+        btnLocate.textContent = "📍 Posizione";
       },
       {
         enableHighAccuracy: true,
@@ -942,6 +1019,10 @@ document.addEventListener("click", (e) => {
     hideSuggestions(suggestionsCategoria);
     hideSuggestions(suggestionsLuogo);
   }
+
+  if (!e.target.closest(".filterbar") && !e.target.closest(".filter-dropdown")) {
+    closeAllDesktopDropdowns();
+  }
 });
 
 attachAutocomplete(inputComune, suggestionsComune, "comuni");
@@ -950,6 +1031,7 @@ attachAutocomplete(inputLuogo, suggestionsLuogo, "luoghi");
 
 window.addEventListener("load", async () => {
   refreshMapSize();
+  syncDesktopToMobileMirrors();
   await loadPointsFromSupabase();
 
   if ("serviceWorker" in navigator) {
@@ -960,4 +1042,4 @@ window.addEventListener("load", async () => {
       console.error("Errore registrazione Service Worker:", error);
     }
   }
-}); // Guarda attentamente grazie
+});
