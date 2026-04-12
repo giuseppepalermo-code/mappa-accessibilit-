@@ -12,9 +12,12 @@
   --shadow-soft:0 6px 18px rgba(0,0,0,.06);
 }
 
-*{ box-sizing:border-box; }
+*{
+  box-sizing:border-box;
+}
 
-html, body{
+html,
+body{
   margin:0;
   padding:0;
   height:100%;
@@ -965,4 +968,4 @@ body{
   #btnLocate{
     order:4;
   }
-}
+} non fare altro oltre al file corretto integrato e completo we need answer with full corrected CSS based user's current and want revert previous issue. Need just file content. Ensure not too much explanation.
