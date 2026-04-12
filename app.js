@@ -38,11 +38,11 @@ function normalizeDisplayText(value) {
 }
 
 function cleanComuneValue(value) {
-  const raw = normalizeText(value).toLowerCase();
-  if (!raw) return "";
+  const v = normalizeDisplayText(value).toLowerCase();
 
-  if (raw.includes("san cataldo")) return "San Cataldo";
-  if (raw.includes("caltanissetta")) return "Caltanissetta";
+  if (!v) return "";
+  if (v.includes("san cataldo")) return "San Cataldo";
+  if (v.includes("caltanissetta")) return "Caltanissetta";
 
   return "";
 }
@@ -70,7 +70,7 @@ function cleanLuogoValue(value) {
   const cleaned = normalizeDisplayText(value);
 
   if (!cleaned) return "";
-  if (cleaned.length < 3) return "";
+  if (cleaned.length < 4) return "";
   if (/^[0-9\s\-]+$/.test(cleaned)) return "";
   if (cleaned.toLowerCase().includes("undefined")) return "";
   if (cleaned.toLowerCase().includes("null")) return "";
@@ -242,91 +242,6 @@ function findNearestPointWithinTolerance(latlng, maxPixelDistance = 26) {
   });
 
   return nearest;
-}
-
-// -------------------------------
-// REVERSE GEOCODING
-// -------------------------------
-
-let reverseGeocodeRequestId = 0;
-
-async function reverseGeocodeFromLatLng(lat, lng) {
-  const requestId = ++reverseGeocodeRequestId;
-
-  try {
-    const url =
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2` +
-      `&lat=${encodeURIComponent(lat)}` +
-      `&lon=${encodeURIComponent(lng)}` +
-      `&accept-language=it`;
-
-    const response = await fetch(url, {
-      method: "GET"
-    });
-
-    if (!response.ok) {
-      throw new Error("Reverse geocoding non disponibile");
-    }
-
-    const data = await response.json();
-
-    if (requestId !== reverseGeocodeRequestId) return;
-
-    const address = data?.address || {};
-
-    const comuneRaw =
-      address.city ||
-      address.town ||
-      address.village ||
-      address.municipality ||
-      address.county ||
-      "";
-
-    const road =
-      address.road ||
-      address.pedestrian ||
-      address.footway ||
-      address.cycleway ||
-      address.path ||
-      "";
-
-    const houseNumber = address.house_number || "";
-    const building = address.building || "";
-    const amenity = address.amenity || "";
-    const suburb = address.suburb || address.neighbourhood || "";
-
-    let luogoAuto = "";
-
-    if (road && houseNumber) {
-      luogoAuto = `${road}, ${houseNumber}`;
-    } else if (road) {
-      luogoAuto = road;
-    } else if (building) {
-      luogoAuto = building;
-    } else if (amenity) {
-      luogoAuto = amenity;
-    } else if (suburb) {
-      luogoAuto = suburb;
-    } else if (data?.display_name) {
-      luogoAuto = data.display_name.split(",")[0] || "";
-    }
-
-    const comunePulito = cleanComuneValue(comuneRaw);
-    const luogoPulito = cleanLuogoValue(luogoAuto);
-
-    if (!editingId) {
-      if (comunePulito) {
-        inputComune.value = comunePulito;
-        inputCodice.value = generateNextCode(comunePulito, points);
-      }
-
-      if (luogoPulito) {
-        inputLuogo.value = luogoPulito;
-      }
-    }
-  } catch (error) {
-    console.warn("Reverse geocoding non riuscito:", error);
-  }
 }
 
 // -------------------------------
@@ -873,7 +788,8 @@ async function loadPointsFromSupabase() {
 async function uploadSinglePhoto(file) {
   if (!file) return null;
 
-  const safeName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+  const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
+  const safeName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${extension}`;
 
   const { error } = await supabaseClient
     .storage
@@ -917,14 +833,8 @@ map.on("click", (e) => {
   editingId = null;
   setCoordsBoxes(selectedCoordsValue);
   resetGpsStatus();
-
   inputCodice.value = generateNextCode(inputComune.value || "", points);
-  inputComune.value = "";
-  inputLuogo.value = "";
-
   openFormModal(false);
-
-  reverseGeocodeFromLatLng(e.latlng.lat, e.latlng.lng);
 });
 
 // -------------------------------
