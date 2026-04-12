@@ -30,6 +30,8 @@
     .btn-hide{background:#e5e7eb;color:#374151}
     .btn-archive{background:#f3e8ff;color:#7e22ce}
     .btn-restore{background:#dcfce7;color:#166534}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-secondary{background:#eef3f8;color:#223}
 
     .login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
     .login-card{width:100%;max-width:620px;background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:28px}
@@ -40,6 +42,7 @@
 
     .field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
     .field label{font-size:.95rem;color:var(--muted);font-weight:700}
+    .field span{font-size:.95rem;color:var(--muted);font-weight:700}
     .field input,.field select,.field textarea{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:16px;font-size:1rem;outline:none;background:#fff;color:var(--text)}
     .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(31,75,122,.10)}
 
@@ -147,6 +150,61 @@
 
     .empty-state{border:2px dashed var(--line);border-radius:24px;padding:28px;background:#fff;text-align:center;color:var(--muted);font-weight:700}
 
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.45);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:3000;
+    }
+    .modal-card{
+      background:#fff;
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      width:min(760px, 100%);
+      max-height:90vh;
+      display:flex;
+      flex-direction:column;
+    }
+    .form-modal .modal-body{
+      overflow-y:auto;
+    }
+    .modal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      flex:0 0 auto;
+    }
+    .modal-header h3{
+      margin:0;
+      font-size:1.15rem;
+      color:var(--brand-dark);
+    }
+    .modal-body{
+      padding:18px;
+      color:var(--text);
+      line-height:1.7;
+    }
+    .form-segnalazione{
+      display:block;
+    }
+    .form-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      position:sticky;
+      bottom:0;
+      background:var(--white, #fff);
+      padding-top:10px;
+    }
+
     @media print{
       body{background:#fff}
       .sidebar,.top-actions,.toolbar,.no-print{display:none !important}
@@ -171,6 +229,10 @@
       .brand-login{align-items:flex-start}
       .brand-login img{width:62px;height:62px}
       .sidebar-brand img{width:56px;height:56px}
+      .modal{padding:0;align-items:stretch;justify-content:stretch}
+      .modal-card{width:100%;height:100%;max-height:100%;border-radius:0}
+      .form-actions{flex-direction:column}
+      .form-actions .btn{width:100%}
     }
   </style>
 </head>
@@ -282,7 +344,7 @@
         </div>
 
         <div class="panel">
-          <div class="section-head"><div><h2>Elenco segnalazioni</h2><p>Vista operativa a schede con gestione archivio e visibilità.</p></div></div>
+          <div class="section-head"><div><h2>Elenco segnalazioni</h2><p>Vista operativa a schede con gestione archivio, visibilità e modifica completa.</p></div></div>
           <div id="cardsGrid" class="cards-grid"></div>
         </div>
       </section>
@@ -332,6 +394,74 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       </section>
     </main>
   </section>
+
+  <div id="editModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card form-modal">
+      <div class="modal-header">
+        <h3>Modifica segnalazione</h3>
+        <button id="btnCloseEditModal" class="btn btn-light" type="button">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="editSegnalazioneForm" class="form-segnalazione">
+          <input type="hidden" id="editId">
+
+          <label class="field">
+            <span>Codice</span>
+            <input id="editCodice" type="text" readonly>
+          </label>
+
+          <label class="field">
+            <span>Titolo</span>
+            <input id="editTitolo" type="text">
+          </label>
+
+          <label class="field">
+            <span>Comune</span>
+            <input id="editComune" type="text">
+          </label>
+
+          <label class="field">
+            <span>Categoria</span>
+            <input id="editCategoria" type="text">
+          </label>
+
+          <label class="field">
+            <span>Luogo</span>
+            <input id="editLuogo" type="text">
+          </label>
+
+          <label class="field">
+            <span>Descrizione</span>
+            <textarea id="editDescrizione" rows="4"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Stato accessibilità</span>
+            <select id="editStatus">
+              <option value="rosso">🔴 Rosso</option>
+              <option value="arancione">🟠 Arancione</option>
+              <option value="verde">🟢 Verde</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Workflow</span>
+            <select id="editWorkflow">
+              <option value="nuova">Nuova</option>
+              <option value="presa in carico">Presa in carico</option>
+              <option value="chiusa">Chiusa</option>
+            </select>
+          </label>
+
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Salva modifiche</button>
+            <button id="btnCloseEditModalFooter" class="btn btn-light" type="button">Chiudi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script>
     const SUPABASE_URL = "https://fawxdgdlmhuadpxjjpac.supabase.co";
@@ -388,7 +518,58 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     const reportBaseInfo = document.getElementById("reportBaseInfo");
     const reportOutput = document.getElementById("reportOutput");
 
+    const editModal = document.getElementById("editModal");
+    const btnCloseEditModal = document.getElementById("btnCloseEditModal");
+    const btnCloseEditModalFooter = document.getElementById("btnCloseEditModalFooter");
+    const editSegnalazioneForm = document.getElementById("editSegnalazioneForm");
+    const editId = document.getElementById("editId");
+    const editCodice = document.getElementById("editCodice");
+    const editTitolo = document.getElementById("editTitolo");
+    const editComune = document.getElementById("editComune");
+    const editCategoria = document.getElementById("editCategoria");
+    const editLuogo = document.getElementById("editLuogo");
+    const editDescrizione = document.getElementById("editDescrizione");
+    const editStatus = document.getElementById("editStatus");
+    const editWorkflow = document.getElementById("editWorkflow");
+
     function normalizeText(value){ return (value ?? "").toString().trim(); }
+    function normalizeDisplayText(value){
+      const cleaned = normalizeText(value).replace(/\s+/g, " ").replace(/\.+$/, "").trim();
+      if(!cleaned) return "";
+      return cleaned.toLowerCase().split(" ").map(word => word ? word.charAt(0).toUpperCase() + word.slice(1) : "").join(" ");
+    }
+    function cleanComuneValue(value){
+      const raw = normalizeText(value).toLowerCase();
+      if(!raw) return "";
+      if(raw.includes("san cataldo")) return "San Cataldo";
+      if(raw.includes("caltanissetta")) return "Caltanissetta";
+      return normalizeDisplayText(value);
+    }
+    function cleanCategoriaValue(value){
+      const v = normalizeDisplayText(value).toLowerCase();
+      if(!v) return "";
+      if(v.includes("parcheggio")) return "Parcheggio disabili";
+      if(v.includes("rampa")) return "Rampa";
+      if(v.includes("farmacia")) return "Farmacia";
+      if(v.includes("scuola")) return "Scuola";
+      if(v.includes("comune")) return "Comune";
+      if(v.includes("barriera")) return "Barriera architettonica";
+      if(v.includes("percorso")) return "Percorso pedonale";
+      if(v.includes("ingresso")) return "Ingresso edificio";
+      if(v.includes("spazio")) return "Spazio pubblico";
+      if(v.includes("altro")) return "Altro";
+      return normalizeDisplayText(value);
+    }
+    function cleanLuogoValue(value){
+      const cleaned = normalizeDisplayText(value);
+      if(!cleaned) return "";
+      if(cleaned.length < 3) return "";
+      if(/^[0-9\s\-]+$/.test(cleaned)) return "";
+      if(cleaned.toLowerCase().includes("undefined")) return "";
+      if(cleaned.toLowerCase().includes("null")) return "";
+      return cleaned;
+    }
+
     function getField(row, ...keys){ for(const key of keys){ if(row[key] !== undefined && row[key] !== null) return row[key]; } return ""; }
     function normalizeWorkflowValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nuova") return "nuova"; if(v === "presa in carico") return "presa in carico"; if(v === "chiusa") return "chiusa"; return ""; }
     function normalizeVisibilityValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nascosta") return "nascosta"; return "pubblica"; }
@@ -396,30 +577,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function normalizeRole(value){ const v = normalizeText(value).toLowerCase(); return v === "admin" ? "admin" : "operatore"; }
     function isAdmin(){ return currentUserRole === "admin"; }
 
-    function setMsg(el, text, type = ""){
-      el.textContent = text || "";
-      el.className = "msg";
-      if(type) el.classList.add(type);
-    }
-
-    function setAdminMessage(text, type = ""){
-      setMsg(adminMsg, text, type);
-      if(text){
-        setTimeout(() => {
-          if(adminMsg.textContent === text) setMsg(adminMsg, "");
-        }, 2600);
-      }
-    }
-
-    function showApp(){
-      loginSection.classList.add("hidden");
-      appSection.classList.remove("hidden");
-    }
-
-    function hideApp(){
-      loginSection.classList.remove("hidden");
-      appSection.classList.add("hidden");
-    }
+    function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
+    function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 2600); } }
+    function showApp(){ loginSection.classList.add("hidden"); appSection.classList.remove("hidden"); }
+    function hideApp(){ loginSection.classList.remove("hidden"); appSection.classList.add("hidden"); }
 
     function refreshRoleUi(){
       if(roleBadge){
@@ -474,10 +635,25 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       return v === "archiviata" ? "archive-badge archive-archived" : "archive-badge archive-active";
     }
 
+    function rowToPoint(row){
+      return {
+        id: row.id,
+        codice: getField(row, "codice", "Codice"),
+        title: normalizeDisplayText(getField(row, "Titolo", "titolo")),
+        comune: cleanComuneValue(getField(row, "Comune", "comune")),
+        categoria: cleanCategoriaValue(getField(row, "Categoria", "categoria")),
+        luogo: cleanLuogoValue(getField(row, "Luogo", "luogo")),
+        description: normalizeText(getField(row, "Descrizione", "descrizione")),
+        status: normalizeText(getField(row, "Stato", "stato")).toLowerCase(),
+        workflow: normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "nuova",
+        visibilita: normalizeVisibilityValue(getField(row, "visibilita", "Visibilita")),
+        statoArchivio: normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio"))
+      };
+    }
+
     async function getAdminProfile(){
       const { data: authData, error: authError } = await client.auth.getUser();
       if(authError) return null;
-
       const user = authData?.user;
       const userEmail = normalizeText(user?.email).toLowerCase();
       if(!userEmail) return null;
@@ -511,19 +687,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function login(){
       const email = normalizeText(document.getElementById("email").value).toLowerCase();
       const password = document.getElementById("password").value;
-
-      if(!email || !password){
-        setMsg(loginMsg, "Inserisci email e password.", "error");
-        return;
-      }
-
+      if(!email || !password){ setMsg(loginMsg, "Inserisci email e password.", "error"); return; }
       setMsg(loginMsg, "Accesso in corso...");
 
       const { error } = await client.auth.signInWithPassword({ email, password });
-      if(error){
-        setMsg(loginMsg, "Login non riuscito: " + error.message, "error");
-        return;
-      }
+      if(error){ setMsg(loginMsg, "Login non riuscito: " + error.message, "error"); return; }
 
       const admin = await isAdminUser();
       if(!admin){
@@ -582,6 +750,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       chartBaseInfo.textContent = "Base analisi non ancora generata";
       chartsWrap.classList.add("hidden");
       chartsEmpty.classList.remove("hidden");
+      closeEditModal();
     }
 
     function getFilteredRows(){
@@ -593,12 +762,12 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       const archivio = filterArchivio.value;
 
       return rowsCache.filter(row => {
-        const titolo = getField(row, "titolo", "Titolo");
-        const luogo = getField(row, "luogo", "Luogo");
-        const descrizione = getField(row, "descrizione", "Descrizione");
-        const comuneRow = getField(row, "comune", "Comune");
+        const titolo = normalizeDisplayText(getField(row, "Titolo", "titolo"));
+        const luogo = cleanLuogoValue(getField(row, "Luogo", "luogo"));
+        const descrizione = normalizeText(getField(row, "Descrizione", "descrizione"));
+        const comuneRow = cleanComuneValue(getField(row, "Comune", "comune"));
         const codice = getField(row, "codice", "Codice");
-        const stato = normalizeText(getField(row, "stato", "Stato")).toLowerCase();
+        const stato = normalizeText(getField(row, "Stato", "stato")).toLowerCase();
         const wf = normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione"));
         const vis = normalizeVisibilityValue(getField(row, "visibilita", "Visibilita"));
         const arc = normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio"));
@@ -619,15 +788,12 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
     function formatDate(value){
       if(!value) return "—";
-      try{
-        return new Date(value).toLocaleString("it-IT");
-      }catch{
-        return value;
-      }
+      try{ return new Date(value).toLocaleString("it-IT"); }
+      catch { return value; }
     }
 
     function updateStats(rows){
-      const stato = r => normalizeText(getField(r, "stato", "Stato")).toLowerCase();
+      const stato = r => normalizeText(getField(r, "Stato", "stato")).toLowerCase();
       const vis = r => normalizeVisibilityValue(getField(r, "visibilita", "Visibilita"));
       const arc = r => normalizeArchiveValue(getField(r, "stato_archivio", "StatoArchivio"));
 
@@ -641,6 +807,25 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       document.getElementById("statArchiviate").textContent = rows.filter(r => arc(r) === "archiviata").length;
     }
 
+    function openEditModal(point){
+      editId.value = point.id;
+      editCodice.value = point.codice || "";
+      editTitolo.value = point.title || "";
+      editComune.value = point.comune || "";
+      editCategoria.value = point.categoria || "";
+      editLuogo.value = point.luogo || "";
+      editDescrizione.value = point.description || "";
+      editStatus.value = point.status || "rosso";
+      editWorkflow.value = point.workflow || "nuova";
+      editModal.classList.remove("hidden");
+      editModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeEditModal(){
+      editModal.classList.add("hidden");
+      editModal.setAttribute("aria-hidden", "true");
+    }
+
     function renderCards(){
       const rows = getFilteredRows();
       resultsCount.textContent = `${rows.length} schede mostrate`;
@@ -652,25 +837,29 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }
 
       rows.forEach(row => {
+        const point = rowToPoint(row);
         const id = row.id;
-        const codice = getField(row, "codice", "Codice");
-        const titolo = getField(row, "titolo", "Titolo");
-        const comune = getField(row, "comune", "Comune");
-        const categoria = getField(row, "categoria", "Categoria");
-        const stato = getField(row, "stato", "Stato");
-        const workflow = normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "nuova";
-        const visibilita = normalizeVisibilityValue(getField(row, "visibilita", "Visibilita"));
-        const archivio = normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio"));
-        const luogo = getField(row, "luogo", "Luogo");
-        const descrizione = getField(row, "descrizione", "Descrizione");
-        const nomeSegnalante = getField(row, "nomesegnalante", "NomeSegnalante");
-        const contattoSegnalante = getField(row, "contattosegnalante", "ContattoSegnalante");
+        const codice = point.codice;
+        const titolo = point.title;
+        const comune = point.comune;
+        const categoria = point.categoria;
+        const stato = point.status;
+        const workflow = point.workflow;
+        const visibilita = point.visibilita;
+        const archivio = point.statoArchivio;
+        const luogo = point.luogo;
+        const descrizione = point.description;
+        const nomeSegnalante = normalizeDisplayText(getField(row, "nomesegnalante", "NomeSegnalante"));
+        const contattoSegnalante = normalizeText(getField(row, "contattosegnalante", "ContattoSegnalante"));
         const createdAt = getField(row, "created_at", "creato_il");
         const updatedAt = getField(row, "updated_at", "aggiornato_alle");
 
         const deleteButtonHtml = isAdmin()
           ? `<button class="btn btn-danger btn-small" data-delete-id="${id}" type="button">Elimina definitiva</button>`
           : "";
+
+        const hideLabel = visibilita === "pubblica" ? "Nascondi" : "Rendi pubblica";
+        const archiveLabel = archivio === "attiva" ? "Archivia" : "Ripristina";
 
         const card = document.createElement("article");
         card.className = "report-card";
@@ -707,39 +896,39 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
               </select>
             </div>
             <div class="actions no-print">
-              <button class="btn btn-light btn-small" data-save-id="${id}" type="button">Salva</button>
-              <button class="btn btn-hide btn-small" data-hide-id="${id}" type="button">Nascondi</button>
-              <button class="btn btn-archive btn-small" data-archive-id="${id}" type="button">Archivia</button>
-              <button class="btn btn-restore btn-small" data-restore-id="${id}" type="button">Ripristina</button>
+              <button class="btn btn-primary btn-small" data-edit-id="${id}" type="button">Modifica scheda</button>
+              <button class="btn btn-light btn-small" data-save-id="${id}" type="button">Salva workflow</button>
+              <button class="btn btn-hide btn-small" data-hide-id="${id}" type="button">${hideLabel}</button>
+              <button class="btn btn-archive btn-small" data-archive-id="${id}" type="button">${archiveLabel}</button>
               ${deleteButtonHtml}
             </div>
           </div>`;
         cardsGrid.appendChild(card);
+
+        const editBtn = card.querySelector(`[data-edit-id="${id}"]`);
+        if(editBtn){
+          editBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            openEditModal(point);
+          });
+        }
       });
     }
 
-    function destroyCharts(){
-      charts.forEach(chart => chart.destroy());
-      charts = [];
-    }
+    function destroyCharts(){ charts.forEach(chart => chart.destroy()); charts = []; }
 
     function buildCharts(rows, label){
-      if(!rows.length){
-        alert("Nessun dato disponibile per generare i grafici.");
-        return;
-      }
-
+      if(!rows.length){ alert("Nessun dato disponibile per generare i grafici."); return; }
       destroyCharts();
       chartsEmpty.classList.add("hidden");
       chartsWrap.classList.remove("hidden");
       chartBaseInfo.textContent = `Base analisi: ${rows.length} segnalazioni (${label})`;
 
       const statusMap = {
-        Rosso: rows.filter(r => normalizeText(getField(r, "stato", "Stato")).toLowerCase() === "rosso").length,
-        Arancione: rows.filter(r => normalizeText(getField(r, "stato", "Stato")).toLowerCase() === "arancione").length,
-        Verde: rows.filter(r => normalizeText(getField(r, "stato", "Stato")).toLowerCase() === "verde").length
+        Rosso: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "rosso").length,
+        Arancione: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "arancione").length,
+        Verde: rows.filter(r => normalizeText(getField(r, "Stato", "stato")).toLowerCase() === "verde").length
       };
-
       const workflowMap = {
         Nuova: rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "nuova").length,
         "Presa in carico": rows.filter(r => normalizeWorkflowValue(getField(r, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) === "presa in carico").length,
@@ -757,16 +946,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         data:{ labels:Object.keys(workflowMap), datasets:[{ label:"Segnalazioni", data:Object.values(workflowMap), backgroundColor:["#3b82f6","#f59e0b","#10b981"] }] },
         options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
       }));
-
       setAdminMessage("Grafici generati correttamente.", "ok");
     }
 
     function buildReport(rows, label){
-      if(!rows.length){
-        alert("Nessun dato disponibile per generare il report.");
-        return;
-      }
-
+      if(!rows.length){ alert("Nessun dato disponibile per generare il report."); return; }
       const lines = [];
       lines.push("REPORT OPERATORI - MAPPA ACCESSIBILITÀ");
       lines.push("NessunOstacolo");
@@ -778,23 +962,22 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       rows.forEach((row, index) => {
         lines.push(`Scheda ${index + 1}`);
         lines.push(`ID: ${row.id}`);
-        lines.push(`Titolo: ${getField(row, "titolo", "Titolo") || "—"}`);
-        lines.push(`Comune: ${getField(row, "comune", "Comune") || "—"}`);
-        lines.push(`Categoria: ${getField(row, "categoria", "Categoria") || "—"}`);
-        lines.push(`Luogo: ${getField(row, "luogo", "Luogo") || "—"}`);
-        lines.push(`Stato: ${getField(row, "stato", "Stato") || "—"}`);
+        lines.push(`Titolo: ${normalizeDisplayText(getField(row, "Titolo", "titolo")) || "—"}`);
+        lines.push(`Comune: ${cleanComuneValue(getField(row, "Comune", "comune")) || "—"}`);
+        lines.push(`Categoria: ${cleanCategoriaValue(getField(row, "Categoria", "categoria")) || "—"}`);
+        lines.push(`Luogo: ${cleanLuogoValue(getField(row, "Luogo", "luogo")) || "—"}`);
+        lines.push(`Stato: ${getField(row, "Stato", "stato") || "—"}`);
         lines.push(`Workflow: ${normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "—"}`);
         lines.push(`Visibilità: ${normalizeVisibilityValue(getField(row, "visibilita", "Visibilita"))}`);
         lines.push(`Archivio: ${normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio"))}`);
         lines.push(`Creato il: ${formatDate(getField(row, "created_at", "creato_il"))}`);
         lines.push(`Aggiornato il: ${formatDate(getField(row, "updated_at", "aggiornato_alle"))}`);
-        lines.push(`Descrizione: ${getField(row, "descrizione", "Descrizione") || "—"}`);
+        lines.push(`Descrizione: ${normalizeText(getField(row, "Descrizione", "descrizione")) || "—"}`);
         lines.push("");
       });
 
       const text = lines.join("\n");
       const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Report operatori - Mappa Accessibilità</title><style>body{font-family:Arial,Helvetica,sans-serif;margin:40px;color:#111;line-height:1.6}header{display:flex;align-items:center;gap:16px;margin-bottom:24px}header img{width:72px;height:72px;object-fit:contain}h1{color:#1f4b7a;margin:0}p{margin:0}pre{white-space:pre-wrap}</style></head><body><header><img src="assets/logo-mappa.png" alt="Logo Mappa Accessibilità"><div><h1>Mappa Accessibilità - NessunOstacolo</h1><p>Area riservata operatori</p></div></header><pre>${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></body></html>`;
-
       lastReportText = text;
       lastReportHtml = html;
       reportOutput.textContent = text;
@@ -813,16 +996,8 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     async function loadData(){
-      const { data, error } = await client
-        .from("segnalazioni")
-        .select("*")
-        .order("id", { ascending:true });
-
-      if(error){
-        alert("Errore caricamento dati: " + error.message);
-        return;
-      }
-
+      const { data, error } = await client.from("segnalazioni").select("*").order("id", { ascending:true });
+      if(error){ alert("Errore caricamento dati: " + error.message); return; }
       rowsCache = data || [];
       updateStats(rowsCache);
       renderCards();
@@ -845,27 +1020,15 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
     function exportCSV(){
       const rows = getFilteredRows();
-      if(!rows.length){
-        alert("Nessun dato da esportare");
-        return;
-      }
-
+      if(!rows.length){ alert("Nessun dato da esportare"); return; }
       const headers = Object.keys(rows[0]);
-      const csv = [
-        headers.join(","),
-        ...rows.map(row => headers.map(h => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","))
-      ].join("\n");
-
+      const csv = [headers.join(","), ...rows.map(row => headers.map(h => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
       exportFile("segnalazioni-mappa.csv", csv, "text/csv;charset=utf-8;");
     }
 
     function exportXLSX(){
       const rows = getFilteredRows();
-      if(!rows.length){
-        alert("Nessun dato da esportare");
-        return;
-      }
-
+      if(!rows.length){ alert("Nessun dato da esportare"); return; }
       const worksheet = XLSX.utils.json_to_sheet(rows);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Segnalazioni");
@@ -873,11 +1036,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     function printReport(){
-      if(!lastReportHtml){
-        alert("Genera prima un report.");
-        return;
-      }
-
+      if(!lastReportHtml){ alert("Genera prima un report."); return; }
       const w = window.open("", "_blank");
       w.document.open();
       w.document.write(lastReportHtml);
@@ -895,77 +1054,53 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     }
 
     async function updateWorkflow(id, nuovoWorkflow){
-      const numericId = Number(id);
-
-      const { error } = await client
-        .from("segnalazioni")
-        .update({ statosegnalazione: nuovoWorkflow })
-        .eq("id", numericId);
-
-      if(error){
-        setAdminMessage("Errore nel salvataggio workflow: " + error.message, "error");
-        return false;
-      }
-
-      await writeLog("workflow_update", numericId, `Nuovo workflow: ${nuovoWorkflow}`);
+      const { error } = await client.from("segnalazioni").update({ statosegnalazione: nuovoWorkflow }).eq("id", id);
+      if(error){ setAdminMessage("Errore nel salvataggio workflow.", "error"); return false; }
+      await writeLog("workflow_update", id, `Nuovo workflow: ${nuovoWorkflow}`);
       setAdminMessage("Workflow aggiornato correttamente.", "ok");
       return true;
     }
 
     async function hideSegnalazione(id){
-      const numericId = Number(id);
+      const currentRow = rowsCache.find(r => Number(r.id) === Number(id));
+      const currentVis = normalizeVisibilityValue(getField(currentRow || {}, "visibilita", "Visibilita"));
+      const nextVis = currentVis === "pubblica" ? "nascosta" : "pubblica";
 
-      const { error } = await client
-        .from("segnalazioni")
-        .update({ visibilita: "nascosta" })
-        .eq("id", numericId);
-
-      if(error){
-        setAdminMessage("Errore durante il nascondimento: " + error.message, "error");
-        return false;
-      }
-
-      await writeLog("nascondi", numericId, "Visibilità impostata a nascosta");
+      const { error } = await client.from("segnalazioni").update({ visibilita: nextVis }).eq("id", id);
+      if(error){ setAdminMessage("Errore durante il cambio visibilità.", "error"); return false; }
+      await writeLog("visibilita_update", id, `Visibilità impostata a ${nextVis}`);
       return true;
     }
 
     async function archiveSegnalazione(id){
-      const numericId = Number(id);
+      const currentRow = rowsCache.find(r => Number(r.id) === Number(id));
+      const currentArc = normalizeArchiveValue(getField(currentRow || {}, "stato_archivio", "StatoArchivio"));
 
-      const { error } = await client
-        .from("segnalazioni")
-        .update({
-          stato_archivio: "archiviata",
-          visibilita: "nascosta"
-        })
-        .eq("id", numericId);
+      let payload;
+      let dettaglio;
 
-      if(error){
-        setAdminMessage("Errore durante l'archiviazione: " + error.message, "error");
-        return false;
+      if(currentArc === "attiva"){
+        payload = { stato_archivio: "archiviata", visibilita: "nascosta" };
+        dettaglio = "Archivio=archiviata, visibilità=nascosta";
+      }else{
+        payload = { stato_archivio: "attiva", visibilita: "pubblica" };
+        dettaglio = "Archivio=attiva, visibilità=pubblica";
       }
 
-      await writeLog("archivia", numericId, "Archivio=archiviata, visibilità=nascosta");
+      const { error } = await client.from("segnalazioni").update(payload).eq("id", id);
+      if(error){ setAdminMessage("Errore durante l'archiviazione/ripristino.", "error"); return false; }
+      await writeLog("archivio_update", id, dettaglio);
       return true;
     }
 
     async function restoreSegnalazione(id){
-      const numericId = Number(id);
+      const { error } = await client.from("segnalazioni").update({
+        stato_archivio: "attiva",
+        visibilita: "pubblica"
+      }).eq("id", id);
 
-      const { error } = await client
-        .from("segnalazioni")
-        .update({
-          stato_archivio: "attiva",
-          visibilita: "pubblica"
-        })
-        .eq("id", numericId);
-
-      if(error){
-        setAdminMessage("Errore durante il ripristino: " + error.message, "error");
-        return false;
-      }
-
-      await writeLog("ripristina", numericId, "Archivio=attiva, visibilità=pubblica");
+      if(error){ setAdminMessage("Errore durante il ripristino.", "error"); return false; }
+      await writeLog("ripristina", id, "Archivio=attiva, visibilità=pubblica");
       return true;
     }
 
@@ -975,30 +1110,16 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         return false;
       }
 
-      const numericId = Number(id);
-
-      const { error } = await client
-        .from("segnalazioni")
-        .delete()
-        .eq("id", numericId);
-
-      if(error){
-        setAdminMessage("Errore durante eliminazione definitiva: " + error.message, "error");
-        return false;
-      }
-
-      await writeLog("elimina_definitiva", numericId, "Segnalazione eliminata definitivamente");
+      const { error } = await client.from("segnalazioni").delete().eq("id", id);
+      if(error){ setAdminMessage("Errore durante eliminazione definitiva.", "error"); return false; }
+      await writeLog("elimina_definitiva", id, "Segnalazione eliminata definitivamente");
       return true;
     }
 
     async function bulkHideFiltered(){
       const ids = getFilteredIds();
-      if(!ids.length){
-        alert("Non ci sono segnalazioni filtrate da nascondere.");
-        return;
-      }
-
-      const conferma = confirm(`Vuoi nascondere ${ids.length} segnalazioni filtrate dalla mappa pubblica?`);
+      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da nascondere."); return; }
+      const conferma = confirm(`Vuoi cambiare visibilità a ${ids.length} segnalazioni filtrate?`);
       if(!conferma) return;
 
       for(const id of ids){
@@ -1006,22 +1127,21 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         if(!ok) return;
       }
 
-      await writeLog("bulk_nascondi", null, `Nascondi filtrate: ${ids.length} segnalazioni`);
-      setAdminMessage(`${ids.length} segnalazioni nascoste correttamente.`, "ok");
+      await writeLog("bulk_visibilita", null, `Cambio visibilità filtrate: ${ids.length} segnalazioni`);
+      setAdminMessage(`Visibilità aggiornata su ${ids.length} segnalazioni.`, "ok");
       await loadData();
     }
 
     async function bulkArchiveFiltered(){
       const ids = getFilteredIds();
-      if(!ids.length){
-        alert("Non ci sono segnalazioni filtrate da archiviare.");
-        return;
-      }
-
+      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da archiviare."); return; }
       const conferma = confirm(`Vuoi archiviare ${ids.length} segnalazioni filtrate? Verranno anche nascoste.`);
       if(!conferma) return;
 
       for(const id of ids){
+        const currentRow = rowsCache.find(r => Number(r.id) === Number(id));
+        const currentArc = normalizeArchiveValue(getField(currentRow || {}, "stato_archivio", "StatoArchivio"));
+        if(currentArc !== "attiva") continue;
         const ok = await archiveSegnalazione(id);
         if(!ok) return;
       }
@@ -1033,11 +1153,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
     async function bulkRestoreFiltered(){
       const ids = getFilteredIds();
-      if(!ids.length){
-        alert("Non ci sono segnalazioni filtrate da ripristinare.");
-        return;
-      }
-
+      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da ripristinare."); return; }
       const conferma = confirm(`Vuoi ripristinare ${ids.length} segnalazioni filtrate? Torneranno attive e pubbliche.`);
       if(!conferma) return;
 
@@ -1058,11 +1174,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }
 
       const ids = getFilteredIds();
-      if(!ids.length){
-        alert("Non ci sono segnalazioni filtrate da eliminare.");
-        return;
-      }
-
+      if(!ids.length){ alert("Non ci sono segnalazioni filtrate da eliminare."); return; }
       const conferma = confirm(`ATTENZIONE: vuoi eliminare DEFINITIVAMENTE ${ids.length} segnalazioni filtrate? Questa azione non si può annullare.`);
       if(!conferma) return;
 
@@ -1083,7 +1195,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       const saveBtn = event.target.closest("[data-save-id]");
       const hideBtn = event.target.closest("[data-hide-id]");
       const archiveBtn = event.target.closest("[data-archive-id]");
-      const restoreBtn = event.target.closest("[data-restore-id]");
       const deleteBtn = event.target.closest("[data-delete-id]");
 
       if(saveBtn){
@@ -1096,33 +1207,27 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
 
       if(hideBtn){
         const id = hideBtn.dataset.hideId;
-        const conferma = confirm("Vuoi nascondere questa segnalazione dalla mappa pubblica?");
+        const conferma = confirm("Vuoi cambiare la visibilità di questa segnalazione?");
         if(!conferma) return;
         const ok = await hideSegnalazione(id);
         if(ok){
-          setAdminMessage("Segnalazione nascosta correttamente.", "ok");
+          setAdminMessage("Visibilità aggiornata correttamente.", "ok");
           await loadData();
         }
       }
 
       if(archiveBtn){
         const id = archiveBtn.dataset.archiveId;
-        const conferma = confirm("Vuoi archiviare questa segnalazione? Verrà anche nascosta dalla mappa pubblica.");
+        const currentRow = rowsCache.find(r => Number(r.id) === Number(id));
+        const currentArc = normalizeArchiveValue(getField(currentRow || {}, "stato_archivio", "StatoArchivio"));
+        const messaggio = currentArc === "attiva"
+          ? "Vuoi archiviare questa segnalazione? Verrà anche nascosta dalla mappa pubblica."
+          : "Vuoi ripristinare questa segnalazione? Tornerà attiva e pubblica.";
+        const conferma = confirm(messaggio);
         if(!conferma) return;
         const ok = await archiveSegnalazione(id);
         if(ok){
-          setAdminMessage("Segnalazione archiviata correttamente.", "ok");
-          await loadData();
-        }
-      }
-
-      if(restoreBtn){
-        const id = restoreBtn.dataset.restoreId;
-        const conferma = confirm("Vuoi ripristinare questa segnalazione? Tornerà attiva e pubblica.");
-        if(!conferma) return;
-        const ok = await restoreSegnalazione(id);
-        if(ok){
-          setAdminMessage("Segnalazione ripristinata correttamente.", "ok");
+          setAdminMessage("Archivio aggiornato correttamente.", "ok");
           await loadData();
         }
       }
@@ -1144,6 +1249,72 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       }
     });
 
+    if(editSegnalazioneForm){
+      editSegnalazioneForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const id = Number(editId.value);
+        const payload = {
+          Titolo: normalizeDisplayText(editTitolo.value),
+          Comune: cleanComuneValue(editComune.value),
+          Categoria: cleanCategoriaValue(editCategoria.value),
+          Luogo: cleanLuogoValue(editLuogo.value),
+          Descrizione: normalizeText(editDescrizione.value),
+          Stato: normalizeText(editStatus.value).toLowerCase(),
+          statosegnalazione: normalizeWorkflowValue(editWorkflow.value) || "nuova"
+        };
+
+        if(!payload.Titolo){
+          alert("Inserisci un titolo valido.");
+          return;
+        }
+        if(!payload.Comune){
+          alert("Inserisci un comune valido.");
+          return;
+        }
+        if(!payload.Categoria){
+          alert("Inserisci una categoria valida.");
+          return;
+        }
+        if(!payload.Luogo){
+          alert("Inserisci un luogo valido.");
+          return;
+        }
+
+        const { error } = await client
+          .from("segnalazioni")
+          .update(payload)
+          .eq("id", id);
+
+        if(error){
+          alert("Errore durante il salvataggio modifiche");
+          console.error(error);
+          return;
+        }
+
+        await writeLog("modifica_scheda", id, "Modifica completa della segnalazione");
+        closeEditModal();
+        await loadData();
+        setAdminMessage("Modifica salvata correttamente.", "ok");
+      });
+    }
+
+    if(btnCloseEditModal){
+      btnCloseEditModal.addEventListener("click", closeEditModal);
+    }
+
+    if(btnCloseEditModalFooter){
+      btnCloseEditModalFooter.addEventListener("click", closeEditModal);
+    }
+
+    if(editModal){
+      editModal.addEventListener("click", (e) => {
+        if(e.target === editModal){
+          closeEditModal();
+        }
+      });
+    }
+
     btnLogin.onclick = login;
     btnRefresh.onclick = loadData;
     btnRefreshTop.onclick = loadData;
@@ -1157,14 +1328,8 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     btnBuildReportFiltered.onclick = () => buildReport(getFilteredRows(), "risultati filtrati");
     btnBuildReportAll.onclick = () => buildReport(rowsCache, "database completo");
     btnPrintReport.onclick = printReport;
-    btnExportReportHtml.onclick = () => {
-      if(!lastReportHtml) return alert("Genera prima un report.");
-      exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;");
-    };
-    btnExportReportTxt.onclick = () => {
-      if(!lastReportText) return alert("Genera prima un report.");
-      exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;");
-    };
+    btnExportReportHtml.onclick = () => { if(!lastReportHtml) return alert("Genera prima un report."); exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;"); };
+    btnExportReportTxt.onclick = () => { if(!lastReportText) return alert("Genera prima un report."); exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;"); };
     btnPrintPage.onclick = () => window.print();
     btnResetFilters.onclick = resetFilters;
 
