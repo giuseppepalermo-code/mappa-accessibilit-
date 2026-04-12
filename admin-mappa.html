@@ -574,7 +574,11 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function normalizeWorkflowValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nuova") return "nuova"; if(v === "presa in carico") return "presa in carico"; if(v === "chiusa") return "chiusa"; return ""; }
     function normalizeVisibilityValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nascosta") return "nascosta"; return "pubblica"; }
     function normalizeArchiveValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "archiviata") return "archiviata"; return "attiva"; }
-    function normalizeRole(value){ const v = normalizeText(value).toLowerCase(); return v === "admin" ? "admin" : "operatore"; }
+    function normalizeRole(value){
+  const v = normalizeText(value).toLowerCase();
+  if(v === "admin" || v === "superadmin") return "admin";
+  return "operatore";
+}
     function isAdmin(){ return currentUserRole === "admin"; }
 
     function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
