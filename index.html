@@ -366,20 +366,35 @@
           </div>
         </label>
 
-        <label class="field">
+        <div class="field">
           <span>Foto 1</span>
-          <input id="inputFoto1" type="file" accept="image/*">
-        </label>
+          <div class="gps-row">
+            <label class="btn btn-light" for="inputFoto1Camera">📷 Scatta foto</label>
+            <input id="inputFoto1Camera" type="file" accept="image/*" capture="environment" style="display:none;">
+            <label class="btn btn-light" for="inputFoto1Gallery">🖼️ Scegli da galleria</label>
+            <input id="inputFoto1Gallery" type="file" accept="image/*" style="display:none;">
+          </div>
+        </div>
 
-        <label class="field">
+        <div class="field">
           <span>Foto 2</span>
-          <input id="inputFoto2" type="file" accept="image/*">
-        </label>
+          <div class="gps-row">
+            <label class="btn btn-light" for="inputFoto2Camera">📷 Scatta foto</label>
+            <input id="inputFoto2Camera" type="file" accept="image/*" capture="environment" style="display:none;">
+            <label class="btn btn-light" for="inputFoto2Gallery">🖼️ Scegli da galleria</label>
+            <input id="inputFoto2Gallery" type="file" accept="image/*" style="display:none;">
+          </div>
+        </div>
 
-        <label class="field">
+        <div class="field">
           <span>Foto 3</span>
-          <input id="inputFoto3" type="file" accept="image/*">
-        </label>
+          <div class="gps-row">
+            <label class="btn btn-light" for="inputFoto3Camera">📷 Scatta foto</label>
+            <input id="inputFoto3Camera" type="file" accept="image/*" capture="environment" style="display:none;">
+            <label class="btn btn-light" for="inputFoto3Gallery">🖼️ Scegli da galleria</label>
+            <input id="inputFoto3Gallery" type="file" accept="image/*" style="display:none;">
+          </div>
+        </div>
 
         <div class="form-actions">
           <button class="btn btn-primary" type="submit">Salva</button>
