@@ -302,9 +302,15 @@ const inputStatus = document.getElementById("inputStatus");
 const inputWorkflow = document.getElementById("inputWorkflow");
 const inputNomeSegnalante = document.getElementById("inputNomeSegnalante");
 const inputContattoSegnalante = document.getElementById("inputContattoSegnalante");
-const inputFoto1 = document.getElementById("inputFoto1");
-const inputFoto2 = document.getElementById("inputFoto2");
-const inputFoto3 = document.getElementById("inputFoto3");
+
+// nuovi campi foto pubblici
+const inputFoto1Camera = document.getElementById("inputFoto1Camera");
+const inputFoto1Gallery = document.getElementById("inputFoto1Gallery");
+const inputFoto2Camera = document.getElementById("inputFoto2Camera");
+const inputFoto2Gallery = document.getElementById("inputFoto2Gallery");
+const inputFoto3Camera = document.getElementById("inputFoto3Camera");
+const inputFoto3Gallery = document.getElementById("inputFoto3Gallery");
+
 const btnResetSegnalazione = document.getElementById("btnResetSegnalazione");
 const btnGpsPhone = document.getElementById("btnGpsPhone");
 const gpsStatus = document.getElementById("gpsStatus");
@@ -330,6 +336,46 @@ const filterStatusMobileMirror = document.getElementById("filterStatusMobileMirr
 const filterWorkflowMobileMirror = document.getElementById("filterWorkflowMobileMirror");
 const filterVisibilitaMobileMirror = document.getElementById("filterVisibilitaMobileMirror");
 const filterArchivioMobileMirror = document.getElementById("filterArchivioMobileMirror");
+
+// -------------------------------
+// FOTO: GESTIONE CAMERA / GALLERIA
+// -------------------------------
+
+function clearOtherFileInput(activeInput, otherInput) {
+  if (!activeInput || !otherInput) return;
+
+  activeInput.addEventListener("change", () => {
+    if (activeInput.files && activeInput.files.length > 0) {
+      otherInput.value = "";
+    }
+  });
+}
+
+function getSelectedFile(primaryInput, secondaryInput) {
+  if (primaryInput?.files?.length > 0) return primaryInput.files[0];
+  if (secondaryInput?.files?.length > 0) return secondaryInput.files[0];
+  return null;
+}
+
+function resetPhotoInputs() {
+  [
+    inputFoto1Camera,
+    inputFoto1Gallery,
+    inputFoto2Camera,
+    inputFoto2Gallery,
+    inputFoto3Camera,
+    inputFoto3Gallery
+  ].forEach((input) => {
+    if (input) input.value = "";
+  });
+}
+
+clearOtherFileInput(inputFoto1Camera, inputFoto1Gallery);
+clearOtherFileInput(inputFoto1Gallery, inputFoto1Camera);
+clearOtherFileInput(inputFoto2Camera, inputFoto2Gallery);
+clearOtherFileInput(inputFoto2Gallery, inputFoto2Camera);
+clearOtherFileInput(inputFoto3Camera, inputFoto3Gallery);
+clearOtherFileInput(inputFoto3Gallery, inputFoto3Camera);
 
 // -------------------------------
 // AUTOCOMPLETE E SUGGERIMENTI
@@ -635,6 +681,7 @@ function resetGpsStatus() {
 
 function clearForm() {
   formSegnalazione.reset();
+  resetPhotoInputs();
   editingId = null;
   selectedCoordsValue = null;
   inputCodice.value = "";
@@ -645,6 +692,7 @@ function clearForm() {
 
 function resetFormKeepPoint() {
   formSegnalazione.reset();
+  resetPhotoInputs();
   resetGpsStatus();
   hideSuggestions(suggestionsComune);
   hideSuggestions(suggestionsCategoria);
@@ -676,6 +724,7 @@ function fillFormFromPoint(point) {
   gpsPhoneCoords = point.gpsLat && point.gpsLng ? [Number(point.gpsLat), Number(point.gpsLng)] : null;
   if (gpsStatus) gpsStatus.textContent = gpsPhoneCoords ? "GPS acquisito" : "Non acquisito";
   setCoordsBoxes(point.coords);
+  resetPhotoInputs();
   openFormModal(true);
 }
 
@@ -788,8 +837,7 @@ async function loadPointsFromSupabase() {
 async function uploadSinglePhoto(file) {
   if (!file) return null;
 
-  const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
-  const safeName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${extension}`;
+  const safeName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
 
   const { error } = await supabaseClient
     .storage
@@ -833,6 +881,7 @@ map.on("click", (e) => {
   editingId = null;
   setCoordsBoxes(selectedCoordsValue);
   resetGpsStatus();
+  resetPhotoInputs();
   inputCodice.value = generateNextCode(inputComune.value || "", points);
   openFormModal(false);
 });
@@ -889,9 +938,13 @@ formSegnalazione.addEventListener("submit", async (e) => {
     let foto2 = null;
     let foto3 = null;
 
-    if (inputFoto1 && inputFoto1.files.length > 0) foto1 = await uploadSinglePhoto(inputFoto1.files[0]);
-    if (inputFoto2 && inputFoto2.files.length > 0) foto2 = await uploadSinglePhoto(inputFoto2.files[0]);
-    if (inputFoto3 && inputFoto3.files.length > 0) foto3 = await uploadSinglePhoto(inputFoto3.files[0]);
+    const fileFoto1 = getSelectedFile(inputFoto1Camera, inputFoto1Gallery);
+    const fileFoto2 = getSelectedFile(inputFoto2Camera, inputFoto2Gallery);
+    const fileFoto3 = getSelectedFile(inputFoto3Camera, inputFoto3Gallery);
+
+    if (fileFoto1) foto1 = await uploadSinglePhoto(fileFoto1);
+    if (fileFoto2) foto2 = await uploadSinglePhoto(fileFoto2);
+    if (fileFoto3) foto3 = await uploadSinglePhoto(fileFoto3);
 
     const point = {
       codice: editingId
