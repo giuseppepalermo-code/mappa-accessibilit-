@@ -204,6 +204,35 @@
       background:var(--white, #fff);
       padding-top:10px;
     }
+    .photo-preview-wrap{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+    .photo-thumb{
+      width:110px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow:var(--shadow-soft);
+    }
+    .photo-thumb img{
+      width:100%;
+      height:82px;
+      object-fit:cover;
+      display:block;
+      background:#f7fafc;
+    }
+    .photo-thumb span{
+      display:block;
+      padding:6px 8px;
+      font-size:.78rem;
+      color:#475569;
+      text-align:center;
+      font-weight:700;
+    }
 
     @media print{
       body{background:#fff}
@@ -454,6 +483,23 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
             </select>
           </label>
 
+          <label class="field">
+            <span>Foto 1</span>
+            <input id="editFoto1" type="file" accept="image/*">
+          </label>
+
+          <label class="field">
+            <span>Foto 2</span>
+            <input id="editFoto2" type="file" accept="image/*">
+          </label>
+
+          <label class="field">
+            <span>Foto 3</span>
+            <input id="editFoto3" type="file" accept="image/*">
+          </label>
+
+          <div id="editPhotoPreview" class="photo-preview-wrap"></div>
+
           <div class="form-actions">
             <button class="btn btn-primary" type="submit">Salva modifiche</button>
             <button id="btnCloseEditModalFooter" class="btn btn-light" type="button">Chiudi</button>
@@ -474,6 +520,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     let lastReportText = "";
     let currentUserRole = "operatore";
     let currentUserEmail = "";
+    let currentEditRow = null;
 
     const loginSection = document.getElementById("loginSection");
     const appSection = document.getElementById("appSection");
@@ -531,6 +578,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     const editDescrizione = document.getElementById("editDescrizione");
     const editStatus = document.getElementById("editStatus");
     const editWorkflow = document.getElementById("editWorkflow");
+    const editFoto1 = document.getElementById("editFoto1");
+    const editFoto2 = document.getElementById("editFoto2");
+    const editFoto3 = document.getElementById("editFoto3");
+    const editPhotoPreview = document.getElementById("editPhotoPreview");
 
     function normalizeText(value){ return (value ?? "").toString().trim(); }
     function normalizeDisplayText(value){
@@ -575,11 +626,32 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function normalizeVisibilityValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nascosta") return "nascosta"; return "pubblica"; }
     function normalizeArchiveValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "archiviata") return "archiviata"; return "attiva"; }
     function normalizeRole(value){
-  const v = normalizeText(value).toLowerCase();
-  if(v === "admin" || v === "superadmin") return "admin";
-  return "operatore";
-}
+      const v = normalizeText(value).toLowerCase();
+      if(v === "admin" || v === "superadmin") return "admin";
+      return "operatore";
+    }
     function isAdmin(){ return currentUserRole === "admin"; }
+
+    function fotoPublicUrl(nomeFile){
+      if(!nomeFile) return "";
+      const { data } = client.storage.from("foto").getPublicUrl(nomeFile);
+      return data.publicUrl;
+    }
+
+    async function uploadSinglePhoto(file){
+      if(!file) return null;
+
+      const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
+      const safeName = `${Date.now()}_${Math.random().toString(36).slice(2,8)}.${extension}`;
+
+      const { error } = await client.storage.from("foto").upload(safeName, file, { upsert:false });
+      if(error){
+        console.error(error);
+        throw new Error("Errore caricamento foto.");
+      }
+
+      return safeName;
+    }
 
     function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
     function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 2600); } }
@@ -651,7 +723,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         status: normalizeText(getField(row, "Stato", "stato")).toLowerCase(),
         workflow: normalizeWorkflowValue(getField(row, "statosegnalazione", "StatoSegnalazione", "stato_segnalazione")) || "nuova",
         visibilita: normalizeVisibilityValue(getField(row, "visibilita", "Visibilita")),
-        statoArchivio: normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio"))
+        statoArchivio: normalizeArchiveValue(getField(row, "stato_archivio", "StatoArchivio")),
+        foto1: getField(row, "foto1"),
+        foto2: getField(row, "foto2"),
+        foto3: getField(row, "foto3")
       };
     }
 
@@ -744,6 +819,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       lastReportText = "";
       currentUserRole = "operatore";
       currentUserEmail = "";
+      currentEditRow = null;
       refreshRoleUi();
       cardsGrid.innerHTML = "";
       hideApp();
@@ -811,7 +887,25 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       document.getElementById("statArchiviate").textContent = rows.filter(r => arc(r) === "archiviata").length;
     }
 
-    function openEditModal(point){
+    function renderPhotoPreview(point){
+      if(!editPhotoPreview) return;
+      const items = [];
+
+      if(point?.foto1){
+        items.push(`<div class="photo-thumb"><img src="${fotoPublicUrl(point.foto1)}" alt="Foto 1"><span>Foto 1 attuale</span></div>`);
+      }
+      if(point?.foto2){
+        items.push(`<div class="photo-thumb"><img src="${fotoPublicUrl(point.foto2)}" alt="Foto 2"><span>Foto 2 attuale</span></div>`);
+      }
+      if(point?.foto3){
+        items.push(`<div class="photo-thumb"><img src="${fotoPublicUrl(point.foto3)}" alt="Foto 3"><span>Foto 3 attuale</span></div>`);
+      }
+
+      editPhotoPreview.innerHTML = items.join("");
+    }
+
+    function openEditModal(point, originalRow){
+      currentEditRow = originalRow;
       editId.value = point.id;
       editCodice.value = point.codice || "";
       editTitolo.value = point.title || "";
@@ -821,6 +915,10 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       editDescrizione.value = point.description || "";
       editStatus.value = point.status || "rosso";
       editWorkflow.value = point.workflow || "nuova";
+      if(editFoto1) editFoto1.value = "";
+      if(editFoto2) editFoto2.value = "";
+      if(editFoto3) editFoto3.value = "";
+      renderPhotoPreview(point);
       editModal.classList.remove("hidden");
       editModal.setAttribute("aria-hidden", "false");
     }
@@ -828,6 +926,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function closeEditModal(){
       editModal.classList.add("hidden");
       editModal.setAttribute("aria-hidden", "true");
+      currentEditRow = null;
     }
 
     function renderCards(){
@@ -913,7 +1012,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         if(editBtn){
           editBtn.addEventListener("click", (ev) => {
             ev.stopPropagation();
-            openEditModal(point);
+            openEditModal(point, row);
           });
         }
       });
@@ -1285,21 +1384,44 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
           return;
         }
 
-        const { error } = await client
-          .from("segnalazioni")
-          .update(payload)
-          .eq("id", id);
+        try{
+          let foto1 = getField(currentEditRow || {}, "foto1") || null;
+          let foto2 = getField(currentEditRow || {}, "foto2") || null;
+          let foto3 = getField(currentEditRow || {}, "foto3") || null;
 
-        if(error){
-          alert("Errore durante il salvataggio modifiche");
+          if(editFoto1 && editFoto1.files.length > 0){
+            foto1 = await uploadSinglePhoto(editFoto1.files[0]);
+          }
+          if(editFoto2 && editFoto2.files.length > 0){
+            foto2 = await uploadSinglePhoto(editFoto2.files[0]);
+          }
+          if(editFoto3 && editFoto3.files.length > 0){
+            foto3 = await uploadSinglePhoto(editFoto3.files[0]);
+          }
+
+          payload.foto1 = foto1;
+          payload.foto2 = foto2;
+          payload.foto3 = foto3;
+
+          const { error } = await client
+            .from("segnalazioni")
+            .update(payload)
+            .eq("id", id);
+
+          if(error){
+            alert("Errore durante il salvataggio modifiche");
+            console.error(error);
+            return;
+          }
+
+          await writeLog("modifica_scheda", id, "Modifica completa della segnalazione");
+          closeEditModal();
+          await loadData();
+          setAdminMessage("Modifica salvata correttamente.", "ok");
+        }catch(error){
+          alert(error.message || "Errore durante il caricamento delle foto.");
           console.error(error);
-          return;
         }
-
-        await writeLog("modifica_scheda", id, "Modifica completa della segnalazione");
-        closeEditModal();
-        await loadData();
-        setAdminMessage("Modifica salvata correttamente.", "ok");
       });
     }
 
