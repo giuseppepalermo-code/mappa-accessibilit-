@@ -45,6 +45,7 @@
     .field span{font-size:.95rem;color:var(--muted);font-weight:700}
     .field input,.field select,.field textarea{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:16px;font-size:1rem;outline:none;background:#fff;color:var(--text)}
     .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(31,75,122,.10)}
+    .field input[type="file"]{padding:10px 12px}
 
     .msg{margin-top:12px;font-size:.95rem;min-height:22px;font-weight:700}
     .msg.error{color:var(--red-text)}
@@ -204,34 +205,47 @@
       background:var(--white, #fff);
       padding-top:10px;
     }
-    .photo-preview-wrap{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:6px;
+
+    .foto-preview-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-top:8px;
     }
-    .photo-thumb{
-      width:110px;
+    .foto-preview-card{
       border:1px solid var(--line);
-      border-radius:12px;
-      overflow:hidden;
-      background:#fff;
-      box-shadow:var(--shadow-soft);
+      border-radius:14px;
+      padding:10px;
+      background:#f8fbff;
     }
-    .photo-thumb img{
+    .foto-preview-card img{
       width:100%;
-      height:82px;
+      height:120px;
       object-fit:cover;
+      border-radius:10px;
       display:block;
-      background:#f7fafc;
+      background:#eef3f8;
     }
-    .photo-thumb span{
-      display:block;
-      padding:6px 8px;
-      font-size:.78rem;
-      color:#475569;
+    .foto-preview-card .foto-empty{
+      width:100%;
+      height:120px;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       text-align:center;
+      padding:8px;
+      background:#eef3f8;
+      color:#64748b;
+      font-size:.85rem;
       font-weight:700;
+    }
+    .foto-preview-card .foto-label{
+      display:block;
+      margin-bottom:8px;
+      font-size:.84rem;
+      font-weight:800;
+      color:#475569;
     }
 
     @media print{
@@ -262,6 +276,7 @@
       .modal-card{width:100%;height:100%;max-height:100%;border-radius:0}
       .form-actions{flex-direction:column}
       .form-actions .btn{width:100%}
+      .foto-preview-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -434,6 +449,9 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       <div class="modal-body">
         <form id="editSegnalazioneForm" class="form-segnalazione">
           <input type="hidden" id="editId">
+          <input type="hidden" id="editFoto1Esistente">
+          <input type="hidden" id="editFoto2Esistente">
+          <input type="hidden" id="editFoto3Esistente">
 
           <label class="field">
             <span>Codice</span>
@@ -483,22 +501,53 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
             </select>
           </label>
 
+          <div class="field">
+            <span>Foto attuali</span>
+            <div class="foto-preview-grid">
+              <div class="foto-preview-card">
+                <span class="foto-label">Foto 1</span>
+                <div id="previewFoto1Wrap"></div>
+              </div>
+              <div class="foto-preview-card">
+                <span class="foto-label">Foto 2</span>
+                <div id="previewFoto2Wrap"></div>
+              </div>
+              <div class="foto-preview-card">
+                <span class="foto-label">Foto 3</span>
+                <div id="previewFoto3Wrap"></div>
+              </div>
+            </div>
+          </div>
+
           <label class="field">
-            <span>Foto 1</span>
-            <input id="editFoto1" type="file" accept="image/*">
+            <span>Foto 1 - Scatta foto</span>
+            <input id="editFoto1Camera" type="file" accept="image/*" capture="environment">
           </label>
 
           <label class="field">
-            <span>Foto 2</span>
-            <input id="editFoto2" type="file" accept="image/*">
+            <span>Foto 1 - Scegli da galleria</span>
+            <input id="editFoto1Gallery" type="file" accept="image/*">
           </label>
 
           <label class="field">
-            <span>Foto 3</span>
-            <input id="editFoto3" type="file" accept="image/*">
+            <span>Foto 2 - Scatta foto</span>
+            <input id="editFoto2Camera" type="file" accept="image/*" capture="environment">
           </label>
 
-          <div id="editPhotoPreview" class="photo-preview-wrap"></div>
+          <label class="field">
+            <span>Foto 2 - Scegli da galleria</span>
+            <input id="editFoto2Gallery" type="file" accept="image/*">
+          </label>
+
+          <label class="field">
+            <span>Foto 3 - Scatta foto</span>
+            <input id="editFoto3Camera" type="file" accept="image/*" capture="environment">
+          </label>
+
+          <label class="field">
+            <span>Foto 3 - Scegli da galleria</span>
+            <input id="editFoto3Gallery" type="file" accept="image/*">
+          </label>
 
           <div class="form-actions">
             <button class="btn btn-primary" type="submit">Salva modifiche</button>
@@ -520,7 +569,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     let lastReportText = "";
     let currentUserRole = "operatore";
     let currentUserEmail = "";
-    let currentEditRow = null;
 
     const loginSection = document.getElementById("loginSection");
     const appSection = document.getElementById("appSection");
@@ -578,17 +626,30 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     const editDescrizione = document.getElementById("editDescrizione");
     const editStatus = document.getElementById("editStatus");
     const editWorkflow = document.getElementById("editWorkflow");
-    const editFoto1 = document.getElementById("editFoto1");
-    const editFoto2 = document.getElementById("editFoto2");
-    const editFoto3 = document.getElementById("editFoto3");
-    const editPhotoPreview = document.getElementById("editPhotoPreview");
+
+    const editFoto1Esistente = document.getElementById("editFoto1Esistente");
+    const editFoto2Esistente = document.getElementById("editFoto2Esistente");
+    const editFoto3Esistente = document.getElementById("editFoto3Esistente");
+
+    const editFoto1Camera = document.getElementById("editFoto1Camera");
+    const editFoto1Gallery = document.getElementById("editFoto1Gallery");
+    const editFoto2Camera = document.getElementById("editFoto2Camera");
+    const editFoto2Gallery = document.getElementById("editFoto2Gallery");
+    const editFoto3Camera = document.getElementById("editFoto3Camera");
+    const editFoto3Gallery = document.getElementById("editFoto3Gallery");
+
+    const previewFoto1Wrap = document.getElementById("previewFoto1Wrap");
+    const previewFoto2Wrap = document.getElementById("previewFoto2Wrap");
+    const previewFoto3Wrap = document.getElementById("previewFoto3Wrap");
 
     function normalizeText(value){ return (value ?? "").toString().trim(); }
+
     function normalizeDisplayText(value){
       const cleaned = normalizeText(value).replace(/\s+/g, " ").replace(/\.+$/, "").trim();
       if(!cleaned) return "";
       return cleaned.toLowerCase().split(" ").map(word => word ? word.charAt(0).toUpperCase() + word.slice(1) : "").join(" ");
     }
+
     function cleanComuneValue(value){
       const raw = normalizeText(value).toLowerCase();
       if(!raw) return "";
@@ -596,6 +657,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       if(raw.includes("caltanissetta")) return "Caltanissetta";
       return normalizeDisplayText(value);
     }
+
     function cleanCategoriaValue(value){
       const v = normalizeDisplayText(value).toLowerCase();
       if(!v) return "";
@@ -611,6 +673,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       if(v.includes("altro")) return "Altro";
       return normalizeDisplayText(value);
     }
+
     function cleanLuogoValue(value){
       const cleaned = normalizeDisplayText(value);
       if(!cleaned) return "";
@@ -621,42 +684,71 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       return cleaned;
     }
 
-    function getField(row, ...keys){ for(const key of keys){ if(row[key] !== undefined && row[key] !== null) return row[key]; } return ""; }
-    function normalizeWorkflowValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nuova") return "nuova"; if(v === "presa in carico") return "presa in carico"; if(v === "chiusa") return "chiusa"; return ""; }
-    function normalizeVisibilityValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "nascosta") return "nascosta"; return "pubblica"; }
-    function normalizeArchiveValue(value){ const v = normalizeText(value).toLowerCase(); if(v === "archiviata") return "archiviata"; return "attiva"; }
+    function getField(row, ...keys){
+      for(const key of keys){
+        if(row[key] !== undefined && row[key] !== null) return row[key];
+      }
+      return "";
+    }
+
+    function normalizeWorkflowValue(value){
+      const v = normalizeText(value).toLowerCase();
+      if(v === "nuova") return "nuova";
+      if(v === "presa in carico") return "presa in carico";
+      if(v === "chiusa") return "chiusa";
+      return "";
+    }
+
+    function normalizeVisibilityValue(value){
+      const v = normalizeText(value).toLowerCase();
+      if(v === "nascosta") return "nascosta";
+      return "pubblica";
+    }
+
+    function normalizeArchiveValue(value){
+      const v = normalizeText(value).toLowerCase();
+      if(v === "archiviata") return "archiviata";
+      return "attiva";
+    }
+
     function normalizeRole(value){
       const v = normalizeText(value).toLowerCase();
       if(v === "admin" || v === "superadmin") return "admin";
       return "operatore";
     }
+
     function isAdmin(){ return currentUserRole === "admin"; }
 
     function fotoPublicUrl(nomeFile){
       if(!nomeFile) return "";
       const { data } = client.storage.from("foto").getPublicUrl(nomeFile);
-      return data.publicUrl;
+      return data?.publicUrl || "";
     }
 
-    async function uploadSinglePhoto(file){
-      if(!file) return null;
+    function setMsg(el, text, type = ""){
+      el.textContent = text || "";
+      el.className = "msg";
+      if(type) el.classList.add(type);
+    }
 
-      const extension = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
-      const safeName = `${Date.now()}_${Math.random().toString(36).slice(2,8)}.${extension}`;
-
-      const { error } = await client.storage.from("foto").upload(safeName, file, { upsert:false });
-      if(error){
-        console.error(error);
-        throw new Error("Errore caricamento foto.");
+    function setAdminMessage(text, type = ""){
+      setMsg(adminMsg, text, type);
+      if(text){
+        setTimeout(() => {
+          if(adminMsg.textContent === text) setMsg(adminMsg, "");
+        }, 2600);
       }
-
-      return safeName;
     }
 
-    function setMsg(el, text, type = ""){ el.textContent = text || ""; el.className = "msg"; if(type) el.classList.add(type); }
-    function setAdminMessage(text, type = ""){ setMsg(adminMsg, text, type); if(text){ setTimeout(() => { if(adminMsg.textContent === text) setMsg(adminMsg, ""); }, 2600); } }
-    function showApp(){ loginSection.classList.add("hidden"); appSection.classList.remove("hidden"); }
-    function hideApp(){ loginSection.classList.remove("hidden"); appSection.classList.add("hidden"); }
+    function showApp(){
+      loginSection.classList.add("hidden");
+      appSection.classList.remove("hidden");
+    }
+
+    function hideApp(){
+      loginSection.classList.remove("hidden");
+      appSection.classList.add("hidden");
+    }
 
     function refreshRoleUi(){
       if(roleBadge){
@@ -730,6 +822,67 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       };
     }
 
+    function renderFotoPreview(container, nomeFile){
+      if(!container) return;
+
+      if(nomeFile){
+        const url = fotoPublicUrl(nomeFile);
+        container.innerHTML = `<img src="${url}" alt="Anteprima foto">`;
+      }else{
+        container.innerHTML = `<div class="foto-empty">Nessuna foto presente</div>`;
+      }
+    }
+
+    function clearOtherFileInput(activeInput, otherInput){
+      if(!activeInput || !otherInput) return;
+
+      activeInput.addEventListener("change", () => {
+        if(activeInput.files && activeInput.files.length > 0){
+          otherInput.value = "";
+        }
+      });
+    }
+
+    function getSelectedFile(primaryInput, secondaryInput){
+      if(primaryInput?.files?.length > 0) return primaryInput.files[0];
+      if(secondaryInput?.files?.length > 0) return secondaryInput.files[0];
+      return null;
+    }
+
+    function resetEditPhotoInputs(){
+      [
+        editFoto1Camera,
+        editFoto1Gallery,
+        editFoto2Camera,
+        editFoto2Gallery,
+        editFoto3Camera,
+        editFoto3Gallery
+      ].forEach((input) => {
+        if(input) input.value = "";
+      });
+    }
+
+    clearOtherFileInput(editFoto1Camera, editFoto1Gallery);
+    clearOtherFileInput(editFoto1Gallery, editFoto1Camera);
+    clearOtherFileInput(editFoto2Camera, editFoto2Gallery);
+    clearOtherFileInput(editFoto2Gallery, editFoto2Camera);
+    clearOtherFileInput(editFoto3Camera, editFoto3Gallery);
+    clearOtherFileInput(editFoto3Gallery, editFoto3Camera);
+
+    async function uploadSinglePhoto(file){
+      if(!file) return null;
+
+      const safeName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+      const { error } = await client.storage.from("foto").upload(safeName, file, { upsert:false });
+
+      if(error){
+        console.error(error);
+        throw new Error("Errore caricamento foto.");
+      }
+
+      return safeName;
+    }
+
     async function getAdminProfile(){
       const { data: authData, error: authError } = await client.auth.getUser();
       if(authError) return null;
@@ -766,11 +919,17 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     async function login(){
       const email = normalizeText(document.getElementById("email").value).toLowerCase();
       const password = document.getElementById("password").value;
-      if(!email || !password){ setMsg(loginMsg, "Inserisci email e password.", "error"); return; }
+      if(!email || !password){
+        setMsg(loginMsg, "Inserisci email e password.", "error");
+        return;
+      }
       setMsg(loginMsg, "Accesso in corso...");
 
       const { error } = await client.auth.signInWithPassword({ email, password });
-      if(error){ setMsg(loginMsg, "Login non riuscito: " + error.message, "error"); return; }
+      if(error){
+        setMsg(loginMsg, "Login non riuscito: " + error.message, "error");
+        return;
+      }
 
       const admin = await isAdminUser();
       if(!admin){
@@ -819,7 +978,6 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       lastReportText = "";
       currentUserRole = "operatore";
       currentUserEmail = "";
-      currentEditRow = null;
       refreshRoleUi();
       cardsGrid.innerHTML = "";
       hideApp();
@@ -887,25 +1045,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       document.getElementById("statArchiviate").textContent = rows.filter(r => arc(r) === "archiviata").length;
     }
 
-    function renderPhotoPreview(point){
-      if(!editPhotoPreview) return;
-      const items = [];
-
-      if(point?.foto1){
-        items.push(`<div class="photo-thumb"><img src="${fotoPublicUrl(point.foto1)}" alt="Foto 1"><span>Foto 1 attuale</span></div>`);
-      }
-      if(point?.foto2){
-        items.push(`<div class="photo-thumb"><img src="${fotoPublicUrl(point.foto2)}" alt="Foto 2"><span>Foto 2 attuale</span></div>`);
-      }
-      if(point?.foto3){
-        items.push(`<div class="photo-thumb"><img src="${fotoPublicUrl(point.foto3)}" alt="Foto 3"><span>Foto 3 attuale</span></div>`);
-      }
-
-      editPhotoPreview.innerHTML = items.join("");
-    }
-
-    function openEditModal(point, originalRow){
-      currentEditRow = originalRow;
+    function openEditModal(point){
       editId.value = point.id;
       editCodice.value = point.codice || "";
       editTitolo.value = point.title || "";
@@ -915,10 +1055,17 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
       editDescrizione.value = point.description || "";
       editStatus.value = point.status || "rosso";
       editWorkflow.value = point.workflow || "nuova";
-      if(editFoto1) editFoto1.value = "";
-      if(editFoto2) editFoto2.value = "";
-      if(editFoto3) editFoto3.value = "";
-      renderPhotoPreview(point);
+
+      editFoto1Esistente.value = point.foto1 || "";
+      editFoto2Esistente.value = point.foto2 || "";
+      editFoto3Esistente.value = point.foto3 || "";
+
+      renderFotoPreview(previewFoto1Wrap, point.foto1 || "");
+      renderFotoPreview(previewFoto2Wrap, point.foto2 || "");
+      renderFotoPreview(previewFoto3Wrap, point.foto3 || "");
+
+      resetEditPhotoInputs();
+
       editModal.classList.remove("hidden");
       editModal.setAttribute("aria-hidden", "false");
     }
@@ -926,7 +1073,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     function closeEditModal(){
       editModal.classList.add("hidden");
       editModal.setAttribute("aria-hidden", "true");
-      currentEditRow = null;
+      resetEditPhotoInputs();
     }
 
     function renderCards(){
@@ -1012,7 +1159,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         if(editBtn){
           editBtn.addEventListener("click", (ev) => {
             ev.stopPropagation();
-            openEditModal(point, row);
+            openEditModal(point);
           });
         }
       });
@@ -1213,8 +1360,20 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         return false;
       }
 
+      const row = rowsCache.find(r => Number(r.id) === Number(id));
+      const filesToDelete = [
+        getField(row || {}, "foto1"),
+        getField(row || {}, "foto2"),
+        getField(row || {}, "foto3")
+      ].filter(Boolean);
+
       const { error } = await client.from("segnalazioni").delete().eq("id", id);
       if(error){ setAdminMessage("Errore durante eliminazione definitiva.", "error"); return false; }
+
+      if(filesToDelete.length > 0){
+        await client.storage.from("foto").remove(filesToDelete);
+      }
+
       await writeLog("elimina_definitiva", id, "Segnalazione eliminata definitivamente");
       return true;
     }
@@ -1357,6 +1516,7 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         e.preventDefault();
 
         const id = Number(editId.value);
+
         const payload = {
           Titolo: normalizeDisplayText(editTitolo.value),
           Comune: cleanComuneValue(editComune.value),
@@ -1385,23 +1545,27 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
         }
 
         try{
-          let foto1 = getField(currentEditRow || {}, "foto1") || null;
-          let foto2 = getField(currentEditRow || {}, "foto2") || null;
-          let foto3 = getField(currentEditRow || {}, "foto3") || null;
+          const fileFoto1 = getSelectedFile(editFoto1Camera, editFoto1Gallery);
+          const fileFoto2 = getSelectedFile(editFoto2Camera, editFoto2Gallery);
+          const fileFoto3 = getSelectedFile(editFoto3Camera, editFoto3Gallery);
 
-          if(editFoto1 && editFoto1.files.length > 0){
-            foto1 = await uploadSinglePhoto(editFoto1.files[0]);
+          let nuovaFoto1 = editFoto1Esistente.value || null;
+          let nuovaFoto2 = editFoto2Esistente.value || null;
+          let nuovaFoto3 = editFoto3Esistente.value || null;
+
+          if(fileFoto1){
+            nuovaFoto1 = await uploadSinglePhoto(fileFoto1);
           }
-          if(editFoto2 && editFoto2.files.length > 0){
-            foto2 = await uploadSinglePhoto(editFoto2.files[0]);
+          if(fileFoto2){
+            nuovaFoto2 = await uploadSinglePhoto(fileFoto2);
           }
-          if(editFoto3 && editFoto3.files.length > 0){
-            foto3 = await uploadSinglePhoto(editFoto3.files[0]);
+          if(fileFoto3){
+            nuovaFoto3 = await uploadSinglePhoto(fileFoto3);
           }
 
-          payload.foto1 = foto1;
-          payload.foto2 = foto2;
-          payload.foto3 = foto3;
+          payload.foto1 = nuovaFoto1;
+          payload.foto2 = nuovaFoto2;
+          payload.foto3 = nuovaFoto3;
 
           const { error } = await client
             .from("segnalazioni")
@@ -1414,12 +1578,12 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
             return;
           }
 
-          await writeLog("modifica_scheda", id, "Modifica completa della segnalazione");
+          await writeLog("modifica_scheda", id, "Modifica completa della segnalazione con gestione foto");
           closeEditModal();
           await loadData();
           setAdminMessage("Modifica salvata correttamente.", "ok");
         }catch(error){
-          alert(error.message || "Errore durante il caricamento delle foto.");
+          alert(error.message || "Errore durante il caricamento foto.");
           console.error(error);
         }
       });
@@ -1454,8 +1618,14 @@ Clicca su “Crea report filtrato” oppure “Crea report completo”.</div>
     btnBuildReportFiltered.onclick = () => buildReport(getFilteredRows(), "risultati filtrati");
     btnBuildReportAll.onclick = () => buildReport(rowsCache, "database completo");
     btnPrintReport.onclick = printReport;
-    btnExportReportHtml.onclick = () => { if(!lastReportHtml) return alert("Genera prima un report."); exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;"); };
-    btnExportReportTxt.onclick = () => { if(!lastReportText) return alert("Genera prima un report."); exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;"); };
+    btnExportReportHtml.onclick = () => {
+      if(!lastReportHtml) return alert("Genera prima un report.");
+      exportFile("report-operatori-mappa.html", lastReportHtml, "text/html;charset=utf-8;");
+    };
+    btnExportReportTxt.onclick = () => {
+      if(!lastReportText) return alert("Genera prima un report.");
+      exportFile("report-operatori-mappa.txt", lastReportText, "text/plain;charset=utf-8;");
+    };
     btnPrintPage.onclick = () => window.print();
     btnResetFilters.onclick = resetFilters;
 
