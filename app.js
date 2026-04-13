@@ -37,31 +37,14 @@ function normalizeDisplayText(value) {
     .join(" ");
 }
 
-function cleanCategoriaValue(value) {
+function cleanComuneValue(value) {
   const v = normalizeDisplayText(value).toLowerCase();
 
   if (!v) return "";
+  if (v.includes("san cataldo")) return "San Cataldo";
+  if (v.includes("caltanissetta")) return "Caltanissetta";
 
-  if (v.includes("parcheggio")) return "Parcheggio disabili";
-  if (v.includes("rampa")) return "Rampa";
-  if (v.includes("farmacia")) return "Farmacia";
-  if (v.includes("ambulatorio")) return "Ambulatorio medico";
-  if (v.includes("medico")) return "Ambulatorio medico";
-  if (v.includes("negozio")) return "Negozio";
-  if (v.includes("scuola")) return "Scuola";
-  if (v.includes("comune")) return "Comune";
-  if (v.includes("barriera")) return "Barriera architettonica";
-  if (v.includes("percorso")) return "Percorso pedonale";
-  if (v.includes("ingresso")) return "Ingresso edificio";
-  if (v.includes("spazio")) return "Spazio pubblico";
-  if (v.includes("ufficio")) return "Ufficio pubblico";
-  if (v.includes("ospedale")) return "Ospedale";
-  if (v.includes("ristorante")) return "Ristorante";
-  if (v.includes("bar")) return "Bar";
-  if (v.includes("supermercato")) return "Supermercato";
-  if (v.includes("altro")) return "Altro";
-
-  return normalizeDisplayText(value);
+  return "";
 }
 
 function cleanCategoriaValue(value) {
@@ -96,7 +79,7 @@ function cleanLuogoValue(value) {
 
   if (!cleaned) return "";
   if (cleaned.length < 3) return "";
-  if (/^[0-9\\s\\-]+$/.test(cleaned)) return "";
+  if (/^[0-9\s\-]+$/.test(cleaned)) return "";
 
   const invalidWords = [
     "undefined",
@@ -157,25 +140,83 @@ function fotoPublicUrl(nomeFile) {
 }
 
 // -------------------------------
+// GEOCODING INVERSO
+// -------------------------------
+
+async function reverseGeocodeCoords(lat, lng) {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&accept-language=it`,
+      {
+        headers: {
+          Accept: "application/json"
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Geocoding non disponibile");
+    }
+
+    const data = await response.json();
+    const address = data.address || {};
+
+    const comuneRaw =
+      address.city ||
+      address.town ||
+      address.village ||
+      address.municipality ||
+      address.county ||
+      "";
+
+    const luogoRaw =
+      address.road ||
+      address.pedestrian ||
+      address.footway ||
+      address.cycleway ||
+      address.path ||
+      address.square ||
+      address.neighbourhood ||
+      address.suburb ||
+      data.name ||
+      address.amenity ||
+      "";
+
+    const displayName = normalizeText(data.display_name || "");
+
+    return {
+      comune: cleanComuneValue(comuneRaw),
+      luogo: cleanLuogoValue(luogoRaw || displayName)
+    };
+  } catch (error) {
+    console.warn("Reverse geocoding non riuscito:", error);
+    return {
+      comune: "",
+      luogo: ""
+    };
+  }
+}
+
+// -------------------------------
 // MAPPING DB <-> APP
 // -------------------------------
 
 function dbRowToPoint(row) {
-  const latValue = Number(row.lat ?? row.Lat);
-  const lngValue = Number(row.lng ?? row.Lng ?? row.log ?? row.Log);
+  const latValue = Number(row.lat ?? row.Lat ?? row.latitude);
+  const lngValue = Number(row.lng ?? row.Lng ?? row.log ?? row.Log ?? row.longitude);
 
   return {
     id: row.id,
     codice: row.codice || row.Codice || "",
-    title: row.titolo || row.Titolo || "",
+    title: row.titolo || row.Titolo || row.title || "",
     comune: cleanComuneValue(row.comune || row.Comune || ""),
     categoria: cleanCategoriaValue(row.categoria || row.Categoria || "Altro"),
     status: normalizeStatus(row.stato || row.Stato || ""),
     workflow: normalizeText(row.statosegnalazione || row.StatoSegnalazione || "nuova").toLowerCase(),
     visibilita: normalizeText(row.visibilita || row.Visibilita || "pubblica").toLowerCase(),
     statoArchivio: normalizeText(row.stato_archivio || row.StatoArchivio || "attiva").toLowerCase(),
-    luogo: cleanLuogoValue(row.luogo || row.Luogo || ""),
-    description: normalizeText(row.descrizione || row.Descrizione || ""),
+    luogo: cleanLuogoValue(row.luogo || row.Luogo || row.indirizzo || ""),
+    description: normalizeText(row.descrizione || row.Descrizione || row.note || ""),
     nomeSegnalante: normalizeDisplayText(row.nomesegnalante || row.NomeSegnalante || ""),
     contattoSegnalante: normalizeText(row.contattosegnalante || row.ContattoSegnalante || ""),
     gpsLat: row.gpslat ?? row.GpsLat ?? null,
@@ -472,6 +513,7 @@ function getSuggestionValues(type) {
 
   return [];
 }
+
 function filterSuggestionValues(values, text) {
   const t = normalizeText(text).toLowerCase();
 
@@ -479,18 +521,14 @@ function filterSuggestionValues(values, text) {
     return values.slice(0, 12);
   }
 
-  const starts = values.filter((v) =>
-    v.toLowerCase().startsWith(t)
-  );
-
+  const starts = values.filter((v) => v.toLowerCase().startsWith(t));
   const includes = values.filter(
-    (v) =>
-      !v.toLowerCase().startsWith(t) &&
-      v.toLowerCase().includes(t)
+    (v) => !v.toLowerCase().startsWith(t) && v.toLowerCase().includes(t)
   );
 
   return [...starts, ...includes].slice(0, 12);
 }
+
 function hideSuggestions(box) {
   if (!box) return;
   box.classList.add("hidden");
@@ -879,7 +917,10 @@ async function loadPointsFromSupabase() {
 
   points = (data || [])
     .map(dbRowToPoint)
-    .filter((point) => Array.isArray(point.coords) && point.coords.every((v) => !Number.isNaN(v)));
+    .filter((point) =>
+      Array.isArray(point.coords) &&
+      point.coords.every((v) => !Number.isNaN(v))
+    );
 
   renderPoints();
 }
@@ -906,7 +947,7 @@ async function uploadSinglePhoto(file) {
 // EVENTI MAPPA
 // -------------------------------
 
-map.on("click", (e) => {
+map.on("click", async (e) => {
   const nearestPoint = findNearestPointWithinTolerance(e.latlng);
 
   if (nearestPoint) {
@@ -933,7 +974,19 @@ map.on("click", (e) => {
   resetGpsStatus();
   resetPhotoInputs();
   inputCodice.value = generateNextCode(inputComune.value || "", points);
+
   openFormModal(false);
+
+  const geoData = await reverseGeocodeCoords(e.latlng.lat, e.latlng.lng);
+
+  if (geoData.comune && !normalizeText(inputComune.value)) {
+    inputComune.value = geoData.comune;
+    inputCodice.value = generateNextCode(geoData.comune, points);
+  }
+
+  if (geoData.luogo && !normalizeText(inputLuogo.value)) {
+    inputLuogo.value = geoData.luogo;
+  }
 });
 
 // -------------------------------
