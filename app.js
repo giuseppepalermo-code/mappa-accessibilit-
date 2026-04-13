@@ -37,14 +37,31 @@ function normalizeDisplayText(value) {
     .join(" ");
 }
 
-function cleanComuneValue(value) {
+function cleanCategoriaValue(value) {
   const v = normalizeDisplayText(value).toLowerCase();
 
   if (!v) return "";
-  if (v.includes("san cataldo")) return "San Cataldo";
-  if (v.includes("caltanissetta")) return "Caltanissetta";
 
-  return "";
+  if (v.includes("parcheggio")) return "Parcheggio disabili";
+  if (v.includes("rampa")) return "Rampa";
+  if (v.includes("farmacia")) return "Farmacia";
+  if (v.includes("ambulatorio")) return "Ambulatorio medico";
+  if (v.includes("medico")) return "Ambulatorio medico";
+  if (v.includes("negozio")) return "Negozio";
+  if (v.includes("scuola")) return "Scuola";
+  if (v.includes("comune")) return "Comune";
+  if (v.includes("barriera")) return "Barriera architettonica";
+  if (v.includes("percorso")) return "Percorso pedonale";
+  if (v.includes("ingresso")) return "Ingresso edificio";
+  if (v.includes("spazio")) return "Spazio pubblico";
+  if (v.includes("ufficio")) return "Ufficio pubblico";
+  if (v.includes("ospedale")) return "Ospedale";
+  if (v.includes("ristorante")) return "Ristorante";
+  if (v.includes("bar")) return "Bar";
+  if (v.includes("supermercato")) return "Supermercato";
+  if (v.includes("altro")) return "Altro";
+
+  return normalizeDisplayText(value);
 }
 
 function cleanCategoriaValue(value) {
@@ -55,12 +72,20 @@ function cleanCategoriaValue(value) {
   if (v.includes("parcheggio")) return "Parcheggio disabili";
   if (v.includes("rampa")) return "Rampa";
   if (v.includes("farmacia")) return "Farmacia";
+  if (v.includes("ambulatorio")) return "Ambulatorio medico";
+  if (v.includes("medico")) return "Ambulatorio medico";
+  if (v.includes("negozio")) return "Negozio";
   if (v.includes("scuola")) return "Scuola";
   if (v.includes("comune")) return "Comune";
   if (v.includes("barriera")) return "Barriera architettonica";
   if (v.includes("percorso")) return "Percorso pedonale";
   if (v.includes("ingresso")) return "Ingresso edificio";
   if (v.includes("spazio")) return "Spazio pubblico";
+  if (v.includes("ufficio")) return "Ufficio pubblico";
+  if (v.includes("ospedale")) return "Ospedale";
+  if (v.includes("ristorante")) return "Ristorante";
+  if (v.includes("bar")) return "Bar";
+  if (v.includes("supermercato")) return "Supermercato";
   if (v.includes("altro")) return "Altro";
 
   return normalizeDisplayText(value);
@@ -70,10 +95,22 @@ function cleanLuogoValue(value) {
   const cleaned = normalizeDisplayText(value);
 
   if (!cleaned) return "";
-  if (cleaned.length < 4) return "";
-  if (/^[0-9\s\-]+$/.test(cleaned)) return "";
-  if (cleaned.toLowerCase().includes("undefined")) return "";
-  if (cleaned.toLowerCase().includes("null")) return "";
+  if (cleaned.length < 3) return "";
+  if (/^[0-9\\s\\-]+$/.test(cleaned)) return "";
+
+  const invalidWords = [
+    "undefined",
+    "null",
+    "nan",
+    "test",
+    "prova"
+  ];
+
+  const lower = cleaned.toLowerCase();
+
+  if (invalidWords.some((word) => lower.includes(word))) {
+    return "";
+  }
 
   return cleaned;
 }
@@ -410,8 +447,15 @@ function getSuggestionValues(type) {
       "Ingresso edificio",
       "Percorso pedonale",
       "Farmacia",
+      "Ambulatorio medico",
+      "Negozio",
       "Scuola",
       "Comune",
+      "Ufficio pubblico",
+      "Ospedale",
+      "Ristorante",
+      "Bar",
+      "Supermercato",
       "Spazio pubblico",
       "Altro",
       ...categoriePulite
@@ -428,19 +472,25 @@ function getSuggestionValues(type) {
 
   return [];
 }
-
 function filterSuggestionValues(values, text) {
   const t = normalizeText(text).toLowerCase();
-  if (!t) return values.slice(0, 20);
 
-  const starts = values.filter((v) => v.toLowerCase().startsWith(t));
-  const includes = values.filter(
-    (v) => !v.toLowerCase().startsWith(t) && v.toLowerCase().includes(t)
+  if (!t) {
+    return values.slice(0, 12);
+  }
+
+  const starts = values.filter((v) =>
+    v.toLowerCase().startsWith(t)
   );
 
-  return [...starts, ...includes].slice(0, 20);
-}
+  const includes = values.filter(
+    (v) =>
+      !v.toLowerCase().startsWith(t) &&
+      v.toLowerCase().includes(t)
+  );
 
+  return [...starts, ...includes].slice(0, 12);
+}
 function hideSuggestions(box) {
   if (!box) return;
   box.classList.add("hidden");
@@ -1017,20 +1067,24 @@ formSegnalazione.addEventListener("submit", async (e) => {
 
 if (inputComune) {
   inputComune.addEventListener("change", () => {
-    if (!editingId) {
-      const comunePulito = cleanComuneValue(inputComune.value);
-      if (comunePulito) {
-        inputComune.value = comunePulito;
+    const comunePulito = cleanComuneValue(inputComune.value);
+
+    if (comunePulito) {
+      inputComune.value = comunePulito;
+
+      if (!editingId) {
         inputCodice.value = generateNextCode(comunePulito, points);
       }
     }
   });
 
   inputComune.addEventListener("blur", () => {
-    if (!editingId) {
-      const comunePulito = cleanComuneValue(inputComune.value);
-      if (comunePulito) {
-        inputComune.value = comunePulito;
+    const comunePulito = cleanComuneValue(inputComune.value);
+
+    if (comunePulito) {
+      inputComune.value = comunePulito;
+
+      if (!editingId) {
         inputCodice.value = generateNextCode(comunePulito, points);
       }
     }
